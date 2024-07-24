@@ -2,6 +2,8 @@
 import { useLayout } from '@/layout/composables/layout';
 import { ref, computed } from 'vue';
 import AppConfig from '@/layout/AppConfig.vue';
+import logoDark from '@/assets/images/logo-dark.svg';
+import logoLight from '@/assets/images/logo-light.svg';
 
 const { layoutConfig } = useLayout();
 const email = ref('');
@@ -9,7 +11,7 @@ const password = ref('');
 const checked = ref(false);
 
 const logoUrl = computed(() => {
-    return `@/assets/images/${layoutConfig.darkTheme.value ? 'logo-white' : 'logo-dark'}.svg`;
+    return layoutConfig.darkTheme.value ? logoDark : logoLight;
 });
 </script>
 
