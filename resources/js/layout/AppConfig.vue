@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, onMounted } from 'vue';
 import { usePrimeVue } from 'primevue/config';
 import { useLayout } from '@/layout/composables/layout';
 
@@ -11,14 +11,10 @@ defineProps({
 });
 
 const $primevue = usePrimeVue();
-const inputStyle = computed(() => $primevue.config.inputStyle || 'outlined');
 
 const scales = ref([12, 13, 14, 15, 16]);
 const visible = ref(false);
-const inputStyles = ref([
-    { label: 'Outlined', value: 'outlined' },
-    { label: 'Filled', value: 'filled' }
-]);
+
 const menuModes = ref([
     { label: 'Static', value: 'static' },
     { label: 'Overlay', value: 'overlay' }
@@ -28,62 +24,62 @@ const primaryFocusRing = ref(true);
 
 const { setScale, layoutConfig } = useLayout();
 
-onMounted(() => {
-    console.log("theme config storage");
-    console.log(JSON.parse(localStorage.getItem('Theme config')));
-
-    // restore theme from local storage
-    if (localStorage.getItem('Theme config')) {
-        $primevue = JSON.parse(localStorage.getItem('Theme config'));
-    }
-});
 
 const onConfigButtonClick = () => {
     visible.value = !visible.value;
 };
+
 const onChangeTheme = (theme, mode) => {
     $primevue.changeTheme(layoutConfig.theme.value, theme, 'theme-css', () => {
+        ;
+        console.log("changing theme");
+        console.log("🚀 ~ $primevue.changeTheme ~ layoutConfig.theme.value:", layoutConfig.theme.value)
+        console.log(theme, mode);
         layoutConfig.theme.value = theme;
         layoutConfig.darkTheme.value = mode;
+        localStorage.setItem('theme', layoutConfig.theme.value);
+        localStorage.setItem('darkTheme', layoutConfig.darkTheme.value);
     });
-    saveConfig();
 };
+
 const decrementScale = () => {
-    setScale(layoutConfig.scale.value - 1);
-    saveConfig();
+    setScale(parseInt(layoutConfig.scale.value) - 1);
+    localStorage.setItem('scale', layoutConfig.scale.value);
     applyScale();
 };
+
 const incrementScale = () => {
-    setScale(layoutConfig.scale.value + 1);
-    saveConfig();
+    setScale(parseInt(layoutConfig.scale.value) + 1);
+    localStorage.setItem('scale', layoutConfig.scale.value);
     applyScale();
 };
+
 const applyScale = () => {
     document.documentElement.style.fontSize = layoutConfig.scale.value + 'px';
-    saveConfig();
 
 };
-const onInputStyleChange = (value) => {
-    $primevue.config.inputStyle = value;
-    saveConfig();
-};
+
+
 const onMenuModeChange = (value) => {
     layoutConfig.menuMode.value = value;
-    saveConfig();
-
+    localStorage.setItem('menuMode', layoutConfig.menuMode.value);
 };
+
 const onRippleChange = (value) => {
     layoutConfig.ripple.value = value;
-    saveConfig();
+    localStorage.setItem('ripple', layoutConfig.ripple.value);
 };
+
 const onDarkModeChange = (value) => {
     const newThemeName = value ? layoutConfig.theme.value.replace('light', 'dark') : layoutConfig.theme.value.replace('dark', 'light');
     layoutConfig.darkTheme.value = value;
-    onChangeTheme(newThemeName, value);
-    saveConfig();
-    console.log(JSON.parse(localStorage.getItem('theme config', $primevue)));
+    console.log("🚀 ~ onDarkModeChange ~ value:", value)
+    console.log("🚀 ~ onDarkModeChange ~ layoutConfig.darkTheme.value:", layoutConfig.darkTheme.value)
 
+    localStorage.setItem('darkTheme', layoutConfig.darkTheme.value);
+    onChangeTheme(newThemeName, value);
 };
+
 const changeTheme = (theme, color) => {
     let newTheme, dark;
 
@@ -96,13 +92,12 @@ const changeTheme = (theme, color) => {
     if (newTheme.startsWith('md-') && compactMaterial.value) {
         newTheme = newTheme.replace('md-', 'mdc-');
     }
-
+    // localStorage.setItem('theme', newTheme);
     dark = layoutConfig.darkTheme.value;
-    localStorage.setItem('theme', 'Changed theme');
     onChangeTheme(newTheme, dark);
-    saveConfig();
 
 };
+
 const isThemeActive = (themeFamily, color) => {
     let themeName;
     let themePrefix = themeFamily === 'md' && compactMaterial.value ? 'mdc' : themeFamily;
@@ -113,21 +108,10 @@ const isThemeActive = (themeFamily, color) => {
         themeName += '-' + color;
     }
 
-    saveConfig();
-
     return layoutConfig.theme.value === themeName;
 };
-const onCompactMaterialChange = (value) => {
-    compactMaterial.value = value;
 
-    if (layoutConfig.theme.value.startsWith('md')) {
-        let tokens = layoutConfig.theme.value.split('-');
 
-        changeTheme(tokens[0].substring(0, 2), tokens[2]);
-    }
-    saveConfig();
-
-};
 const onFocusRingColorChange = (value) => {
     primaryFocusRing.value = value;
     let root = document.documentElement;
@@ -139,13 +123,26 @@ const onFocusRingColorChange = (value) => {
         if (layoutConfig.darkTheme.value) root.style.setProperty('--p-focus-ring-color', 'var(--surface-500)');
         else root.style.setProperty('--p-focus-ring-color', 'var(--surface-900)');
     }
-    saveConfig();
+
+    localStorage.setItem('primary-focus-ring', primaryFocusRing.value);
+
 };
 
-const saveConfig = () => {
-    localStorage.setItem('theme config', JSON.stringify($primevue));
-    console.log(JSON.parse(localStorage.getItem('theme config', $primevue)));
-}
+
+
+onMounted(() => {
+    layoutConfig.scale.value = localStorage.getItem('scale') ? localStorage.getItem('scale') : layoutConfig.scale.value;
+    layoutConfig.ripple.value = (localStorage.getItem('ripple') == "false") ? false : true;
+    layoutConfig.menuMode.value = localStorage.getItem('menuMode') ? localStorage.getItem('menuMode') : layoutConfig.menuMode.value;
+    layoutConfig.darkTheme.value = (localStorage.getItem('darkTheme') == "false") ? false : true;
+    layoutConfig.theme.value = localStorage.getItem('theme') ? localStorage.getItem('theme') : layoutConfig.theme.value;
+    console.log("🚀 ~ onMounted ~ layoutConfig.theme.value:", localStorage.getItem('theme').toString())
+    primaryFocusRing.value = (localStorage.getItem('primary-focus-ring') == "false") ? false : true;
+    changeTheme(layoutConfig.theme.value.substring(0, layoutConfig.theme.value.indexOf('-')), layoutConfig.theme.value.substring(layoutConfig.theme.value.lastIndexOf('-') + 1, layoutConfig.theme.value.length));
+    applyScale();
+});
+
+
 </script>
 
 <template>
@@ -159,7 +156,7 @@ const saveConfig = () => {
                 <span class="text-xl font-semibold">Scale</span>
                 <div class="flex align-items-center gap-2 border-1 surface-border py-1 px-2" style="border-radius: 30px">
                     <Button icon="pi pi-minus" @click="decrementScale" text rounded :disabled="layoutConfig.scale.value === scales[0]" />
-                    <i v-for="s in scales" :key="s" :class="['pi pi-circle-fill text-sm text-200', { 'text-lg text-primary': s === layoutConfig.scale.value }]" />
+                    <i v-for="s in scales" :key="s" :class="['pi pi-circle-fill text-sm text-200', { 'text-lg text-primary': s == layoutConfig.scale.value }]" />
 
                     <Button icon="pi pi-plus" @click="incrementScale" text rounded :disabled="layoutConfig.scale.value === scales[scales.length - 1]" />
                 </div>
@@ -176,10 +173,7 @@ const saveConfig = () => {
                     <SelectButton :modelValue="layoutConfig.menuMode.value" @update:modelValue="onMenuModeChange" :options="menuModes" optionLabel="label" optionValue="value" :allowEmpty="false" />
                 </section>
 
-                <section class="py-4 flex align-items-center justify-content-between border-bottom-1 surface-border">
-                    <span class="text-xl font-semibold">Input Variant</span>
-                    <SelectButton :modelValue="inputStyle" @update:modelValue="onInputStyleChange" :options="inputStyles" optionLabel="label" optionValue="value" :allowEmpty="false" />
-                </section>
+
             </template>
 
             <section class="py-4 flex align-items-center justify-content-between border-bottom-1 surface-border">
@@ -327,32 +321,6 @@ const saveConfig = () => {
                 </div>
             </section>
 
-            <section class="py-4 border-bottom-1 surface-border">
-                <div class="flex align-items-center gap-2 mb-3">
-                    <img src="https://primefaces.org/cdn/primevue/images/themes/md-light-indigo.svg" alt="Material Design" class="border-circle" style="width: 1.5rem" />
-                    <span class="font-medium">Material Design</span>
-                    <div class="ml-auto flex align-items-center gap-2">
-                        <label for="material-condensed" class="text-sm">Condensed</label>
-                        <InputSwitch inputId="material-condensed" :modelValue="compactMaterial" @update:modelValue="onCompactMaterialChange" class="ml-auto" />
-                    </div>
-                </div>
-                <div class="flex align-items-center justify-content-between gap-3">
-                    <button :class="[
-                        'bg-transparent border-1 cursor-pointer p-2 w-3 flex align-items-center justify-content-center transition-all transition-duration-200',
-                        { 'border-primary': isThemeActive('md', 'indigo'), 'hover:border-500 surface-border': !isThemeActive('md', 'indigo') }
-                    ]" style="border-radius: 30px" @click="changeTheme('md', 'indigo')">
-                        <span class="block h-1rem w-full" style="border-radius: 30px; background: linear-gradient(180deg, #0565f2 0%, rgba(5, 101, 242, 0.5) 100%)"></span>
-                    </button>
-                    <button :class="[
-                        'bg-transparent border-1 cursor-pointer p-2 w-3 flex align-items-center justify-content-center transition-all transition-duration-200',
-                        { 'border-primary': isThemeActive('md', 'deeppurple'), 'hover:border-500 surface-border': !isThemeActive('md', 'deeppurple') }
-                    ]" style="border-radius: 30px" @click="changeTheme('md', 'deeppurple')">
-                        <span class="block h-1rem w-full" style="border-radius: 30px; background: linear-gradient(180deg, #702f92 0%, rgba(112, 47, 146, 0.5) 100%)"></span>
-                    </button>
-                    <div class="w-3"></div>
-                    <div class="w-3"></div>
-                </div>
-            </section>
         </div>
     </Sidebar>
 </template>

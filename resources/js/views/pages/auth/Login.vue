@@ -11,7 +11,7 @@ const password = ref('');
 const checked = ref(false);
 
 const logoUrl = computed(() => {
-    return layoutConfig.darkTheme.value ? logoDark : logoLight;
+    return layoutConfig.darkTheme.value ? logoLight : logoDark;
 });
 </script>
 

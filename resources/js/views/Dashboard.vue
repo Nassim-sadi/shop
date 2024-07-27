@@ -32,10 +32,8 @@ const items = ref([
     { label: 'Remove', icon: 'pi pi-fw pi-minus' }
 ]);
 const lineOptions = ref(null);
-const productService = new ProductService();
 
 onMounted(() => {
-    productService.getProductsSmall().then((data) => (products.value = data));
 });
 
 const formatCurrency = (value) => {
