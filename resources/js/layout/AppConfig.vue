@@ -31,14 +31,8 @@ const onConfigButtonClick = () => {
 
 const onChangeTheme = (theme, mode) => {
     $primevue.changeTheme(layoutConfig.theme.value, theme, 'theme-css', () => {
-        ;
-        console.log("changing theme");
-        console.log("🚀 ~ $primevue.changeTheme ~ layoutConfig.theme.value:", layoutConfig.theme.value)
-        console.log(theme, mode);
         layoutConfig.theme.value = theme;
         layoutConfig.darkTheme.value = mode;
-        localStorage.setItem('theme', layoutConfig.theme.value);
-        localStorage.setItem('darkTheme', layoutConfig.darkTheme.value);
     });
 };
 
@@ -73,18 +67,13 @@ const onRippleChange = (value) => {
 const onDarkModeChange = (value) => {
     const newThemeName = value ? layoutConfig.theme.value.replace('light', 'dark') : layoutConfig.theme.value.replace('dark', 'light');
     layoutConfig.darkTheme.value = value;
-    console.log("🚀 ~ onDarkModeChange ~ value:", value)
-    console.log("🚀 ~ onDarkModeChange ~ layoutConfig.darkTheme.value:", layoutConfig.darkTheme.value)
-
     localStorage.setItem('darkTheme', layoutConfig.darkTheme.value);
     onChangeTheme(newThemeName, value);
 };
 
 const changeTheme = (theme, color) => {
     let newTheme, dark;
-
     newTheme = theme + '-' + (layoutConfig.darkTheme.value ? 'dark' : 'light');
-
     if (color) {
         newTheme += '-' + color;
     }
@@ -92,7 +81,7 @@ const changeTheme = (theme, color) => {
     if (newTheme.startsWith('md-') && compactMaterial.value) {
         newTheme = newTheme.replace('md-', 'mdc-');
     }
-    // localStorage.setItem('theme', newTheme);
+    localStorage.setItem('theme', newTheme);
     dark = layoutConfig.darkTheme.value;
     onChangeTheme(newTheme, dark);
 
@@ -128,18 +117,21 @@ const onFocusRingColorChange = (value) => {
 
 };
 
-
-
-onMounted(() => {
+const getLocalThemeConfig = () => {
     layoutConfig.scale.value = localStorage.getItem('scale') ? localStorage.getItem('scale') : layoutConfig.scale.value;
     layoutConfig.ripple.value = (localStorage.getItem('ripple') == "false") ? false : true;
     layoutConfig.menuMode.value = localStorage.getItem('menuMode') ? localStorage.getItem('menuMode') : layoutConfig.menuMode.value;
     layoutConfig.darkTheme.value = (localStorage.getItem('darkTheme') == "false") ? false : true;
-    layoutConfig.theme.value = localStorage.getItem('theme') ? localStorage.getItem('theme') : layoutConfig.theme.value;
-    console.log("🚀 ~ onMounted ~ layoutConfig.theme.value:", localStorage.getItem('theme').toString())
+    let theme = localStorage.getItem('theme') ? localStorage.getItem('theme') : layoutConfig.theme.value;
     primaryFocusRing.value = (localStorage.getItem('primary-focus-ring') == "false") ? false : true;
-    changeTheme(layoutConfig.theme.value.substring(0, layoutConfig.theme.value.indexOf('-')), layoutConfig.theme.value.substring(layoutConfig.theme.value.lastIndexOf('-') + 1, layoutConfig.theme.value.length));
+    changeTheme(theme.substring(0, theme.indexOf('-')), theme.substring(theme.lastIndexOf('-') + 1, theme.length));
     applyScale();
+}
+
+
+
+onMounted(() => {
+    getLocalThemeConfig();
 });
 
 
