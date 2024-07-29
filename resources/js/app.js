@@ -1,8 +1,8 @@
 import { createApp } from "vue";
 import App from "./App.vue";
 import router from "./router/Index";
-import eventbus from "@jakriese/vue3-event-bus";
-import { createI18n } from "vue-i18n";
+import i18n from "@/i18n";
+import mitt from "mitt";
 
 import PrimeVue from "primevue/config";
 import AutoComplete from "primevue/autocomplete";
@@ -109,27 +109,19 @@ import TriStateCheckbox from "primevue/tristatecheckbox";
 import VirtualScroller from "primevue/virtualscroller";
 
 import BlockViewer from "@/components/BlockViewer.vue";
-import EN from "@/locale/en.json";
-import AR from "@/locale/en.json";
 import "@/assets/styles.scss";
-
-const i18n = createI18n({
-    locale: "EN",
-    messages: {
-        EN: EN,
-        AR: AR,
-    },
-});
 
 const app = createApp(App);
 
+const emitter = mitt(); // Initialize mitt
+
+app.provide("emitter", emitter);
 app.use(router);
 app.use(PrimeVue, { ripple: true });
 app.use(ToastService);
 app.use(DialogService);
 app.use(ConfirmationService);
 app.use(i18n);
-app.use(eventbus);
 
 app.directive("tooltip", Tooltip);
 app.directive("badge", BadgeDirective);

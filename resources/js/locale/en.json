@@ -1,3 +1,11 @@
 {
-    "title": "Breeze App"
+    "title": "Breeze App",
+    "scale": "Scale",
+    "darkMode": "Dark mode",
+    "menuType": "Menu type",
+    "rippleEffect": "Ripple effect",
+    "themes": "Themes",
+    "primaryFocusRing": "Primary Focus Ring",
+    "overlay": "Overlay",
+    "static": "Static"
 }

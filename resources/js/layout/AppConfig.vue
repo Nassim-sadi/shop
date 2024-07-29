@@ -1,7 +1,12 @@
 <script setup>
-import { ref, onMounted } from 'vue';
+
+import { useI18n } from 'vue-i18n'
+const { t } = useI18n()
+import { ref, onMounted, inject, onBeforeUnmount } from 'vue';
 import { usePrimeVue } from 'primevue/config';
 import { useLayout } from '@/layout/composables/layout';
+
+const emitter = inject('emitter');
 
 defineProps({
     simple: {
@@ -15,9 +20,11 @@ const $primevue = usePrimeVue();
 const scales = ref([12, 13, 14, 15, 16]);
 const visible = ref(false);
 
+
+
 const menuModes = ref([
-    { label: 'Static', value: 'static' },
-    { label: 'Overlay', value: 'overlay' }
+    { label: t('static'), value: 'static' },
+    { label: t('overlay'), value: 'overlay' }
 ]);
 const compactMaterial = ref(false);
 const primaryFocusRing = ref(true);
@@ -131,21 +138,28 @@ const getLocalThemeConfig = () => {
 
 
 onMounted(() => {
+    emitter.on('config-button-click', () => {
+        onConfigButtonClick();
+    })
     getLocalThemeConfig();
 });
 
+onBeforeUnmount(() => {
+    emitter.off('config-button-click');
+});
 
 </script>
 
 <template>
-    <button class="layout-config-button p-link" type="button" @click="onConfigButtonClick()">
+    <!-- <button class="layout-config-button p-link" type="button" @click="onConfigButtonClick()">
         <i class="pi pi-cog"></i>
-    </button>
+    </button> -->
 
     <Sidebar v-model:visible="visible" position="right" class="layout-config-sidebar w-26rem" pt:closeButton="ml-auto">
+
         <div class="p-2">
             <section class="pb-4 flex align-items-center justify-content-between border-bottom-1 surface-border">
-                <span class="text-xl font-semibold">Scale</span>
+                <span class="text-xl font-semibold">{{ $t('scale') }}</span>
                 <div class="flex align-items-center gap-2 border-1 surface-border py-1 px-2" style="border-radius: 30px">
                     <Button icon="pi pi-minus" @click="decrementScale" text rounded :disabled="layoutConfig.scale.value === scales[0]" />
                     <i v-for="s in scales" :key="s" :class="['pi pi-circle-fill text-sm text-200', { 'text-lg text-primary': s == layoutConfig.scale.value }]" />
@@ -155,13 +169,13 @@ onMounted(() => {
             </section>
 
             <section class="py-4 flex align-items-center justify-content-between border-bottom-1 surface-border">
-                <span :class="['text-xl font-semibold']">Dark Mode</span>
+                <span :class="['text-xl font-semibold']">{{ $t('darkMode') }}</span>
                 <InputSwitch :modelValue="layoutConfig.darkTheme.value" @update:modelValue="onDarkModeChange" />
             </section>
 
             <template v-if="!simple">
                 <section class="py-4 flex align-items-center justify-content-between border-bottom-1 surface-border">
-                    <span class="text-xl font-semibold">Menu Type</span>
+                    <span class="text-xl font-semibold">{{ $t('menuType') }}</span>
                     <SelectButton :modelValue="layoutConfig.menuMode.value" @update:modelValue="onMenuModeChange" :options="menuModes" optionLabel="label" optionValue="value" :allowEmpty="false" />
                 </section>
 
@@ -169,12 +183,12 @@ onMounted(() => {
             </template>
 
             <section class="py-4 flex align-items-center justify-content-between border-bottom-1 surface-border">
-                <span class="text-xl font-semibold">Ripple Effect</span>
+                <span class="text-xl font-semibold">{{ $t('rippleEffect') }}</span>
                 <InputSwitch :modelValue="layoutConfig.ripple.value" @update:modelValue="onRippleChange" />
             </section>
 
             <section class="py-4 border-bottom-1 surface-border">
-                <div class="text-xl font-semibold mb-3">Themes</div>
+                <div class="text-xl font-semibold mb-3">{{ $t('themes') }}</div>
                 <div class="flex align-items-center gap-2 mb-3">
                     <img src="https://primefaces.org/cdn/primevue/images/themes/aura.png" alt="Aura" style="width: 1.5rem" />
                     <span class="font-medium">Aura</span>
@@ -249,7 +263,7 @@ onMounted(() => {
                 </div>
 
                 <section class="pt-4 flex align-items-center justify-content-between">
-                    <span class="text-sm">Primary Focus Ring</span>
+                    <span class="text-sm">{{ $t("primaryFocusRing") }}</span>
                     <InputSwitch :modelValue="primaryFocusRing" @update:modelValue="onFocusRingColorChange" />
                 </section>
             </section>
@@ -312,9 +326,12 @@ onMounted(() => {
                     </button>
                 </div>
             </section>
-
         </div>
     </Sidebar>
 </template>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.border-bottom-1:last-child {
+    border-bottom-width: 0px !important;
+}
+</style>

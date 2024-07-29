@@ -1,11 +1,14 @@
 <script setup>
-import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
+import { useI18n } from 'vue-i18n'
+const { t } = useI18n()
+import { ref, computed, onMounted, onBeforeUnmount, inject } from 'vue';
 import { useLayout } from '@/layout/composables/layout';
 import { useRouter } from 'vue-router';
 import logoDark from '@/assets/images/logo-dark.svg';
 import logoLight from '@/assets/images/logo-light.svg';
 const { layoutConfig, onMenuToggle } = useLayout();
 
+const emitter = inject('emitter');
 const outsideClickListener = ref(null);
 const topbarMenuActive = ref(false);
 const router = useRouter();
@@ -33,13 +36,15 @@ const onTopBarMenuButton = () => {
 };
 const onSettingsClick = () => {
     topbarMenuActive.value = false;
-    router.push('/');
+    emitter.emit('config-button-click');
 };
+
 const topbarMenuClasses = computed(() => {
     return {
         'layout-topbar-menu-mobile-active': topbarMenuActive.value
     };
 });
+
 
 const onProfileButton = () => {
     router.push('/auth/login');
@@ -69,6 +74,9 @@ const isOutsideClicked = (event) => {
 
     return !(sidebarEl.isSameNode(event.target) || sidebarEl.contains(event.target) || topbarEl.isSameNode(event.target) || topbarEl.contains(event.target));
 };
+
+
+
 </script>
 
 <template>
