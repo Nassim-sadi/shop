@@ -44,4 +44,16 @@ const router = createRouter({
     ],
 });
 
+// router.beforeEach((to, from, next) => {
+//     // Check if the route requires authentication and if the user is authenticated
+//     if (
+//         to.matched.some((record) => record.meta.requiresAuth) &&
+//         !store.isAuthenticated
+//     ) {
+//         next("/login"); // redirect to login page
+//     } else {
+//         next(); // proceed to route
+//     }
+// });
+
 export default router;

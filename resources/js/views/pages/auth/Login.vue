@@ -4,6 +4,9 @@ import { ref, computed } from 'vue';
 import AppConfig from '@/layout/AppConfig.vue';
 import logoDark from '@/assets/images/logo-dark.svg';
 import logoLight from '@/assets/images/logo-light.svg';
+import { authStore } from '@/store/AuthStore';
+
+const auth = authStore();
 
 const { layoutConfig } = useLayout();
 const email = ref('');
@@ -13,6 +16,15 @@ const checked = ref(false);
 const logoUrl = computed(() => {
     return layoutConfig.darkTheme.value ? logoLight : logoDark;
 });
+
+const login = () => {
+    console.log("loggin in ");
+    let user = {
+        email: email.value,
+        password: password.value
+    }
+    auth.login(user);
+}
 </script>
 
 <template>
@@ -41,7 +53,7 @@ const logoUrl = computed(() => {
                             </div>
                             <a class="font-medium no-underline ml-2 text-right cursor-pointer" style="color: var(--primary-color)">Forgot password?</a>
                         </div>
-                        <Button label="Sign In" class="w-full p-3 text-xl"></Button>
+                        <Button label="Sign In" class="w-full p-3 text-xl" :onclick="login"></Button>
                     </div>
                 </div>
             </div>

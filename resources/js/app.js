@@ -1,9 +1,14 @@
 import { createApp } from "vue";
 import App from "./App.vue";
+
+// custom imports
 import router from "./router/Index";
+import { createPinia } from "pinia";
+import piniaPersist from "pinia-plugin-persist";
 import i18n from "@/i18n";
 import mitt from "mitt";
 
+// imports made by primevue template
 import PrimeVue from "primevue/config";
 import AutoComplete from "primevue/autocomplete";
 import Accordion from "primevue/accordion";
@@ -112,6 +117,8 @@ import BlockViewer from "@/components/BlockViewer.vue";
 import "@/assets/styles.scss";
 
 const app = createApp(App);
+const pinia = createPinia();
+pinia.use(piniaPersist);
 
 const emitter = mitt(); // Initialize mitt
 
@@ -122,7 +129,9 @@ app.use(ToastService);
 app.use(DialogService);
 app.use(ConfirmationService);
 app.use(i18n);
+app.use(pinia);
 
+// Directives and components of PrimeVue
 app.directive("tooltip", Tooltip);
 app.directive("badge", BadgeDirective);
 app.directive("ripple", Ripple);
