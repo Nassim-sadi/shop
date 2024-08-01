@@ -7,5 +7,8 @@
     "themes": "المظهر",
     "primaryFocusRing": "حلقة التركيز الأساسية",
     "overlay": "تراكب",
-    "static": "ثابت"
+    "static": "ثابت",
+    "settings": "الإعدادات",
+    "profile": "الملف الشخصي",
+    "logout": "تسجيل الخروج"
 }

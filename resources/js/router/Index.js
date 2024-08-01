@@ -1,5 +1,7 @@
 import { createRouter, createWebHistory } from "vue-router";
 import AppLayout from "@/layout/AppLayout.vue";
+import { authStore } from "@/store/AuthStore";
+import { isUserLoggedIn } from "./utils";
 
 const router = createRouter({
     history: createWebHistory(),
@@ -44,16 +46,38 @@ const router = createRouter({
     ],
 });
 
-// router.beforeEach((to, from, next) => {
-//     // Check if the route requires authentication and if the user is authenticated
-//     if (
-//         to.matched.some((record) => record.meta.requiresAuth) &&
-//         !store.isAuthenticated
-//     ) {
-//         next("/login"); // redirect to login page
-//     } else {
-//         next(); // proceed to route
-//     }
-// });
+router.beforeEach((to, from, next) => {
+    const auth = authStore();
+    if (
+        to.name !== "login" &&
+        to.name !== "forgot-password" &&
+        to.name !== "reset-password"
+    ) {
+        if (isUserLoggedIn(auth)) {
+            // if (
+            //     to.name === "root" ||
+            //     to.name === "profile" ||
+            //     to.name === "clients" ||
+            //     to.name === "advertising-board" ||
+            //     to.name === "users-planning" ||
+            //     to.name === "roles-planning" ||
+            //     canNavigate(to.name)
+            // ) {
+            //     next();
+            // } else {
+            //     next("/");
+            // }
+            next();
+        } else {
+            next({ name: "login" });
+        }
+    } else {
+        if (isUserLoggedIn(auth)) {
+            next("/");
+        } else {
+            next();
+        }
+    }
+});
 
 export default router;
