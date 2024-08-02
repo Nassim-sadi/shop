@@ -1,6 +1,6 @@
-import { createRouter, createWebHistory } from "vue-router";
 import AppLayout from "@/layout/AppLayout.vue";
 import { authStore } from "@/store/AuthStore";
+import { createRouter, createWebHistory } from "vue-router";
 import { isUserLoggedIn } from "./utils";
 
 const router = createRouter({
@@ -18,11 +18,6 @@ const router = createRouter({
             ],
         },
         {
-            path: "/landing",
-            name: "landing",
-            component: () => import("@/views/pages/Landing.vue"),
-        },
-        {
             path: "/pages/notfound",
             name: "notfound",
             component: () => import("@/views/pages/NotFound.vue"),
@@ -32,6 +27,11 @@ const router = createRouter({
             path: "/auth/login",
             name: "login",
             component: () => import("@/views/pages/auth/Login.vue"),
+        },
+        {
+            path: "/NotFound",
+            name: "notFound",
+            component: () => import("@/views/pages/NotFound.vue"),
         },
         {
             path: "/auth/access",

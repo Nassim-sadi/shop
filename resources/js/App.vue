@@ -8,8 +8,8 @@
 
 
 <script setup>
-import { onMounted } from 'vue';
 import axios from '@/plugins/axios';
+import { onMounted } from 'vue';
 
 onMounted(async () => {
     await axios.get('/sanctum/csrf-cookie').then((response) => { })

@@ -1,15 +1,9 @@
 <script setup>
+import Navigation from '@/navigation/Index';
 import { ref } from 'vue';
-
 import AppMenuItem from './AppMenuItem.vue';
 
-const model = ref([
-    {
-        label: 'Home',
-        items: [{ label: 'Dashboard', icon: 'pi pi-fw pi-home', to: '/' }]
-    },
-
-]);
+const model = ref(Navigation);
 </script>
 
 <template>
@@ -18,7 +12,6 @@ const model = ref([
             <app-menu-item v-if="!item.separator" :item="item" :index="i"></app-menu-item>
             <li v-if="item.separator" class="menu-separator"></li>
         </template>
-
     </ul>
 </template>
 

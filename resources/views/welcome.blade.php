@@ -13,7 +13,7 @@
     <link id="theme-css" rel="stylesheet" type="text/css" href="/themes/aura-light-green/theme.css">
 
     <!-- Styles -->
-    @vite(['resources/styles/app.css', 'resources/js/app.js'])
+    @vite(['resources/js/assets/tailwind.css', 'resources/js/app.js'])
 
 </head>
 
