@@ -1,5 +1,8 @@
 <?php
 
+use Illuminate\Support\Facades\Facade;
+use Illuminate\Support\ServiceProvider;
+
 return [
 
     /*
@@ -124,5 +127,17 @@ return [
     ],
 
 
+    'providers' => ServiceProvider::defaultProviders()->merge([
+
+
+        Ichtrojan\Otp\OtpServiceProvider::class,
+
+    ])->toArray(),
+
+    'aliases' => Facade::defaultAliases()->merge([
+
+        'Otp' => Ichtrojan\Otp\Otp::class,
+
+    ])->toArray(),
 
 ];
