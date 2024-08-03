@@ -42,15 +42,14 @@ export function useLayout() {
     const toggleDarkMode = () => {
         if (!document.startViewTransition) {
             executeDarkModeToggle();
-
             return;
         }
-
         document.startViewTransition(() => executeDarkModeToggle(event));
     };
 
     const executeDarkModeToggle = () => {
         layoutConfig.darkTheme = !layoutConfig.darkTheme;
+        localStorage.setItem('darkTheme', layoutConfig.darkTheme);
         document.documentElement.classList.toggle('app-dark');
     };
 
@@ -80,5 +79,21 @@ export function useLayout() {
 
     const getSurface = computed(() => layoutConfig.surface);
 
+
+    if (localStorage.getItem('darkTheme') && localStorage.getItem('darkTheme') === 'true') {
+        layoutConfig.darkTheme = true;
+    } else {
+        layoutConfig.darkTheme = false;
+    }
+
+    if (localStorage.getItem('primary')) {
+        layoutConfig.primary = JSON.parse(localStorage.getItem('primary')).name
+    }
+
+    if (localStorage.getItem('surface')) {
+        layoutConfig.surface = JSON.parse(localStorage.getItem('surface')).name
+    }
+
     return { layoutConfig: readonly(layoutConfig), layoutState: readonly(layoutState), onMenuToggle, isSidebarActive, isDarkTheme, getPrimary, getSurface, setActiveMenuItem, toggleDarkMode, setPrimary, setSurface, setPreset, resetMenu, setMenuMode };
+
 }
