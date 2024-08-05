@@ -5,6 +5,7 @@ const instance = axios.create({
     withXSRFToken: true,
     headers: {
         Accept: "application/json",
+
     },
 });
 

@@ -1,5 +1,6 @@
 import axios from "@/plugins/axios";
 import { defineStore } from "pinia";
+
 export const authStore = defineStore("authStore", {
     state: () => ({
         user: null,
@@ -32,7 +33,6 @@ export const authStore = defineStore("authStore", {
 
         logout() {
             return new Promise((resolve, reject) => {
-                console.log("this token", this.token);
                 axios
                     .post(
                         "api/admin/logout",
@@ -51,6 +51,28 @@ export const authStore = defineStore("authStore", {
                         resolve(response);
                     })
                     .catch((error) => {
+                        reject(error);
+                    });
+            });
+        },
+
+        getUser() {
+            return new Promise((resolve, reject) => {
+                axios
+                    .get("api/admin/user", {
+                        headers: {
+                            Authorization: "Bearer " + this.token,
+                            // "X-Authorization": import.meta.env.VITE_API_KEY,
+                        },
+
+                    })
+                    .then((response) => {
+                        this.user = response.data;
+                        resolve(response);
+                    })
+                    .catch((error) => {
+                        this.user = null;
+                        this.access_token = null;
                         reject(error);
                     });
             });

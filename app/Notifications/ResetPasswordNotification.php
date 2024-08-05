@@ -8,7 +8,7 @@ use Illuminate\Notifications\Notification;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 
-class ResetPasswordNotification extends Notification implements ShouldQueue
+class ResetPasswordNotification extends Notification
 {
     use Queueable;
     public $message;
@@ -24,7 +24,7 @@ class ResetPasswordNotification extends Notification implements ShouldQueue
     {
         $this->message = 'use the below code for reset password';
         $this->subject = 'password resetting';
-        $this->fromEmail = 'test@gmail.com';
+        $this->fromEmail = env('MAIL_FROM_ADDRESS');
         $this->otp = new Otp();
     }
 
@@ -45,6 +45,7 @@ class ResetPasswordNotification extends Notification implements ShouldQueue
     {
         $otp = $this->otp->generate($notifiable->email, 'numeric', 6, 15);
         return (new MailMessage)
+            ->from($this->fromEmail)
             ->subject($this->subject)
             ->line($this->message)
             ->line("code :" . $otp->token);

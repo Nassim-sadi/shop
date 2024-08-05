@@ -2,11 +2,10 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Controllers\Controller;
-use App\Http\Requests\auth\ForgotPasswordRequest;
 use App\Models\User;
+use App\Http\Controllers\Controller;
 use App\Notifications\ResetPasswordNotification;
-use Illuminate\Http\Request;
+use App\Http\Requests\auth\ForgotPasswordRequest;
 
 class ForgotPasswordController extends Controller
 {
