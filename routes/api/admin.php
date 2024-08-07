@@ -5,6 +5,8 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\AuthController;
 use App\Http\Controllers\Admin\ForgotPasswordController;
 use App\Http\Controllers\Admin\ResetPasswordController;
+use GuzzleHttp\Middleware;
+
 /*
 |--------------------------------------------------------------------------
 | API Admin Routes
@@ -18,8 +20,8 @@ Route::controller(AuthController::class)->group(function () {
     Route::post('login', 'login');
 });
 
-Route::post('password/forgot', [ForgotPasswordController::class, 'forgotPassword']);
-Route::post('password/reset', [ResetPasswordController::class, 'resetPassword']);
+Route::post('password/forgot', [ForgotPasswordController::class, 'forgotPassword'])->Middleware('guest');
+Route::post('password/reset', [ResetPasswordController::class, 'resetPassword'])->Middleware('guest')->name('password.reset');
 
 Route::middleware(["auth:sanctum"])->group(function () {
     Route::controller(AuthController::class)->group(function () {

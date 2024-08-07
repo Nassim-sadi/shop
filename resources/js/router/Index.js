@@ -15,6 +15,11 @@ const router = createRouter({
                     name: "dashboard",
                     component: () => import("@/views/Dashboard.vue"),
                 },
+                {
+                    path: "/settings",
+                    name: "settings",
+                    component: () => import("@/views/pages/settings/Index.vue"),
+                },
             ],
         },
         {
@@ -43,7 +48,10 @@ const router = createRouter({
             name: "error",
             component: () => import("@/views/pages/auth/Error.vue"),
         },
+
+
     ],
+
 });
 
 router.beforeEach((to, from, next) => {

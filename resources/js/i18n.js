@@ -1,5 +1,5 @@
-import EN from "@/locale/en.json";
 import AR from "@/locale/ar.json";
+import EN from "@/locale/en.json";
 import { createI18n } from "vue-i18n";
 
 const i18n = createI18n({
@@ -13,4 +13,6 @@ const i18n = createI18n({
     },
 });
 
-export default i18n;
+const $t = i18n.global.t;
+
+export { $t, i18n };

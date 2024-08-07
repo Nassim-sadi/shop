@@ -1,4 +1,6 @@
+import { $t } from "@/i18n";
 import axios from "@/plugins/axios";
+import emitter from "@/plugins/emitter";
 import { defineStore } from "pinia";
 
 export const authStore = defineStore("authStore", {
@@ -15,23 +17,24 @@ export const authStore = defineStore("authStore", {
         ],
     },
     actions: {
-        login(user) {
+        async login(user) {
             return new Promise((resolve, reject) => {
                 axios
                     .post("api/admin/login", user)
                     .then((response) => {
                         this.user = response.data.user;
                         this.token = response.data.authorization.token;
-                        resolve(response);
+                        resolve();
                     })
                     .catch((error) => {
                         console.log(error);
-                        reject(error);
+                        // emitter.emit("toast", ({ summary: $t("getUserErrorSummary"), message: $t("getUserErrorMessage"), severity: "error" }));
+                        reject();
                     });
             });
         },
 
-        logout() {
+        async logout() {
             return new Promise((resolve, reject) => {
                 axios
                     .post(
@@ -47,7 +50,7 @@ export const authStore = defineStore("authStore", {
                     .then((response) => {
                         console.log(response);
                         this.user = null;
-                        this.access_token = null;
+                        this.token = null;
                         resolve(response);
                     })
                     .catch((error) => {
@@ -56,7 +59,7 @@ export const authStore = defineStore("authStore", {
             });
         },
 
-        getUser() {
+        async getUser() {
             return new Promise((resolve, reject) => {
                 axios
                     .get("api/admin/user", {
@@ -68,12 +71,13 @@ export const authStore = defineStore("authStore", {
                     })
                     .then((response) => {
                         this.user = response.data;
-                        resolve(response);
+                        resolve();
                     })
                     .catch((error) => {
                         this.user = null;
-                        this.access_token = null;
-                        reject(error);
+                        this.token = null;
+                        emitter.emit("toast", ({ summary: $t("getUserErrorSummary"), message: $t("getUserErrorMessage"), severity: "error" }));
+                        throw error;
                     });
             });
         },

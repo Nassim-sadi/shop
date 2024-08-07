@@ -5,8 +5,8 @@ import ToastService from "primevue/toastservice";
 import { createApp } from "vue";
 import App from "./App.vue";
 // custom imports
-import i18n from "@/i18n";
-import mitt from "mitt";
+import { i18n } from "@/i18n";
+import emitter from "@/plugins/emitter";
 import { createPinia } from "pinia";
 import piniaPersist from "pinia-plugin-persist";
 import router from "./router/Index";
@@ -15,13 +15,14 @@ import "@/assets/styles.scss";
 import "@/assets/tailwind.css";
 
 const app = createApp(App);
+
+app.provide("emitter", emitter);
+
+app.use(router);
+
 const pinia = createPinia();
 pinia.use(piniaPersist);
 
-const emitter = mitt(); // Initialize mitt
-
-app.provide("emitter", emitter);
-app.use(router);
 app.use(PrimeVue, {
     theme: {
         preset: Aura,

@@ -33,8 +33,15 @@ export default [
                         icon: 'pi pi-fw pi-lock',
                         to: '/auth/access'
                     }
+
                 ]
             },
+            ,
+            {
+                label: 'Settings',
+                icon: 'pi pi-fw pi-cog',
+                to: '/settings'
+            }
             // {
             //     label: 'Crud',
             //     icon: 'pi pi-fw pi-pencil',

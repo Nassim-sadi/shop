@@ -10,5 +10,7 @@
     "static": "Static",
     "settings": "Setting",
     "profile": "Profile",
-    "logout": "Logout"
+    "logout": "Logout",
+    "getUserErrorSummary": "Error while fetching user",
+    "getUserErrorMessage": "Failed to get previous session, Please sign in again"
 }
