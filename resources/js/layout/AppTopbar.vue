@@ -1,7 +1,67 @@
 <script setup>
 import { useLayout } from "@/layout/composables/layout";
 import AppConfigurator from "./AppConfigurator.vue";
+import { ref, computed } from "vue";
 const { onMenuToggle, toggleDarkMode, isDarkTheme } = useLayout();
+import { useConfirm } from "primevue/useconfirm";
+const confirm = useConfirm();
+
+import router from "@/router/Index";
+
+import { $t } from "@/plugins/i18n";
+import { authStore } from "@/store/AuthStore";
+const auth = authStore();
+
+const menu = ref();
+const items = ref([
+    {
+        label: "Options",
+        items: [
+            {
+                label: $t("profile"),
+                icon: "pi pi-user",
+                command: () => {
+                    router.push({ name: "settings" });
+                },
+            },
+            {
+                label: $t("logout"),
+                icon: "pi pi-sign-out",
+                command: () => {
+                    confirmLogout();
+                },
+            },
+        ],
+    },
+]);
+
+const user = computed(() => {
+    return auth.user;
+});
+
+const toggleProfileMenu = (event) => {
+    menu.value.toggle(event);
+};
+
+const confirmLogout = () => {
+    confirm.require({
+        header: $t("logout.confirm.header"),
+        message: $t("logout.confirm.message"),
+        icon: "pi pi-exclamation-triangle",
+        rejectProps: {
+            label: $t("cancel"),
+            severity: "secondary",
+            outlined: true,
+        },
+        acceptProps: {
+            label: $t("confirm"),
+        },
+        accept: () => {
+            auth.logout();
+        },
+        reject: () => {},
+    });
+};
 </script>
 
 <template>
@@ -108,12 +168,62 @@ const { onMenuToggle, toggleDarkMode, isDarkTheme } = useLayout();
                         <i class="pi pi-inbox"></i>
                         <span>Messages</span>
                     </button>
-                    <button type="button" class="layout-topbar-action">
+                    <button
+                        type="button"
+                        class="layout-topbar-action"
+                        @click="toggleProfileMenu"
+                        aria-haspopup="true"
+                        aria-controls="overlay_menu"
+                    >
                         <i class="pi pi-user"></i>
                         <span>Profile</span>
                     </button>
                 </div>
             </div>
         </div>
+        <Menu
+            :model="items"
+            ref="menu"
+            id="overlay_menu"
+            class="w-full md:w-60"
+            :popup="true"
+        >
+            <template #submenulabel="{ item }">
+                <span class="text-primary font-bold">{{ item.label }}</span>
+            </template>
+            <template #item="{ item, props }">
+                <a v-ripple class="flex items-center" v-bind="props.action">
+                    <span :class="item.icon" />
+                    <span>{{ item.label }}</span>
+                    <Badge
+                        v-if="item.badge"
+                        class="ml-auto"
+                        :value="item.badge"
+                    />
+                    <span
+                        v-if="item.shortcut"
+                        class="ml-auto border border-surface rounded bg-emphasis text-muted-color text-xs p-1"
+                        >{{ item.shortcut }}</span
+                    >
+                </a>
+            </template>
+            <template #start>
+                <div
+                    class="relative overflow-hidden w-full border-0 bg-transparent flex items-start p-2 pl-4 rounded-none transition-colors duration-200"
+                >
+                    <!-- TODO : add image to user -->
+                    <Avatar
+                        image="https://primefaces.org/cdn/primevue/images/avatar/amyelsner.png"
+                        class="mr-2"
+                        shape="circle"
+                    />
+                    <span class="inline-flex flex-col items-start">
+                        <span class="font-bold">{{ user.name }}</span>
+                        <span class="text-sm">{{ user.role }}</span>
+                    </span>
+                </div>
+            </template>
+        </Menu>
+        <ConfirmDialog></ConfirmDialog>
     </div>
 </template>

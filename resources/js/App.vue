@@ -38,7 +38,7 @@ const showToast = () => {
 };
 const checkAuth = async () => {
     if (router.currentRoute.value.name == "login") return;
-    await auth.getUser();
+    // await auth.getUser();
 };
 </script>
 

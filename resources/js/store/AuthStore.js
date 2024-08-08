@@ -1,6 +1,7 @@
-import { $t } from "@/i18n";
 import axios from "@/plugins/axios";
 import emitter from "@/plugins/emitter";
+import { $t } from "@/plugins/i18n";
+import router from "@/router/Index";
 import { defineStore } from "pinia";
 
 export const authStore = defineStore("authStore", {
@@ -45,12 +46,13 @@ export const authStore = defineStore("authStore", {
                                 Authorization: "Bearer " + this.token,
                                 // "X-Authorization": import.meta.env.VITE_API_KEY,
                             },
-                        }
+                        },
                     )
                     .then((response) => {
                         console.log(response);
                         this.user = null;
                         this.token = null;
+                        router.push({ name: "login" });
                         resolve(response);
                     })
                     .catch((error) => {
@@ -67,17 +69,78 @@ export const authStore = defineStore("authStore", {
                             Authorization: "Bearer " + this.token,
                             // "X-Authorization": import.meta.env.VITE_API_KEY,
                         },
-
                     })
                     .then((response) => {
+                        console.log(response);
                         this.user = response.data;
                         resolve();
                     })
                     .catch((error) => {
                         this.user = null;
                         this.token = null;
-                        emitter.emit("toast", ({ summary: $t("getUserErrorSummary"), message: $t("getUserErrorMessage"), severity: "error" }));
+                        emitter.emit("toast", {
+                            summary: $t("getUserErrorSummary"),
+                            message: $t("getUserErrorMessage"),
+                            severity: "error",
+                        });
                         throw error;
+                    });
+            });
+        },
+
+        async forgotPassword(email) {
+            console.log(email);
+
+            return new Promise((resolve, reject) => {
+                axios
+                    .post("api/admin/password/forgot", { email: email })
+                    .then((response) => {
+                        emitter.emit("toast", {
+                            summary: $t("auth.otp_sent"),
+                            message: $t("auth.otp_sent_message"),
+                            severity: "success",
+                        });
+                        resolve(response);
+                    })
+                    .catch((error) => {
+                        emitter.emit("toast", {
+                            summary: $t("auth.error"),
+                            message: $t("auth.error_message"),
+                            severity: "error",
+                        });
+                        reject(error);
+                    });
+            });
+        },
+
+        async resetPassword(data) {
+            console.log(data);
+
+            return new Promise((resolve, reject) => {
+                axios
+                    .post("api/admin/password/reset", {
+                        email: data.email,
+                        otp: data.otp,
+                        password: data.password,
+                        password_confirmation: data.password_confirmation,
+                    })
+                    .then((response) => {
+                        console.log(response);
+                        emitter.emit("toast", {
+                            summary: $t("auth.password_changed"),
+                            message: $t("auth.password_changed_message"),
+                            severity: "success",
+                        });
+                        resolve();
+                    })
+                    .catch((error) => {
+                        emitter.emit("toast", {
+                            summary: $t("auth.error"),
+                            message: $t("auth.error_message"),
+                            severity: "error",
+                        });
+                        console.log(error);
+                        reject();
                     });
             });
         },

@@ -19,6 +19,10 @@ const login = () => {
         router.push({ name: "dashboard" });
     });
 };
+
+const forgotPassword = () => {
+    router.push({ name: "forgot-password" });
+};
 </script>
 
 <template>
@@ -97,6 +101,7 @@ const login = () => {
                             type="text"
                             placeholder="Email address"
                             class="w-full md:w-[30rem] mb-8"
+                            fluid
                             v-model="email"
                         />
 
@@ -127,10 +132,13 @@ const login = () => {
                                 ></Checkbox>
                                 <label for="rememberme1">Remember me</label>
                             </div>
-                            <span
-                                class="font-medium no-underline ml-2 text-right cursor-pointer text-primary"
-                                >Forgot password?</span
+
+                            <Button
+                                link
+                                @click="forgotPassword"
+                                label="Forgot password?"
                             >
+                            </Button>
                         </div>
                         <Button
                             label="Sign In"

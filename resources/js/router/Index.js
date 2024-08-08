@@ -34,6 +34,16 @@ const router = createRouter({
             component: () => import("@/views/pages/auth/Login.vue"),
         },
         {
+            path: "/auth/forgot-password",
+            name: "forgot-password",
+            component: () => import("@/views/pages/auth/ForgotPassword.vue"),
+        },
+        {
+            path: "/auth/reset-password",
+            name: "reset-password",
+            component: () => import("@/views/pages/auth/ResetPassword.vue"),
+        },
+        {
             path: "/NotFound",
             name: "notFound",
             component: () => import("@/views/pages/NotFound.vue"),
@@ -48,10 +58,7 @@ const router = createRouter({
             name: "error",
             component: () => import("@/views/pages/auth/Error.vue"),
         },
-
-
     ],
-
 });
 
 router.beforeEach((to, from, next) => {

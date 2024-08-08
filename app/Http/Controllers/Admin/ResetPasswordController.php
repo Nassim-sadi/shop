@@ -20,9 +20,12 @@ class ResetPasswordController extends Controller
     public function resetPassword(ResetPasswordRequest $request)
     {
         $otp2 = $this->otp->validate($request->email, $request->otp);
+
         if (!$otp2->status) {
             return response()->json(['error' => $otp2], 401);
         }
+
+
         $user = User::where('email', $request->email)->first();
         $user->update(
             [

@@ -5,8 +5,8 @@ import ToastService from "primevue/toastservice";
 import { createApp } from "vue";
 import App from "./App.vue";
 // custom imports
-import { i18n } from "@/i18n";
 import emitter from "@/plugins/emitter";
+import { i18n } from "@/plugins/i18n";
 import { createPinia } from "pinia";
 import piniaPersist from "pinia-plugin-persist";
 import router from "./router/Index";
