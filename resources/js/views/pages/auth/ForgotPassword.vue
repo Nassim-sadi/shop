@@ -1,21 +1,19 @@
 <script setup>
 import FloatingConfigurator from "@/components/FloatingConfigurator.vue";
+import { $t } from "@/plugins/i18n";
+import router from "@/router/Index";
 import { authStore } from "@/store/AuthStore";
 import { ref } from "vue";
-import { useRouter } from "vue-router";
-const router = useRouter();
 const auth = authStore();
-
-import { $t } from "@/plugins/i18n";
+const send = ref(false);
 
 const email = ref("nacimbreeze@gmail.com");
 
-const sendOtp = () => {
+const sendLink = () => {
     auth.forgotPassword(email.value).then((res) => {
-        router.push({
-            name: "reset-password",
-            query: { email: email.value },
-        });
+        if (res.status == 200) {
+            send.value = true;
+        }
     });
 };
 </script>
@@ -40,6 +38,7 @@ const sendOtp = () => {
                 <div
                     class="w-full bg-surface-0 dark:bg-surface-900 py-20 px-8 sm:px-20"
                     style="border-radius: 53px"
+                    v-if="!send"
                 >
                     <div class="text-center mb-8">
                         <div
@@ -70,9 +69,27 @@ const sendOtp = () => {
                         <Button
                             :label="$t('auth.send_code')"
                             class="w-full"
-                            @click="sendOtp"
+                            @click="sendLink"
                         ></Button>
                     </div>
+                </div>
+
+                <div
+                    class="w-full bg-surface-0 dark:bg-surface-900 py-20 px-8 sm:px-20"
+                    style="border-radius: 53px"
+                    v-if="send"
+                >
+                    <div
+                        class="text-surface-700 dark:text-surface-0 text-xl font-medium mb-4 max-w-screen-sm"
+                    >
+                        {{ $t("auth.sent_email_success") }}
+                    </div>
+
+                    <Button
+                        :label="$t('login')"
+                        class="w-full"
+                        @click="() => router.push({ name: 'login' })"
+                    ></Button>
                 </div>
             </div>
         </div>

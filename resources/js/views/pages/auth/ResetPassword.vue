@@ -1,27 +1,41 @@
 <script setup>
 import FloatingConfigurator from "@/components/FloatingConfigurator.vue";
+import emitter from "@/plugins/emitter";
+import { $t } from "@/plugins/i18n";
+import router from "@/router/Index";
 import { authStore } from "@/store/AuthStore";
 import { ref } from "vue";
-import { useRoute, useRouter } from "vue-router";
-const router = useRouter();
+import { useRoute } from "vue-router";
 const route = useRoute();
-
 const auth = authStore();
+const reset_status = ref("false");
 
 const password = ref("password2");
 const password_confirm = ref("password2");
-const otp = ref("123456");
+const token = route.query.token;
+const email = route.query.email;
 
 const resetPassword = () => {
     let data = {
-        otp: otp.value,
-        email: route.query.email,
+        token: token,
+        email: email,
         password: password.value,
         password_confirmation: password_confirm.value,
     };
-    auth.resetPassword(data).then((res) => {
-        router.push({ name: "login" });
+
+    emitter.on("reset-password", (data) => {
+        console.log("🚀 ~ emitter.on ~ data:");
+
+        console.log(data);
+
+        if (data.status == 200) {
+            reset_status.value = "success";
+        } else {
+            reset_status.value = "failed";
+        }
     });
+
+    auth.resetPassword(data);
 };
 </script>
 
@@ -45,55 +59,25 @@ const resetPassword = () => {
                 <div
                     class="w-full bg-surface-0 dark:bg-surface-900 py-20 px-8 sm:px-20"
                     style="border-radius: 53px"
+                    v-if="reset_status == 'false'"
                 >
                     <div class="text-center mb-8">
                         <div
                             class="text-surface-900 dark:text-surface-0 text-3xl font-medium mb-4"
                         >
-                            reset password
+                            {{ $t("reset_password") }}
                         </div>
-                        <span class="text-muted-color font-medium"
-                            >enter new password</span
-                        >
+                        <span class="text-muted-color font-medium">
+                            {{ $t("reset_password_message") }}
+                        </span>
                         {{ route.query.email }}
                     </div>
 
                     <div>
                         <label
-                            for="otp"
-                            class="block text-surface-900 dark:text-surface-0 font-medium text-xl mb-2"
-                            >OTP</label
-                        >
-                        <!-- <InputOtp
-                            id="otp"
-                            v-model="otp"
-                            integerOnly
-                            :length="6"
-                        /> -->
-                        <InputOtp
-                            id="otp"
-                            v-model="otp"
-                            :length="6"
-                            style="gap: 0"
-                            integerOnly
-                        >
-                            <template #default="{ attrs, events, index }">
-                                <input
-                                    type="text"
-                                    v-bind="attrs"
-                                    v-on="events"
-                                    class="custom-otp-input mb-4"
-                                />
-                                <div v-if="index === 3" class="px-4">
-                                    <i class="pi pi-minus" />
-                                </div>
-                            </template>
-                        </InputOtp>
-
-                        <label
                             for="password1"
                             class="block text-surface-900 dark:text-surface-0 font-medium text-xl mb-2"
-                            >New password</label
+                            >{{ $t("new_password") }}</label
                         >
                         <Password
                             id="password1"
@@ -108,7 +92,7 @@ const resetPassword = () => {
                         <label
                             for="password2"
                             class="block text-surface-900 dark:text-surface-0 font-medium text-xl mb-2"
-                            >Password</label
+                            >{{ $t("confirm_password") }}</label
                         >
                         <Password
                             id="password2"
@@ -121,19 +105,43 @@ const resetPassword = () => {
                         ></Password>
 
                         <Button
-                            label="Sign In"
+                            label="Change password"
                             class="w-full"
                             @click="resetPassword"
                         ></Button>
-                        <div class="flex justify-between mt-8 self-stretch">
-                            <Button
-                                label="Resend Code"
-                                link
-                                class="p-0"
-                            ></Button>
-                            <Button label="Submit Code"></Button>
-                        </div>
                     </div>
+                </div>
+                <div
+                    class="w-full bg-surface-0 dark:bg-surface-900 py-20 px-8 sm:px-20"
+                    style="border-radius: 53px"
+                    v-if="reset_status == 'success'"
+                >
+                    <div
+                        class="text-surface-700 dark:text-surface-0 text-xl font-medium mb-4 max-w-screen-sm"
+                    >
+                        {{ $t("auth.password_reset_success") }}
+                    </div>
+                    <Button
+                        label="Sign in"
+                        class="w-full"
+                        @click="() => router.push({ name: 'login' })"
+                    ></Button>
+                </div>
+                <div
+                    class="w-full bg-surface-0 dark:bg-surface-900 py-20 px-8 sm:px-20"
+                    style="border-radius: 53px"
+                    v-if="reset_status == 'failed'"
+                >
+                    <div
+                        class="text-surface-700 dark:text-surface-0 text-xl font-medium mb-4 max-w-screen-sm"
+                    >
+                        {{ $t("auth.password_reset_fail") }}
+                    </div>
+                    <Button
+                        label="Sign in"
+                        class="w-full"
+                        @click="() => router.push({ name: 'login' })"
+                    ></Button>
                 </div>
             </div>
         </div>
@@ -149,40 +157,5 @@ const resetPassword = () => {
 .pi-eye-slash {
     transform: scale(1.6);
     margin-right: 1rem;
-}
-.custom-otp-input {
-    width: 48px;
-    height: 48px;
-    font-size: 24px;
-    appearance: none;
-    text-align: center;
-    transition: all 0.2s;
-    border-radius: 0;
-    border: 1px solid var(--p-inputtext-border-color);
-    background: transparent;
-    outline-offset: -2px;
-    outline-color: transparent;
-    border-right: 0 none;
-    transition: outline-color 0.3s;
-    color: var(--p-inputtext-color);
-}
-
-.custom-otp-input:focus {
-    outline: 2px solid var(--p-focus-ring-color);
-}
-
-.custom-otp-input:first-child,
-.custom-otp-input:nth-child(5) {
-    border-top-left-radius: 12px;
-    border-bottom-left-radius: 12px;
-}
-
-.custom-otp-input:nth-child(3),
-.custom-otp-input:last-child {
-    border-top-right-radius: 12px;
-    border-bottom-right-radius: 12px;
-    border-right-width: 1px;
-    border-right-style: solid;
-    border-color: var(--p-inputtext-border-color);
 }
 </style>

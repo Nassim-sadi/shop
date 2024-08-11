@@ -93,7 +93,7 @@ export const authStore = defineStore("authStore", {
 
             return new Promise((resolve, reject) => {
                 axios
-                    .post("api/admin/password/forgot", { email: email })
+                    .post("api/admin/password/send-link", { email: email })
                     .then((response) => {
                         emitter.emit("toast", {
                             summary: $t("auth.otp_sent"),
@@ -104,8 +104,8 @@ export const authStore = defineStore("authStore", {
                     })
                     .catch((error) => {
                         emitter.emit("toast", {
-                            summary: $t("auth.error"),
-                            message: $t("auth.error_message"),
+                            summary: $t("error"),
+                            message: $t("error_message"),
                             severity: "error",
                         });
                         reject(error);
@@ -120,12 +120,12 @@ export const authStore = defineStore("authStore", {
                 axios
                     .post("api/admin/password/reset", {
                         email: data.email,
-                        otp: data.otp,
+                        token: data.token,
                         password: data.password,
                         password_confirmation: data.password_confirmation,
                     })
                     .then((response) => {
-                        console.log(response);
+                        emitter.emit("reset-password", response);
                         emitter.emit("toast", {
                             summary: $t("auth.password_changed"),
                             message: $t("auth.password_changed_message"),
@@ -135,8 +135,8 @@ export const authStore = defineStore("authStore", {
                     })
                     .catch((error) => {
                         emitter.emit("toast", {
-                            summary: $t("auth.error"),
-                            message: $t("auth.error_message"),
+                            summary: $t("error"),
+                            message: $t("error_message"),
                             severity: "error",
                         });
                         console.log(error);
