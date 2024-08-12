@@ -131,7 +131,7 @@ export const authStore = defineStore("authStore", {
                             message: $t("auth.password_changed_message"),
                             severity: "success",
                         });
-                        resolve();
+                        resolve(response);
                     })
                     .catch((error) => {
                         emitter.emit("toast", {
@@ -140,7 +140,7 @@ export const authStore = defineStore("authStore", {
                             severity: "error",
                         });
                         console.log(error);
-                        reject();
+                        reject(error);
                     });
             });
         },

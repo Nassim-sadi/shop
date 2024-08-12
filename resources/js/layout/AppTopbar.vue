@@ -1,9 +1,9 @@
 <script setup>
 import { useLayout } from "@/layout/composables/layout";
-import AppConfigurator from "./AppConfigurator.vue";
-import { ref, computed } from "vue";
-const { onMenuToggle, toggleDarkMode, isDarkTheme } = useLayout();
 import { useConfirm } from "primevue/useconfirm";
+import { computed, ref } from "vue";
+import AppConfigurator from "./AppConfigurator.vue";
+const { onMenuToggle, toggleDarkMode, isDarkTheme } = useLayout();
 const confirm = useConfirm();
 
 import router from "@/router/Index";
@@ -218,7 +218,9 @@ const confirmLogout = () => {
                         shape="circle"
                     />
                     <span class="inline-flex flex-col items-start">
-                        <span class="font-bold">{{ user.name }}</span>
+                        <span class="font-bold">{{
+                            user.firstname + " " + user.lastname
+                        }}</span>
                         <span class="text-sm">{{ user.role }}</span>
                     </span>
                 </div>

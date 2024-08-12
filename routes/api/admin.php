@@ -1,12 +1,8 @@
 <?php
 
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\AuthController;
-use App\Http\Controllers\Admin\ForgotPasswordController;
 use App\Http\Controllers\Admin\ResetPasswordController;
-use Illuminate\Support\Facades\RateLimiter;
-use GuzzleHttp\Middleware;
 
 /*
 |--------------------------------------------------------------------------
@@ -21,9 +17,11 @@ Route::controller(AuthController::class)->group(function () {
     Route::post('login', 'login');
 });
 
-Route::post('password/send-link', [ResetPasswordController::class, 'sendLink'])->middleware('password_reset_link',  'guest');
 
-Route::post('password/reset', [ResetPasswordController::class, 'reset'])->Middleware('guest');
+Route::controller(ResetPasswordController::class)->group(function () {
+    Route::post('password/send-link', 'sendLink')->middleware('password_reset_link',  'guest');
+    Route::post('password/reset', 'reset')->Middleware('guest');
+});
 
 Route::middleware(["auth:sanctum"])->group(function () {
     Route::controller(AuthController::class)->group(function () {
@@ -33,10 +31,6 @@ Route::middleware(["auth:sanctum"])->group(function () {
 });
 
 
-// Route::controller(ResetPasswordController::class)->group(function () {
-//     Route::post('forget-password', 'sendLink');
-//     Route::post('reset-password', 'reset');
-// });
 
 // Route::middleware(["auth:sanctum", "admin"])->group(function () {
 //     Route::controller(AuthController::class)->group(function () {

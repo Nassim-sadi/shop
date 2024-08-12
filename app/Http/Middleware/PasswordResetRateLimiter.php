@@ -20,7 +20,7 @@ class PasswordResetRateLimiter
         $key = $request->ip(); // You can customize the key based on your needs
 
         if ($this->limiter->tooManyAttempts($key, $maxAttempts)) {
-            return response('Too Many Attempts. fk you', Response::HTTP_TOO_MANY_REQUESTS);
+            return response('Too Many Attempts.', Response::HTTP_TOO_MANY_REQUESTS);
         }
 
         $this->limiter->hit($key, $decayMinutes * 60);

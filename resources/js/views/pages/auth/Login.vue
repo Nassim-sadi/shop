@@ -1,6 +1,13 @@
 <script setup>
 import FloatingConfigurator from "@/components/FloatingConfigurator.vue";
 import { authStore } from "@/store/AuthStore";
+import useVuelidate from "@vuelidate/core";
+import {
+    email as emailValidator,
+    minLength,
+    required,
+} from "@vuelidate/validators";
+
 import { ref } from "vue";
 import { useRouter } from "vue-router";
 const router = useRouter();
@@ -10,14 +17,23 @@ const email = ref("nacimbreeze@gmail.com");
 const password = ref("password");
 const checked = ref(false);
 
+const rules = {
+    email: { required, emailValidator },
+    password: { required, minLength: minLength(8) },
+};
+const v$ = useVuelidate(rules, { email, password });
+
 const login = () => {
-    let user = {
-        email: email.value,
-        password: password.value,
-    };
-    auth.login(user).then(() => {
-        router.push({ name: "dashboard" });
-    });
+    v$.value.$touch();
+    if (!v$.value.$invalid) {
+        let user = {
+            email: email.value,
+            password: password.value,
+        };
+        auth.login(user).then(() => {
+            router.push({ name: "dashboard" });
+        });
+    }
 };
 
 const forgotPassword = () => {
@@ -105,6 +121,14 @@ const forgotPassword = () => {
                             v-model="email"
                         />
 
+                        <div
+                            class="text-red-500"
+                            v-for="error of v$.email.$errors"
+                            :key="error.$uid"
+                        >
+                            <small class="p-error">{{ error.$message }}</small>
+                        </div>
+
                         <label
                             for="password1"
                             class="block text-surface-900 dark:text-surface-0 font-medium text-xl mb-2"
@@ -119,6 +143,14 @@ const forgotPassword = () => {
                             fluid
                             :feedback="false"
                         ></Password>
+
+                        <div
+                            class="text-red-500"
+                            v-for="error of v$.password.$errors"
+                            :key="error.$uid"
+                        >
+                            <small class="p-error">{{ error.$message }}</small>
+                        </div>
 
                         <div
                             class="flex items-center justify-between mt-2 mb-8 gap-8"

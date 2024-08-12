@@ -4,6 +4,8 @@ import emitter from "@/plugins/emitter";
 import { $t } from "@/plugins/i18n";
 import router from "@/router/Index";
 import { authStore } from "@/store/AuthStore";
+import { useVuelidate } from "@vuelidate/core";
+import { helpers, minLength, required, sameAs } from "@vuelidate/validators";
 import { ref } from "vue";
 import { useRoute } from "vue-router";
 const route = useRoute();
@@ -15,27 +17,44 @@ const password_confirm = ref("password2");
 const token = route.query.token;
 const email = route.query.email;
 
+const rules = {
+    password: { required, minLength: minLength(8) },
+    password_confirmation: {
+        required,
+        minLength: minLength(8),
+        sameAs: helpers.withMessage("Passwords must match", sameAs(password)),
+    },
+};
+
+const v$ = useVuelidate(rules, {
+    password,
+    password_confirmation: password_confirm,
+});
+
 const resetPassword = () => {
-    let data = {
-        token: token,
-        email: email,
-        password: password.value,
-        password_confirmation: password_confirm.value,
-    };
+    v$.value.$touch();
+    if (!v$.value.$invalid) {
+        let data = {
+            token: token,
+            email: email,
+            password: password.value,
+            password_confirmation: password_confirm.value,
+        };
 
-    emitter.on("reset-password", (data) => {
-        console.log("🚀 ~ emitter.on ~ data:");
+        emitter.on("reset-password", (data) => {
+            console.log("🚀 ~ emitter.on ~ data:");
 
-        console.log(data);
+            console.log(data);
 
-        if (data.status == 200) {
-            reset_status.value = "success";
-        } else {
-            reset_status.value = "failed";
-        }
-    });
+            if (data.status == 200) {
+                reset_status.value = "success";
+            } else {
+                reset_status.value = "failed";
+            }
+        });
 
-    auth.resetPassword(data);
+        auth.resetPassword(data);
+    }
 };
 </script>
 
@@ -89,6 +108,14 @@ const resetPassword = () => {
                             :feedback="false"
                         ></Password>
 
+                        <div
+                            class="text-red-500"
+                            v-for="error of v$.password.$errors"
+                            :key="error.$uid"
+                        >
+                            <small class="p-error">{{ error.$message }}</small>
+                        </div>
+
                         <label
                             for="password2"
                             class="block text-surface-900 dark:text-surface-0 font-medium text-xl mb-2"
@@ -103,6 +130,14 @@ const resetPassword = () => {
                             fluid
                             :feedback="false"
                         ></Password>
+
+                        <div
+                            class="text-red-500"
+                            v-for="error of v$.password_confirmation.$errors"
+                            :key="error.$uid"
+                        >
+                            <small class="p-error">{{ error.$message }}</small>
+                        </div>
 
                         <Button
                             label="Change password"

@@ -3,18 +3,29 @@ import FloatingConfigurator from "@/components/FloatingConfigurator.vue";
 import { $t } from "@/plugins/i18n";
 import router from "@/router/Index";
 import { authStore } from "@/store/AuthStore";
+import { useVuelidate } from "@vuelidate/core";
+import { email as emailValidator, required } from "@vuelidate/validators";
+
 import { ref } from "vue";
 const auth = authStore();
 const send = ref(false);
-
 const email = ref("nacimbreeze@gmail.com");
 
+const rules = {
+    email: { required, emailValidator },
+};
+
+const v$ = useVuelidate(rules, { email });
+
 const sendLink = () => {
-    auth.forgotPassword(email.value).then((res) => {
-        if (res.status == 200) {
-            send.value = true;
-        }
-    });
+    v$.value.$touch();
+    if (!v$.value.$invalid) {
+        auth.forgotPassword(email.value).then((res) => {
+            if (res.status == 200) {
+                send.value = true;
+            }
+        });
+    }
 };
 </script>
 
@@ -61,14 +72,22 @@ const sendLink = () => {
                             id="email1"
                             type="text"
                             placeholder="Email address"
-                            class="w-full md:w-[30rem] mb-8"
+                            class="w-full md:w-[30rem] mb-4"
                             fluid
                             v-model="email"
                         />
 
+                        <div
+                            class="text-red-500"
+                            v-for="error of v$.email.$errors"
+                            :key="error.$uid"
+                        >
+                            <small class="p-error">{{ error.$message }}</small>
+                        </div>
+
                         <Button
                             :label="$t('auth.send_code')"
-                            class="w-full"
+                            class="w-full mt-4"
                             @click="sendLink"
                         ></Button>
                     </div>
