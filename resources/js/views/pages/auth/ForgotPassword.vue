@@ -5,7 +5,6 @@ import router from "@/router/Index";
 import { authStore } from "@/store/AuthStore";
 import { useVuelidate } from "@vuelidate/core";
 import { email as emailValidator, required } from "@vuelidate/validators";
-
 import { ref } from "vue";
 const auth = authStore();
 const send = ref(false);
@@ -51,13 +50,15 @@ const sendLink = () => {
                     style="border-radius: 53px"
                     v-if="!send"
                 >
-                    <div class="text-center mb-8">
+                    <div class="text-center mb-8 w-full">
                         <div
-                            class="text-surface-900 dark:text-surface-0 text-3xl font-medium mb-4"
+                            class="text-surface-900 dark:text-surface-0 text-3xl font-medium mb-4 wrap"
                         >
                             {{ $t("auth.forgot_password") }}
                         </div>
-                        <span class="text-muted-color font-medium">
+                        <span
+                            class="text-muted-color font-medium w-4/6 block mx-auto"
+                        >
                             {{ $t("auth.forgot_password_message") }}
                         </span>
                     </div>

@@ -1,6 +1,8 @@
 <script setup>
 import { useLayout } from "@/layout/composables/layout";
+import { $t as t } from "@/plugins/i18n";
 import { $t, updatePreset, updateSurfacePalette } from "@primevue/themes";
+
 import Aura from "@primevue/themes/aura";
 import Lara from "@primevue/themes/lara";
 import { onBeforeMount, onMounted, ref } from "vue";
@@ -24,8 +26,8 @@ const presetOptions = ref(Object.keys(presets));
 
 const menuMode = ref(layoutConfig.menuMode);
 const menuModeOptions = ref([
-    { label: "Static", value: "static" },
-    { label: "Overlay", value: "overlay" },
+    { label: t("static"), value: "static" },
+    { label: t("overlay"), value: "overlay" },
 ]);
 
 const primaryColors = ref([
@@ -598,9 +600,9 @@ onMounted(() => {
     >
         <div class="flex flex-col gap-4">
             <div>
-                <span class="text-sm text-muted-color font-semibold"
-                    >Primary</span
-                >
+                <span class="text-sm text-muted-color font-semibold">{{
+                    t("primary")
+                }}</span>
                 <div class="pt-2 flex gap-2 flex-wrap justify-between">
                     <button
                         v-for="primaryColor of primaryColors"
@@ -622,9 +624,9 @@ onMounted(() => {
                 </div>
             </div>
             <div>
-                <span class="text-sm text-muted-color font-semibold"
-                    >Surface</span
-                >
+                <span class="text-sm text-muted-color font-semibold">{{
+                    t("surface")
+                }}</span>
                 <div class="pt-2 flex gap-2 flex-wrap justify-between">
                     <button
                         v-for="surface of surfaces"
@@ -649,9 +651,9 @@ onMounted(() => {
                 </div>
             </div>
             <div class="flex flex-col gap-2">
-                <span class="text-sm text-muted-color font-semibold"
-                    >Presets</span
-                >
+                <span class="text-sm text-muted-color font-semibold">{{
+                    t("presets")
+                }}</span>
                 <SelectButton
                     v-model="preset"
                     @change="onPresetChange"
@@ -660,9 +662,9 @@ onMounted(() => {
                 />
             </div>
             <div class="flex flex-col gap-2">
-                <span class="text-sm text-muted-color font-semibold"
-                    >Menu Mode</span
-                >
+                <span class="text-sm text-muted-color font-semibold">{{
+                    t("menuMode")
+                }}</span>
                 <SelectButton
                     v-model="menuMode"
                     @change="onMenuModeChange"

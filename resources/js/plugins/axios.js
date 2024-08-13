@@ -7,20 +7,7 @@ const instance = axios.create({
     withXSRFToken: true,
     headers: {
         Accept: "application/json",
-
     },
 });
-
-instance.interceptors.response.use(
-    response => response,
-    error => {
-        if (error.response && error.response.status === 401) {
-            router.push({ name: "login" });
-            return Promise.resolve({ error: 'Unauthorized', redirect: true });
-        }
-        return Promise.reject(error);
-    }
-);
-
 
 export default instance;

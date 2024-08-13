@@ -42,10 +42,6 @@ const resetPassword = () => {
         };
 
         emitter.on("reset-password", (data) => {
-            console.log("🚀 ~ emitter.on ~ data:");
-
-            console.log(data);
-
             if (data.status == 200) {
                 reset_status.value = "success";
             } else {
@@ -53,7 +49,13 @@ const resetPassword = () => {
             }
         });
 
-        auth.resetPassword(data);
+        auth.resetPassword(data)
+            .then((result) => {
+                console.log(result);
+            })
+            .catch((err) => {
+                console.log(err);
+            });
     }
 };
 </script>
@@ -101,7 +103,7 @@ const resetPassword = () => {
                         <Password
                             id="password1"
                             v-model="password"
-                            placeholder="Password"
+                            :placeholder="$t('new_password')"
                             :toggleMask="true"
                             class="mb-4"
                             fluid
@@ -124,7 +126,7 @@ const resetPassword = () => {
                         <Password
                             id="password2"
                             v-model="password_confirm"
-                            placeholder="Password"
+                            :placeholder="$t('confirm_password')"
                             :toggleMask="true"
                             class="mb-4"
                             fluid
@@ -140,7 +142,7 @@ const resetPassword = () => {
                         </div>
 
                         <Button
-                            label="Change password"
+                            :label="$t('auth.reset_password')"
                             class="w-full"
                             @click="resetPassword"
                         ></Button>
@@ -152,7 +154,7 @@ const resetPassword = () => {
                     v-if="reset_status == 'success'"
                 >
                     <div
-                        class="text-surface-700 dark:text-surface-0 text-xl font-medium mb-4 max-w-screen-sm"
+                        class="text-surface-700 dark:text-surface-0 text-xl font-medium mb-4 max-w-screen-sm w-2/3 block"
                     >
                         {{ $t("auth.password_reset_success") }}
                     </div>

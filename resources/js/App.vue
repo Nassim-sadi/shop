@@ -16,15 +16,10 @@ import { useToast } from "primevue/usetoast";
 const toast = useToast();
 
 import { onMounted } from "vue";
-import { useRouter } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 const auth = authStore();
 const router = useRouter();
-
-onMounted(async () => {
-    await axios.get("/sanctum/csrf-cookie");
-    checkAuth();
-    showToast();
-});
+const route = useRoute();
 
 const showToast = () => {
     emitter.on("toast", ({ summary, message, severity, life }) => {
@@ -36,10 +31,22 @@ const showToast = () => {
         });
     });
 };
-const checkAuth = async () => {
-    if (router.currentRoute.value.name == "login") return;
-    // await auth.getUser();
+
+const excludedRoutes = ["login", "forgot-password", "reset-password"];
+
+const checkAuth = () => {
+    if (excludedRoutes.includes(route.name)) {
+        return;
+    }
+    auth.getUser();
 };
+
+onMounted(async () => {
+    await router.isReady();
+    await axios.get("/sanctum/csrf-cookie");
+    checkAuth();
+    showToast();
+});
 </script>
 
 <style lang="scss" scoped></style>

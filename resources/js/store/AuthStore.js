@@ -25,12 +25,10 @@ export const authStore = defineStore("authStore", {
                     .then((response) => {
                         this.user = response.data.user;
                         this.token = response.data.authorization.token;
-                        resolve();
+                        resolve(response);
                     })
                     .catch((error) => {
-                        console.log(error);
-                        // emitter.emit("toast", ({ summary: $t("getUserErrorSummary"), message: $t("getUserErrorMessage"), severity: "error" }));
-                        reject();
+                        reject(error);
                     });
             });
         },
@@ -71,13 +69,13 @@ export const authStore = defineStore("authStore", {
                         },
                     })
                     .then((response) => {
-                        console.log(response);
                         this.user = response.data;
                         resolve();
                     })
                     .catch((error) => {
                         this.user = null;
                         this.token = null;
+                        router.push({ name: "login" });
                         emitter.emit("toast", {
                             summary: $t("getUserErrorSummary"),
                             message: $t("getUserErrorMessage"),
@@ -114,8 +112,6 @@ export const authStore = defineStore("authStore", {
         },
 
         async resetPassword(data) {
-            console.log(data);
-
             return new Promise((resolve, reject) => {
                 axios
                     .post("api/admin/password/reset", {

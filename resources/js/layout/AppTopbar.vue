@@ -11,6 +11,7 @@ import router from "@/router/Index";
 import { $t } from "@/plugins/i18n";
 import { authStore } from "@/store/AuthStore";
 const auth = authStore();
+const appName = ref(import.meta.env.VITE_APP_NAME);
 
 const menu = ref();
 const items = ref([
@@ -107,7 +108,7 @@ const confirmLogout = () => {
                     </g>
                 </svg>
 
-                <span>SAKAI</span>
+                <span>{{ appName }}</span>
             </router-link>
         </div>
 

@@ -8,6 +8,7 @@ import {
     required,
 } from "@vuelidate/validators";
 
+import { $t } from "@/plugins/i18n";
 import { ref } from "vue";
 import { useRouter } from "vue-router";
 const router = useRouter();
@@ -23,16 +24,27 @@ const rules = {
 };
 const v$ = useVuelidate(rules, { email, password });
 
+const loading = ref(false);
+const loginError = ref(false);
 const login = () => {
+    loading.value = true;
     v$.value.$touch();
     if (!v$.value.$invalid) {
         let user = {
             email: email.value,
             password: password.value,
         };
-        auth.login(user).then(() => {
-            router.push({ name: "dashboard" });
-        });
+        auth.login(user)
+            .then((res) => {
+                router.push({ name: "dashboard" });
+            })
+            .catch((err) => {
+                console.log(err.response.data);
+                loginError.value = true;
+            });
+        loading.value = false;
+    } else {
+        loading.value = false;
     }
 };
 
@@ -99,23 +111,23 @@ const forgotPassword = () => {
                         <div
                             class="text-surface-900 dark:text-surface-0 text-3xl font-medium mb-4"
                         >
-                            Welcome to PrimeLand!
+                            {{ $t("login.title") }}
                         </div>
-                        <span class="text-muted-color font-medium"
-                            >Sign in to continue</span
-                        >
+                        <span class="text-muted-color font-medium">{{
+                            $t("login.subtitle")
+                        }}</span>
                     </div>
 
                     <div>
                         <label
                             for="email1"
                             class="block text-surface-900 dark:text-surface-0 text-xl font-medium mb-2"
-                            >Email</label
+                            >{{ $t("auth.email") }}</label
                         >
                         <InputText
                             id="email1"
                             type="text"
-                            placeholder="Email address"
+                            :placeholder="$t('email.placeholder')"
                             class="w-full md:w-[30rem] mb-8"
                             fluid
                             v-model="email"
@@ -132,12 +144,12 @@ const forgotPassword = () => {
                         <label
                             for="password1"
                             class="block text-surface-900 dark:text-surface-0 font-medium text-xl mb-2"
-                            >Password</label
+                            >{{ $t("password") }}</label
                         >
                         <Password
                             id="password1"
                             v-model="password"
-                            placeholder="Password"
+                            :placeholder="$t('password')"
                             :toggleMask="true"
                             class="mb-4"
                             fluid
@@ -152,6 +164,12 @@ const forgotPassword = () => {
                             <small class="p-error">{{ error.$message }}</small>
                         </div>
 
+                        <div class="text-red-500" v-if="loginError">
+                            <small class="p-error"
+                                >{{ $t("auth.sign_in_credentials_error") }}
+                            </small>
+                        </div>
+
                         <div
                             class="flex items-center justify-between mt-2 mb-8 gap-8"
                         >
@@ -162,20 +180,23 @@ const forgotPassword = () => {
                                     binary
                                     class="mr-2"
                                 ></Checkbox>
-                                <label for="rememberme1">Remember me</label>
+                                <label for="rememberme1"
+                                    >{{ $t("remember_me") }}
+                                </label>
                             </div>
 
                             <Button
                                 link
                                 @click="forgotPassword"
-                                label="Forgot password?"
+                                :label="$t('auth.forgot_password') + ' ?'"
                             >
                             </Button>
                         </div>
                         <Button
-                            label="Sign In"
+                            :label="$t('auth.sign_in')"
                             class="w-full"
                             @click="login"
+                            :loading="loading"
                         ></Button>
                     </div>
                 </div>

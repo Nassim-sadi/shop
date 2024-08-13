@@ -1,11 +1,10 @@
 {
     "title": "Breeze App",
-    "scale": "Scale",
     "darkMode": "Dark mode",
-    "menuType": "Menu type",
-    "rippleEffect": "Ripple effect",
-    "themes": "Themes",
-    "primaryFocusRing": "Primary Focus Ring",
+    "primary": "Primary",
+    "surface": "Surface",
+    "presets": "Presets",
+    "menuMode": "Menu Mode",
     "overlay": "Overlay",
     "static": "Static",
     "login": "Login",
@@ -33,6 +32,7 @@
     "auth.register": "Register",
     "auth.sign_in": "Sign in",
     "auth.sign_in_message": "Sign in",
+    "auth.sign_in_credentials_error": "Invalid email or password. Please try again",
     "auth.send_code": "Send code",
     "auth.otp_sent": "OTP sent successfully",
     "auth.otp_sent_message": "Check your email for OTP",
@@ -46,5 +46,9 @@
     "reset_password_message": "Enter your new password",
     "new_password": "New password",
     "password": "Password",
-    "confirm_password": "Confirm new password"
+    "confirm_password": "Confirm new password",
+    "email.placeholder": "Email address",
+    "remember_me": "Remember me",
+    "login.title": "Welcome back to Company",
+    "login.subtitle": "Login to your account"
 }
