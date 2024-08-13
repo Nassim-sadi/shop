@@ -31,6 +31,7 @@
     "auth.password_confirmation": "Password confirmation",
     "auth.register": "Register",
     "auth.sign_in": "Sign in",
+    "auth.reset.sign_in": "Back to sign in",
     "auth.sign_in_message": "Sign in",
     "auth.sign_in_credentials_error": "Invalid email or password. Please try again",
     "auth.send_code": "Send code",

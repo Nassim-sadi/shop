@@ -91,6 +91,13 @@ const sendLink = () => {
                             class="w-full mt-4"
                             @click="sendLink"
                         ></Button>
+
+                        <Button
+                            :label="$t('auth.reset.sign_in')"
+                            severity="secondary"
+                            class="w-full mt-4"
+                            @click="() => router.push({ name: 'login' })"
+                        ></Button>
                     </div>
                 </div>
 
