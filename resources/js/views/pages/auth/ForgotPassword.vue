@@ -9,7 +9,8 @@ import { ref } from "vue";
 const auth = authStore();
 const send = ref(false);
 const email = ref("nacimbreeze@gmail.com");
-
+const loading = ref(false);
+const invalidEmail = ref(false);
 const rules = {
     email: { required, emailValidator },
 };
@@ -17,14 +18,23 @@ const rules = {
 const v$ = useVuelidate(rules, { email });
 
 const sendLink = () => {
+    loading.value = true;
     v$.value.$touch();
-    if (!v$.value.$invalid) {
-        auth.forgotPassword(email.value).then((res) => {
+    if (v$.value.$invalid) return;
+
+    auth.forgotPassword(email.value)
+        .then((res) => {
             if (res.status == 200) {
                 send.value = true;
             }
+        })
+        .catch((err) => {
+            if (err.response.status == 422) {
+                invalidEmail.value = true;
+            }
         });
-    }
+
+    loading.value = false;
 };
 </script>
 
@@ -83,13 +93,22 @@ const sendLink = () => {
                             v-for="error of v$.email.$errors"
                             :key="error.$uid"
                         >
-                            <small class="p-error">{{ error.$message }}</small>
+                            <Message severity="error">{{
+                                error.$message
+                            }}</Message>
+                        </div>
+
+                        <div class="text-red-500" v-if="invalidEmail">
+                            <Message severity="error">
+                                {{ $t("auth.non_existing_email") }}
+                            </Message>
                         </div>
 
                         <Button
                             :label="$t('auth.send_code')"
                             class="w-full mt-4"
                             @click="sendLink"
+                            :loading="loading"
                         ></Button>
 
                         <Button

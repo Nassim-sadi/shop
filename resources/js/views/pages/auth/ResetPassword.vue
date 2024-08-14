@@ -115,7 +115,9 @@ const resetPassword = () => {
                             v-for="error of v$.password.$errors"
                             :key="error.$uid"
                         >
-                            <small class="p-error">{{ error.$message }}</small>
+                            <Message severity="error">{{
+                                error.$message
+                            }}</Message>
                         </div>
 
                         <label
@@ -138,7 +140,9 @@ const resetPassword = () => {
                             v-for="error of v$.password_confirmation.$errors"
                             :key="error.$uid"
                         >
-                            <small class="p-error">{{ error.$message }}</small>
+                            <Message severity="error">{{
+                                error.$message
+                            }}</Message>
                         </div>
 
                         <Button

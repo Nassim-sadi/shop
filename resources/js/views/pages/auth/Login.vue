@@ -39,7 +39,6 @@ const login = () => {
                 router.push({ name: "dashboard" });
             })
             .catch((err) => {
-                console.log(err.response.data);
                 loginError.value = true;
             });
         loading.value = false;
@@ -128,7 +127,7 @@ const forgotPassword = () => {
                             id="email1"
                             type="text"
                             :placeholder="$t('email.placeholder')"
-                            class="w-full md:w-[30rem] mb-8"
+                            class="w-full md:w-[30rem] mb-4"
                             fluid
                             v-model="email"
                         />
@@ -138,12 +137,14 @@ const forgotPassword = () => {
                             v-for="error of v$.email.$errors"
                             :key="error.$uid"
                         >
-                            <small class="p-error">{{ error.$message }}</small>
+                            <Message severity="error">{{
+                                error.$message
+                            }}</Message>
                         </div>
 
                         <label
                             for="password1"
-                            class="block text-surface-900 dark:text-surface-0 font-medium text-xl mb-2"
+                            class="block text-surface-900 dark:text-surface-0 font-medium text-xl mb-2 mt-4"
                             >{{ $t("password") }}</label
                         >
                         <Password
@@ -161,13 +162,15 @@ const forgotPassword = () => {
                             v-for="error of v$.password.$errors"
                             :key="error.$uid"
                         >
-                            <small class="p-error">{{ error.$message }}</small>
+                            <Message severity="error">{{
+                                error.$message
+                            }}</Message>
                         </div>
 
                         <div class="text-red-500" v-if="loginError">
-                            <small class="p-error"
-                                >{{ $t("auth.sign_in_credentials_error") }}
-                            </small>
+                            <Message severity="error">
+                                {{ $t("auth.sign_in_credentials_error") }}
+                            </Message>
                         </div>
 
                         <div

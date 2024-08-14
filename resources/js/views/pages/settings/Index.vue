@@ -1,10 +1,6 @@
 <template>
-    <div class="flex flex-col md:flex-row gap-8">
-        settings page
-
-        <Account />
-        <Notifications />
-    </div>
+    <Account />
+    <!-- <Notifications /> -->
 </template>
 
 <script setup>

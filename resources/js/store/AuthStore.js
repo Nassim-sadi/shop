@@ -87,8 +87,6 @@ export const authStore = defineStore("authStore", {
         },
 
         async forgotPassword(email) {
-            console.log(email);
-
             return new Promise((resolve, reject) => {
                 axios
                     .post("api/admin/password/send-link", { email: email })
@@ -101,11 +99,11 @@ export const authStore = defineStore("authStore", {
                         resolve(response);
                     })
                     .catch((error) => {
-                        emitter.emit("toast", {
-                            summary: $t("error"),
-                            message: $t("error_message"),
-                            severity: "error",
-                        });
+                        // emitter.emit("toast", {
+                        //     summary: $t("error"),
+                        //     message: $t("error_message"),
+                        //     severity: "error",
+                        // });
                         reject(error);
                     });
             });

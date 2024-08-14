@@ -20,6 +20,8 @@ class DatabaseSeeder extends Seeder
             'lastname' => 'sadi',
             'email' => 'nacimbreeze@gmail.com',
             'password' => 'password',
+            'role' => 'admin',
+            'status' => '1',
         ]);
     }
 }
