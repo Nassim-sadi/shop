@@ -1,16 +1,40 @@
-<script setup></script>
+<script setup>
+import { $t } from "@/plugins/i18n";
+import { defineProps } from "vue";
+defineProps({
+    user: Object,
+});
+</script>
 
 <template>
-    <div class="col-span-12 lg:col-span-6 card">
-        <div class="font-semibold text-xl col-span-6">
-            {{ $t("settings.security") }}
-            <div class="w-full flex justify-between">
-                <Button class="btn btn-primary">
-                    {{ $t("settings.change_password") }}
-                </Button>
-                <Button class="btn btn-primary">
-                    {{ $t("settings.change_email") }}
-                </Button>
+    <div class="col-span-12 grid grid-cols-12 lg:col-span-6 card gap-8">
+        <div
+            class="font-semibold text-surface-900 dark:text-surface-0 text-xl col-span-12 flex justify-between"
+        >
+            <h3>
+                {{ $t("settings.security") }}
+            </h3>
+        </div>
+
+        <div class="col-span-12">
+            <div class="flex items-center">
+                <p class="font-semibold text-surface-900 dark:text-surface-0">
+                    <i class="pi pi-envelope"></i>
+                    {{ $t("auth.email") }} :&#160;
+                </p>
+                <p>{{ user.email }}</p>
+                <Button text label="Change Email"></Button>
+            </div>
+        </div>
+
+        <div class="col-span-12">
+            <div class="flex items-center">
+                <p class="font-semibold text-surface-900 dark:text-surface-0">
+                    <i class="pi pi-envelope"></i>
+                    {{ $t("auth.password") }} :&#160;
+                </p>
+                <p>*******</p>
+                <Button text label="Change Password"></Button>
             </div>
         </div>
     </div>

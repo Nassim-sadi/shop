@@ -13,6 +13,8 @@ declare module 'vue' {
     Chart: typeof import('primevue/chart')['default']
     Checkbox: typeof import('primevue/checkbox')['default']
     ConfirmDialog: typeof import('primevue/confirmdialog')['default']
+    Drawer: typeof import('primevue/drawer')['default']
+    Image: typeof import('primevue/image')['default']
     InputOtp: typeof import('primevue/inputotp')['default']
     InputText: typeof import('primevue/inputtext')['default']
     Menu: typeof import('primevue/menu')['default']

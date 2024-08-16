@@ -18,7 +18,7 @@ onMounted(() => {
 <template>
     <div class="grid grid-cols-12 gap-8">
         <Profile :user="user" />
-        <Security />
+        <Security :user="user" />
     </div>
 </template>
 <style lang="scss" scoped></style>
