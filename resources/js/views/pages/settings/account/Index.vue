@@ -1,5 +1,4 @@
 <script setup>
-import { $t } from "@/plugins/i18n";
 import { authStore } from "@/store/AuthStore";
 import { onMounted, ref } from "vue";
 const auth = authStore();

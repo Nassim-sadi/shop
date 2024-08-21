@@ -214,7 +214,11 @@ const confirmLogout = () => {
                 >
                     <!-- TODO : add image to user -->
                     <Avatar
-                        image="https://primefaces.org/cdn/primevue/images/avatar/amyelsner.png"
+                        :image="
+                            user.picture
+                                ? user.picture
+                                : 'https://images.pexels.com/photos/26347258/pexels-photo-26347258/free-photo-of-homme-portrait-jeune-homme-arriere-plan-rouge.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1'
+                        "
                         class="mr-2"
                         shape="circle"
                     />

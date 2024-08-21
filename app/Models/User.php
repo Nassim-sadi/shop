@@ -55,4 +55,15 @@ class User extends Authenticatable
 
         $this->notify(new ResetPasswordNotification($url));
     }
+
+    /**
+     * Get the user's image.
+     *
+     * @param  string  $value
+     * @return string
+     */
+    public function getImageAttribute($value)
+    {
+        return asset('/storage/images/profile/' . $value);
+    }
 }

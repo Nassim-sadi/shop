@@ -1,22 +1,55 @@
 <script setup>
+import axios from "@/plugins/axios";
+import emitter from "@/plugins/emitter";
 import { $t } from "@/plugins/i18n";
-import { defineProps, ref } from "vue";
+import { defineProps, onMounted, ref } from "vue";
 import Edit from "./sidebars/Edit.vue";
-
 const editDrawer = ref(false);
+
 defineProps({
-    user: Object,
+    user: {
+        type: Object,
+        required: true,
+    },
 });
 
 const edit = () => {
     editDrawer.value = true;
 };
+
+const changeImage = (val) => {
+    return new Promise((resolve, reject) => {
+        axios
+            .post("api/admin/profile-image", val)
+            .then((response) => {
+                console.log(response);
+                resolve(response);
+            })
+            .catch((error) => {
+                console.log(error);
+                reject(error);
+            });
+    });
+};
+
+onMounted(() => {
+    emitter.on("update:isOpen", (val) => {
+        editDrawer.value = val;
+    });
+
+    emitter.on("update-profile-picture", async (val) => {
+        await changeImage(val);
+    });
+});
 </script>
 
 <template>
     <Edit :current="user" v-model:isOpen="editDrawer" />
 
     <div class="col-span-12 grid grid-cols-12 lg:col-span-6 card gap-8">
+        <pre>
+        {{ user }}
+        </pre>
         <div
             class="font-semibold text-surface-900 dark:text-surface-0 text-xl col-span-12 flex justify-between"
         >
@@ -30,30 +63,22 @@ const edit = () => {
                 @click="edit"
             />
         </div>
+
         <div
             class="col-span-4 mx-auto aspect-square overflow-hidden flex justify-center items-center rounded-xl"
         >
             <Image
                 :src="
-                    user.avatar
-                        ? user.avatar
+                    user.image
+                        ? user.image
                         : 'https://images.pexels.com/photos/26347258/pexels-photo-26347258/free-photo-of-homme-portrait-jeune-homme-arriere-plan-rouge.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1'
                 "
                 class="col-span-12"
                 rounded
             ></Image>
+            {{ user.picture }}
         </div>
-        <!-- <Avatar
-                :icon="user.avatar ? '' : 'pi pi-user'"
-                class="col-span-12 mb-4"
-                size="xlarge"
-                shape="circle"
-                :image="user.avatar ? user.avatar : ''"
-                style="
-                    background-color: var(--primary-color);
-                    color: var(--surface-ground);
-                "
-            /> -->
+
         <div class="col-span-8">
             <div class="col-span-12 flex">
                 <p class="font-semibold text-surface-900 dark:text-surface-0">

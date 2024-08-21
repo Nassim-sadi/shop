@@ -36,16 +36,7 @@ export const authStore = defineStore("authStore", {
         async logout() {
             return new Promise((resolve, reject) => {
                 axios
-                    .post(
-                        "api/admin/logout",
-                        {},
-                        {
-                            headers: {
-                                Authorization: "Bearer " + this.token,
-                                // "X-Authorization": import.meta.env.VITE_API_KEY,
-                            },
-                        },
-                    )
+                    .post("api/admin/logout")
                     .then((response) => {
                         console.log(response);
                         this.user = null;
@@ -62,12 +53,7 @@ export const authStore = defineStore("authStore", {
         async getUser() {
             return new Promise((resolve, reject) => {
                 axios
-                    .get("api/admin/user", {
-                        headers: {
-                            Authorization: "Bearer " + this.token,
-                            // "X-Authorization": import.meta.env.VITE_API_KEY,
-                        },
-                    })
+                    .get("api/admin/user")
                     .then((response) => {
                         this.user = response.data;
                         resolve();

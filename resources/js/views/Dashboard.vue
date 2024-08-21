@@ -1,7 +1,7 @@
 <script setup>
 import { useLayout } from "@/layout/composables/layout";
+import emitter from "@/plugins/emitter";
 import { onMounted, ref, watch } from "vue";
-
 const { getPrimary, getSurface, isDarkTheme } = useLayout();
 
 const chartData = ref(null);

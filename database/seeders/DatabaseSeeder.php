@@ -20,6 +20,7 @@ class DatabaseSeeder extends Seeder
             'lastname' => 'sadi',
             'email' => 'nacimbreeze@gmail.com',
             'password' => 'password',
+            'image' => fake()->imageUrl(400, 300, null,  false),
             'role' => 'admin',
             'status' => '1',
         ]);

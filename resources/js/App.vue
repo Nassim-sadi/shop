@@ -9,15 +9,15 @@
 
 <script setup>
 import axios from "@/plugins/axios";
-import emitter from "@/plugins/emitter";
 import { authStore } from "@/store/AuthStore";
 import Toast from "primevue/toast";
 import { useToast } from "primevue/usetoast";
 const toast = useToast();
+const auth = authStore();
 
+import emitter from "@/plugins/emitter";
 import { onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
-const auth = authStore();
 const router = useRouter();
 const route = useRoute();
 
