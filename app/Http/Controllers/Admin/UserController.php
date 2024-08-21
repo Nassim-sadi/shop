@@ -23,13 +23,14 @@ class UserController extends Controller
         $user = $request->user();
 
         $request->validate([
-            'image' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'image' => 'required|image|mimes:jpeg,png,jpg,gif,svg,webp|max:2048',
         ]);
 
         if ($request->hasFile('image')) {
             $image = $request->file('image');
-            $name =
-                pathinfo($image->getClientOriginalName(), PATHINFO_FILENAME) . '-' . time() . '.' . $image->getClientOriginalExtension();
+            $extension = $request->file('image')->extension();
+            $imageName = $request->file('image')->getClientOriginalName();
+            $name = $imageName . '-' . time() . '.' . $extension;
             $destinationPath = public_path('/storage/images/profile');
             $image->move($destinationPath, $name);
             $user->image = $name;

@@ -47,9 +47,6 @@ onMounted(() => {
     <Edit :current="user" v-model:isOpen="editDrawer" />
 
     <div class="col-span-12 grid grid-cols-12 lg:col-span-6 card gap-8">
-        <pre>
-        {{ user }}
-        </pre>
         <div
             class="font-semibold text-surface-900 dark:text-surface-0 text-xl col-span-12 flex justify-between"
         >
@@ -76,7 +73,6 @@ onMounted(() => {
                 class="col-span-12"
                 rounded
             ></Image>
-            {{ user.picture }}
         </div>
 
         <div class="col-span-8">

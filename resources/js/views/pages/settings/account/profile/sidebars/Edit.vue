@@ -1,5 +1,6 @@
 <script setup>
 import emitter from "@/plugins/emitter";
+import imageCompression from "browser-image-compression";
 import { defineProps, ref, toRefs, watch } from "vue";
 const props = defineProps({
     current: {
@@ -17,17 +18,30 @@ const { isOpen, current } = toRefs(props);
 const previewImage = ref(null);
 let currentUser = ref({});
 
-const updateProfilePicture = (e) => {
-    let file = e.target.files[0];
-    const image = e.target.files[0];
-    const reader = new FileReader();
-    reader.readAsDataURL(image);
-    reader.onload = () => {
-        previewImage.value = reader.result;
-    };
+const updateProfilePicture = async (e) => {
+    let file = await compressImage(e.target.files[0]);
+    console.log(e.target.files[0]);
+
+    previewImage.value = URL.createObjectURL(file);
+    const compressedImage = new File(
+        [file],
+        e.target.files[0].name.split(".")[0],
+        {
+            type: file.type,
+        },
+    );
     const formData = new FormData();
-    formData.append("image", file);
+    formData.append("image", compressedImage);
     emitter.emit("update-profile-picture", formData);
+};
+
+const compressImage = async (image) => {
+    const options = {
+        maxSizeMB: 1,
+        maxWidthOrHeight: 1000,
+        useWebWorker: true,
+    };
+    return await imageCompression(image, options);
 };
 
 watch(

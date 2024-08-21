@@ -1,17 +1,27 @@
 <script setup>
-import { authStore } from "@/store/AuthStore";
+import axios from "@/plugins/axios";
 import { onMounted, ref } from "vue";
-const auth = authStore();
 const user = ref({});
 
 import Profile from "./profile/Index.vue";
 import Security from "./security/Index.vue";
-const getUser = () => {
-    user.value = auth.user;
+
+const getUser = async () => {
+    return new Promise((resolve, reject) => {
+        axios
+            .get("api/admin/user")
+            .then((response) => {
+                user.value = response.data;
+                resolve(response);
+            })
+            .catch((error) => {
+                reject(error);
+            });
+    });
 };
 
-onMounted(() => {
-    getUser();
+onMounted(async () => {
+    await getUser();
 });
 </script>
 <template>
