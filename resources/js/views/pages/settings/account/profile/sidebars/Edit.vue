@@ -23,6 +23,7 @@ const updateProfilePicture = async (e) => {
     console.log(e.target.files[0]);
 
     previewImage.value = URL.createObjectURL(file);
+
     const compressedImage = new File(
         [file],
         e.target.files[0].name.split(".")[0],
@@ -30,6 +31,7 @@ const updateProfilePicture = async (e) => {
             type: file.type,
         },
     );
+
     const formData = new FormData();
     formData.append("image", compressedImage);
     emitter.emit("update-profile-picture", formData);
@@ -37,7 +39,7 @@ const updateProfilePicture = async (e) => {
 
 const compressImage = async (image) => {
     const options = {
-        maxSizeMB: 1,
+        maxSizeMB: 2,
         maxWidthOrHeight: 1000,
         useWebWorker: true,
     };
@@ -62,9 +64,10 @@ watch(
 <template>
     <Drawer
         :visible="isOpen"
-        header="Left Drawer"
+        header="Edit Profile"
         position="right"
         @update:visible="$emit('update:isOpen', $event)"
+        class="md:!w-80 lg:!w-[30rem]"
     >
         <div>
             <!-- input image here -->
@@ -100,7 +103,20 @@ watch(
                 />
             </div>
         </div>
-        <pre>{{ currentUser }}</pre>
+        <div slot="footer">
+            <Button
+                label="Cancel"
+                icon="pi pi-times"
+                @click="$emit('update:isOpen', false)"
+                severity="danger"
+            />
+            <Button
+                label="Save"
+                icon="pi pi-check"
+                severity="success"
+                @click="$emit('update:isOpen', false)"
+            />
+        </div>
     </Drawer>
 </template>
 

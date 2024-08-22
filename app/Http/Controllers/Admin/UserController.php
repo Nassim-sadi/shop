@@ -28,13 +28,12 @@ class UserController extends Controller
 
         if ($request->hasFile('image')) {
             $image = $request->file('image');
-            $extension = $request->file('image')->extension();
-            $imageName = $request->file('image')->getClientOriginalName();
-            $name = $imageName . '-' . time() . '.' . $extension;
+            $name = $image->getClientOriginalName() . '-' . time() . '.' . $image->extension();
             $destinationPath = public_path('/storage/images/profile');
             $image->move($destinationPath, $name);
             $user->image = $name;
             $user->save();
+
             $user->refresh();
             return response()->json(['success' => 'Image uploaded successfully', 'user' => $user], 200);
         } else {

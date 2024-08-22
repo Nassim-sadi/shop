@@ -11,13 +11,17 @@ defineProps({
         type: Object,
         required: true,
     },
+    loading: {
+        type: Boolean,
+        required: true,
+    },
 });
 
 const edit = () => {
     editDrawer.value = true;
 };
 
-const changeImage = (val) => {
+const updateImage = (val) => {
     return new Promise((resolve, reject) => {
         axios
             .post("api/admin/profile-image", val)
@@ -38,7 +42,7 @@ onMounted(() => {
     });
 
     emitter.on("update-profile-picture", async (val) => {
-        await changeImage(val);
+        await updateImage(val);
     });
 });
 </script>
@@ -64,6 +68,13 @@ onMounted(() => {
         <div
             class="col-span-4 mx-auto aspect-square overflow-hidden flex justify-center items-center rounded-xl"
         >
+            <ProgressSpinner
+                v-if="loading"
+                style="width: 50px; height: 50px"
+                strokeWidth="8"
+                fill="transparent"
+                animationDuration=".5s"
+            />
             <Image
                 :src="
                     user.image
@@ -71,6 +82,7 @@ onMounted(() => {
                         : 'https://images.pexels.com/photos/26347258/pexels-photo-26347258/free-photo-of-homme-portrait-jeune-homme-arriere-plan-rouge.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1'
                 "
                 class="col-span-12"
+                v-else
                 rounded
             ></Image>
         </div>
