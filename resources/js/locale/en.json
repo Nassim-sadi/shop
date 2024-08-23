@@ -67,5 +67,9 @@
     "firstname": "First name",
     "lastname": "Last name",
     "username": "Username",
-    "role": "Role"
+    "role": "Role",
+    "cancel.edit": "Discard changes",
+    "cancel.edit.message": "Are you sure you want to discard the changes?",
+    "yes": "Yes",
+    "no": "No"
 }

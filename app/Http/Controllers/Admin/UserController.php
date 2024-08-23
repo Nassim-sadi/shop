@@ -6,6 +6,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Storage;
+use PhpParser\Node\Stmt\TryCatch;
 
 class UserController extends Controller
 
@@ -27,13 +28,18 @@ class UserController extends Controller
         ]);
 
         if ($request->hasFile('image')) {
+            if ($user->image) {
+                $oldImage = basename(parse_url($user->image, PHP_URL_PATH));
+            }
             $image = $request->file('image');
-            $name = $image->getClientOriginalName() . '-' . time() . '.' . $image->extension();
+            $imageName = $image->getClientOriginalName() . '-' . time() . '.' . $image->extension();
             $destinationPath = public_path('/storage/images/profile');
-            $image->move($destinationPath, $name);
-            $user->image = $name;
+            $image->move($destinationPath, $imageName);
+            $user->image = $imageName;
+            if (file_exists("storage/images/profile/" . $oldImage)) {
+                unlink("storage/images/profile/" . $oldImage);
+            }
             $user->save();
-
             $user->refresh();
             return response()->json(['success' => 'Image uploaded successfully', 'user' => $user], 200);
         } else {
