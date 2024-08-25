@@ -2,11 +2,9 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Models\User;
+use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Storage;
-use PhpParser\Node\Stmt\TryCatch;
 
 class UserController extends Controller
 
@@ -18,32 +16,49 @@ class UserController extends Controller
         return $user;
     }
 
-    public function updateProfilePicture(Request $request)
+    public function update(Request $request)
     {
-
         $user = $request->user();
 
         $request->validate([
-            'image' => 'required|image|mimes:jpeg,png,jpg,gif,svg,webp|max:2048',
+            'image' => 'sometimes|required|image|mimes:jpeg,png,jpg,gif,svg,webp|max:2048',
+            'firstname' => 'sometimes|required|string|max:255',
+            'lastname' => 'sometimes|required|string|max:255',
         ]);
 
         if ($request->hasFile('image')) {
+            // Handle old image removal
             if ($user->image) {
                 $oldImage = basename(parse_url($user->image, PHP_URL_PATH));
+                $oldImagePath = public_path('/storage/images/profile/' . $oldImage);
+
+                if (file_exists($oldImagePath)) {
+                    unlink($oldImagePath);
+                }
             }
+
+            // Handle new image upload
             $image = $request->file('image');
-            $imageName = $image->getClientOriginalName() . '-' . time() . '.' . $image->extension();
+            $originalName = pathinfo($image->getClientOriginalName(), PATHINFO_FILENAME);
+            $extension = $image->extension();
+            $imageName = Str::slug($originalName) . '-' . time() . '.' . $extension;
             $destinationPath = public_path('/storage/images/profile');
             $image->move($destinationPath, $imageName);
             $user->image = $imageName;
-            if (file_exists("storage/images/profile/" . $oldImage)) {
-                unlink("storage/images/profile/" . $oldImage);
-            }
-            $user->save();
-            $user->refresh();
-            return response()->json(['success' => 'Image uploaded successfully', 'user' => $user], 200);
-        } else {
-            return response()->json(['message' => 'No image found + ' . $request->image], 404);
         }
+
+        // Update other user details
+        if ($request->has('firstname')) {
+            $user->firstname = $request->firstname;
+        }
+
+        if ($request->has('lastname')) {
+            $user->lastname = $request->lastname;
+        }
+
+        $user->save();
+        $user->refresh();
+
+        return response()->json(['success' => 'User updated successfully', 'user' => $user], 200);
     }
 }

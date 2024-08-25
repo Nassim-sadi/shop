@@ -71,5 +71,7 @@
     "cancel.edit": "Discard changes",
     "cancel.edit.message": "Are you sure you want to discard the changes?",
     "yes": "Yes",
-    "no": "No"
+    "no": "No",
+    "update.success": "Updated successfully",
+    "update.success_message": "Updated Personnel information successfully"
 }

@@ -1,10 +1,11 @@
 <script setup>
+import placeholder from "@/assets/images/avatar/profile-placeholder.png";
 import axios from "@/plugins/axios";
 import emitter from "@/plugins/emitter";
 import { $t } from "@/plugins/i18n";
-import { defineProps, onMounted, ref } from "vue";
+import { defineEmits, defineProps, ref } from "vue";
 import Edit from "./sidebars/Edit.vue";
-const editDrawer = ref(false);
+const sidebar = ref(false);
 
 defineProps({
     user: {
@@ -17,16 +18,24 @@ defineProps({
     },
 });
 
+const emit = defineEmits(["update:user"]);
+
 const edit = () => {
-    editDrawer.value = true;
+    sidebar.value = true;
 };
 
-const updateImage = (val) => {
+const editItem = (val) => {
     return new Promise((resolve, reject) => {
         axios
-            .post("api/admin/profile-image", val)
+            .post("api/admin/update", val)
             .then((response) => {
-                console.log(response);
+                emitter.emit("toast", {
+                    summary: $t("update.success"),
+                    message: $t("update.success_message"),
+                    severity: "success",
+                });
+
+                emit("update:user", response.data.user);
                 resolve(response);
             })
             .catch((error) => {
@@ -35,22 +44,12 @@ const updateImage = (val) => {
             });
     });
 };
-
-onMounted(() => {
-    emitter.on("update:isOpen", (val) => {
-        editDrawer.value = val;
-    });
-
-    emitter.on("update-profile-picture", async (val) => {
-        await updateImage(val);
-    });
-});
 </script>
 
 <template>
-    <Edit :current="user" v-model:isOpen="editDrawer" />
+    <Edit :current="user" v-model:isOpen="sidebar" @editItem="editItem" />
 
-    <div class="col-span-12 grid grid-cols-12 lg:col-span-6 card gap-8">
+    <div class="col-span-12 grid grid-cols-12 xl:col-span-6 card gap-8">
         <div
             class="font-semibold text-surface-900 dark:text-surface-0 text-xl col-span-12 flex justify-between"
         >
@@ -64,9 +63,8 @@ onMounted(() => {
                 @click="edit"
             />
         </div>
-
         <div
-            class="col-span-4 mx-auto aspect-square overflow-hidden flex justify-center items-center rounded-xl"
+            class="col-span-4 mx-auto overflow-hidden flex justify-center items-center rounded-xl bg-sky-400 w-full aspect-[1/0.75]"
         >
             <ProgressSpinner
                 v-if="loading"
@@ -76,14 +74,10 @@ onMounted(() => {
                 animationDuration=".5s"
             />
             <Image
-                :src="
-                    user.image
-                        ? user.image
-                        : 'https://images.pexels.com/photos/26347258/pexels-photo-26347258/free-photo-of-homme-portrait-jeune-homme-arriere-plan-rouge.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1'
-                "
-                class="col-span-12"
+                :src="user.image ? user.image : placeholder"
+                class="object-scale-down"
                 v-else
-                rounded
+                alt="Image"
             ></Image>
         </div>
 

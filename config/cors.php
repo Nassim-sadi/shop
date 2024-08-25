@@ -19,9 +19,10 @@ return [
 
 
 
+
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => ['*'],
+    'allowed_origins' => ['localhost:8000'],
 
     'allowed_origins_patterns' => [],
 

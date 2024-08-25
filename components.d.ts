@@ -14,6 +14,7 @@ declare module 'vue' {
     Checkbox: typeof import('primevue/checkbox')['default']
     ConfirmDialog: typeof import('primevue/confirmdialog')['default']
     Drawer: typeof import('primevue/drawer')['default']
+    FloatLabel: typeof import('primevue/floatlabel')['default']
     Image: typeof import('primevue/image')['default']
     InputOtp: typeof import('primevue/inputotp')['default']
     InputText: typeof import('primevue/inputtext')['default']

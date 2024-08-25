@@ -23,13 +23,17 @@ const getUser = async () => {
     });
 };
 
+const updateUser = (val) => {
+    user.value = val;
+};
+
 onMounted(async () => {
     await getUser();
 });
 </script>
 <template>
     <div class="grid grid-cols-12 gap-8">
-        <Profile :user="user" :loading="loading" />
+        <Profile :user="user" :loading="loading" @update:user="updateUser" />
         <Security :user="user" :loading="loading" />
     </div>
 </template>

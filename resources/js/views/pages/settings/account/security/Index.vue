@@ -7,7 +7,7 @@ defineProps({
 </script>
 
 <template>
-    <div class="col-span-12 grid grid-cols-12 lg:col-span-6 card gap-8">
+    <div class="col-span-12 grid grid-cols-12 xl:col-span-6 card gap-8">
         <div
             class="font-semibold text-surface-900 dark:text-surface-0 text-xl col-span-12 flex justify-between"
         >

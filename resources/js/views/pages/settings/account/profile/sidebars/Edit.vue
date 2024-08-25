@@ -1,18 +1,11 @@
 <script setup>
-import emitter from "@/plugins/emitter";
 import { $t } from "@/plugins/i18n";
+import useVuelidate from "@vuelidate/core";
+import { required } from "@vuelidate/validators";
 import imageCompression from "browser-image-compression";
 import _ from "lodash";
 import { useConfirm } from "primevue/useconfirm";
-import {
-    computed,
-    defineEmits,
-    defineProps,
-    nextTick,
-    ref,
-    toRefs,
-    watch,
-} from "vue";
+import { computed, defineEmits, defineProps, ref, toRefs, watch } from "vue";
 
 const confirm = useConfirm();
 
@@ -27,12 +20,20 @@ const props = defineProps({
     },
 });
 
-const $emit = defineEmits(["update:isOpen"]);
+const $emit = defineEmits(["update:isOpen", "editItem"]);
 
 const { isOpen, current } = toRefs(props);
 
 const previewImage = ref(null);
 let editedUser = ref({});
+const formData = new FormData();
+
+const rules = {
+    firstname: { required },
+    lastname: { required },
+};
+
+const v$ = useVuelidate(rules, editedUser);
 
 const updateProfilePicture = async (e) => {
     let file = await compressImage(e.target.files[0]);
@@ -48,9 +49,7 @@ const updateProfilePicture = async (e) => {
         },
     );
 
-    const formData = new FormData();
     formData.append("image", compressedImage);
-    emitter.emit("update-profile-picture", formData);
 };
 
 const compressImage = async (image) => {
@@ -62,25 +61,26 @@ const compressImage = async (image) => {
     return await imageCompression(image, options);
 };
 
-watch(
-    () => isOpen.value,
-    (val) => {
-        if (val) {
-            setTimeout(() => {
-                editedUser.value = { ...current.value };
-                previewImage.value = current.value.image
-                    ? current.value.image
-                    : "https://placehold.co/600x400";
-            }, 50);
-        } else {
-            editedUser.value = {};
-        }
-    },
-);
-
 const isEdited = computed(() => {
-    return _.isEqual(editedUser.value, current.value);
+    return (
+        _.isEqual(editedUser.value, current.value) &&
+        previewImage.value === current.value.image
+    );
 });
+
+const updateItem = () => {
+    v$.value.$touch();
+    if (!v$.value.$invalid && !isEdited.value) {
+        formData.append("id", current.value.id);
+        formData.append("firstname", editedUser.value.firstname);
+        formData.append("lastname", editedUser.value.lastname);
+        console.log(formData);
+
+        $emit("editItem", formData);
+        v$.value.$reset();
+        $emit("update:isOpen", false);
+    }
+};
 
 const cancelEdit = () => {
     console.log("closing edit");
@@ -109,6 +109,22 @@ const cancelEdit = () => {
         $emit("update:isOpen", false);
     }
 };
+
+watch(
+    () => isOpen.value,
+    (val) => {
+        if (val) {
+            setTimeout(() => {
+                editedUser.value = { ...current.value };
+                previewImage.value = current.value.image
+                    ? current.value.image
+                    : "https://placehold.co/600x400";
+            }, 50);
+        } else {
+            editedUser.value = {};
+        }
+    },
+);
 </script>
 
 <template>
@@ -117,57 +133,74 @@ const cancelEdit = () => {
         header="Edit Profile"
         position="right"
         @update:visible="$emit('update:isOpen', $event)"
-        class="sm:!w-1/2 md:!w-90 lg:!w-[30rem]"
         :dismissable="isEdited"
+        @close="cancelEdit"
     >
-        <div>
-            <!-- input image here -->
-            <label for="image">
-                <input
-                    type="file"
-                    id="image"
-                    @change="updateProfilePicture"
-                    accept="image/*"
-                    class="hidden"
-                />
-                <img
-                    :src="previewImage"
-                    class="w-24 h-24 object-cover rounded-full"
-                />
-            </label>
-        </div>
-        <div class="p-fluid">
-            <div class="field">
-                <label for="firstname">firstname</label>
+        <div class="flex flex-col min-h-full">
+            <div
+                class="cursor-pointer mb-10 w-full aspect-[1/0.75] rounded-xl overflow-hidden"
+            >
+                <label for="image" class="w-full">
+                    <input
+                        type="file"
+                        id="image"
+                        @change="updateProfilePicture"
+                        accept="image/*"
+                        class="hidden"
+                    />
+                    <Image :src="previewImage" class="object-cover w-full" />
+                </label>
+            </div>
+
+            <FloatLabel class="mb-10">
                 <InputText
                     id="firstname"
-                    type="text"
                     v-model="editedUser.firstname"
+                    aria-labelledby="firstname"
+                    class="w-full"
                 />
-            </div>
-            <div class="field">
-                <label for="lastname">lastname</label>
+                <label for="firstname">{{ $t("firstname") }}</label>
+            </FloatLabel>
+
+            <p
+                v-for="error of v$.firstname.$silentErrors"
+                :key="error.$uid"
+                class="text-red-500"
+            >
+                {{ error.$message }}
+            </p>
+            <FloatLabel class="mb-10">
                 <InputText
                     id="lastname"
-                    type="text"
                     v-model="editedUser.lastname"
+                    aria-labelledby="lastname"
+                    class="w-full"
+                />
+                <label for="lastname">{{ $t("lastname") }}</label>
+            </FloatLabel>
+            <p
+                v-for="error of v$.lastname.$silentErrors"
+                :key="error.$uid"
+                class="text-red-500"
+            >
+                {{ error.$message }}
+            </p>
+
+            <div slot="footer" class="mt-auto flex justify-evenly">
+                <Button
+                    label="Cancel"
+                    icon="pi pi-times"
+                    severity="danger"
+                    @click="cancelEdit"
+                />
+                <Button
+                    label="Save"
+                    icon="pi pi-check"
+                    severity="success"
+                    @click="updateItem"
+                    :disabled="isEdited"
                 />
             </div>
-        </div>
-        <div slot="footer">
-            <Button
-                label="Cancel"
-                icon="pi pi-times"
-                severity="danger"
-                @click="cancelEdit"
-            />
-            <Button
-                label="Save"
-                icon="pi pi-check"
-                severity="success"
-                @click="$emit('update:isOpen', false)"
-                :disabled="isEdited"
-            />
         </div>
     </Drawer>
 </template>

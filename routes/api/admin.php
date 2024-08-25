@@ -31,7 +31,7 @@ Route::middleware(["auth:sanctum"])->group(function () {
     });
 
     Route::controller(UserController::class)->group(function () {
-        Route::post('profile-image', 'updateProfilePicture');
+        Route::post('update', 'update');
     });
 });
 
