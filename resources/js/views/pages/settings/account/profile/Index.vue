@@ -75,10 +75,10 @@ const editItem = (val) => {
             />
             <Image
                 :src="user.image ? user.image : placeholder"
-                class="object-scale-down"
+                class="w-full object-cover"
                 v-else
                 alt="Image"
-            ></Image>
+            />
         </div>
 
         <div class="col-span-8">

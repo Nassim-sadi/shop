@@ -1,7 +1,13 @@
 <script setup>
 import { $t } from "@/plugins/i18n";
 import useVuelidate from "@vuelidate/core";
-import { required } from "@vuelidate/validators";
+import {
+    alpha,
+    helpers,
+    maxLength,
+    minLength,
+    required,
+} from "@vuelidate/validators";
 import imageCompression from "browser-image-compression";
 import _ from "lodash";
 import { useConfirm } from "primevue/useconfirm";
@@ -29,18 +35,25 @@ let editedUser = ref({});
 const formData = new FormData();
 
 const rules = {
-    firstname: { required },
-    lastname: { required },
+    firstname: {
+        required: helpers.withMessage("This field cannot be empty", required),
+        maxLength: 255,
+        minLength: minLength(3),
+        alpha,
+    },
+    lastname: {
+        required: helpers.withMessage("This field cannot be empty", required),
+        maxLength: 255,
+        minLength: minLength(3),
+        alpha,
+    },
 };
 
 const v$ = useVuelidate(rules, editedUser);
 
 const updateProfilePicture = async (e) => {
     let file = await compressImage(e.target.files[0]);
-    console.log(e.target.files[0]);
-
     previewImage.value = URL.createObjectURL(file);
-
     const compressedImage = new File(
         [file],
         e.target.files[0].name.split(".")[0],
@@ -83,9 +96,6 @@ const updateItem = () => {
 };
 
 const cancelEdit = () => {
-    console.log("closing edit");
-    console.log(isEdited.value);
-
     if (!isEdited.value) {
         confirm.require({
             header: $t("cancel.edit"),
@@ -121,6 +131,7 @@ watch(
                     : "https://placehold.co/600x400";
             }, 50);
         } else {
+            v$.value.$reset();
             editedUser.value = {};
         }
     },
@@ -138,7 +149,7 @@ watch(
     >
         <div class="flex flex-col min-h-full">
             <div
-                class="cursor-pointer mb-10 w-full aspect-[1/0.75] rounded-xl overflow-hidden"
+                class="cursor-pointer mb-10 w-full aspect-[1/0.75] flex justify-center items-center rounded-xl overflow-hidden"
             >
                 <label for="image" class="w-full">
                     <input
@@ -148,11 +159,11 @@ watch(
                         accept="image/*"
                         class="hidden"
                     />
-                    <Image :src="previewImage" class="object-cover w-full" />
+                    <Image :src="previewImage" class="w-full object-cover" />
                 </label>
             </div>
 
-            <FloatLabel class="mb-10">
+            <FloatLabel class="mb-5">
                 <InputText
                     id="firstname"
                     v-model="editedUser.firstname"
@@ -165,11 +176,11 @@ watch(
             <p
                 v-for="error of v$.firstname.$silentErrors"
                 :key="error.$uid"
-                class="text-red-500"
+                class="text-red-500 mb-5"
             >
                 {{ error.$message }}
             </p>
-            <FloatLabel class="mb-10">
+            <FloatLabel class="mt-5 mb-5">
                 <InputText
                     id="lastname"
                     v-model="editedUser.lastname"
