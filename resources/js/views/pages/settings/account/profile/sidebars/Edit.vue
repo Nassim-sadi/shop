@@ -79,7 +79,7 @@ const compressImage = async (image) => {
 };
 
 const isEdited = computed(() => {
-    return (
+    return !(
         _.isEqual(editedUser.value, current.value) &&
         previewImage.value === current.value.image
     );
@@ -87,7 +87,7 @@ const isEdited = computed(() => {
 
 const updateItem = () => {
     v$.value.$touch();
-    if (!v$.value.$invalid && !isEdited.value) {
+    if (!v$.value.$invalid && isEdited.value) {
         formData.append("id", current.value.id);
         formData.append("firstname", editedUser.value.firstname);
         formData.append("lastname", editedUser.value.lastname);
@@ -99,7 +99,7 @@ const updateItem = () => {
 };
 
 const cancelEdit = () => {
-    if (!isEdited.value) {
+    if (isEdited.value) {
         confirm.require({
             header: $t("cancel.edit"),
             message: $t("cancel.edit.message"),
@@ -147,8 +147,8 @@ watch(
         header="Edit Profile"
         position="right"
         @update:visible="$emit('update:isOpen', $event)"
-        :dismissable="isEdited"
-        @close="cancelEdit"
+        :dismissable="!isEdited"
+        :showCloseIcon="!isEdited"
     >
         <div class="flex flex-col min-h-full">
             <div
@@ -165,7 +165,10 @@ watch(
                         accept="image/*"
                         class="hidden"
                     />
-                    <Image :src="previewImage" class="w-full object-cover" />
+                    <img
+                        :src="previewImage"
+                        class="w-full object-cover !h-full"
+                    />
                 </label>
                 <div
                     class="mb-5 absolute z-10 right-2 left-2 bottom-0"
@@ -175,39 +178,40 @@ watch(
                 </div>
             </div>
 
-            <FloatLabel class="mb-5">
-                <InputText
-                    id="firstname"
-                    v-model="editedUser.firstname"
-                    aria-labelledby="firstname"
-                    class="w-full"
-                />
-                <label for="firstname">{{ $t("firstname") }}</label>
-            </FloatLabel>
+            <label for="firstname" class="mb-5 text-surface-700">{{
+                $t("firstname")
+            }}</label>
+            <InputText
+                id="firstname"
+                v-model="editedUser.firstname"
+                aria-labelledby="firstname"
+                class="w-full mb-5"
+            />
 
-            <p
-                v-for="error of v$.firstname.$silentErrors"
-                :key="error.$uid"
+            <div
                 class="text-red-500 mb-5"
-            >
-                {{ error.$message }}
-            </p>
-            <FloatLabel class="mt-5 mb-5">
-                <InputText
-                    id="lastname"
-                    v-model="editedUser.lastname"
-                    aria-labelledby="lastname"
-                    class="w-full"
-                />
-                <label for="lastname">{{ $t("lastname") }}</label>
-            </FloatLabel>
-            <p
-                v-for="error of v$.lastname.$silentErrors"
+                v-for="error of v$.firstname.$errors"
                 :key="error.$uid"
-                class="text-red-500"
             >
-                {{ error.$message }}
-            </p>
+                <Message severity="error">{{ error.$message }}</Message>
+            </div>
+
+            <label for="lastname" class="mb-5 text-surface-700">{{
+                $t("lastname")
+            }}</label>
+            <InputText
+                id="lastname"
+                v-model="editedUser.lastname"
+                aria-labelledby="lastname"
+                class="w-full mb-5"
+            />
+            <div
+                class="text-red-500 mb-5"
+                v-for="error of v$.lastname.$errors"
+                :key="error.$uid"
+            >
+                <Message severity="error">{{ error.$message }}</Message>
+            </div>
 
             <div slot="footer" class="mt-auto flex justify-evenly">
                 <Button
@@ -221,11 +225,9 @@ watch(
                     icon="pi pi-check"
                     severity="success"
                     @click="updateItem"
-                    :disabled="isEdited"
+                    :disabled="!isEdited"
                 />
             </div>
-
-            {{ progress }}
         </div>
     </Drawer>
 </template>

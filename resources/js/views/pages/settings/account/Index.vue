@@ -34,7 +34,7 @@ onMounted(async () => {
 <template>
     <div class="grid grid-cols-12 gap-8">
         <Profile :user="user" :loading="loading" @update:user="updateUser" />
-        <Security :user="user" :loading="loading" />
+        <Security :user="user" />
     </div>
 </template>
 <style lang="scss" scoped></style>

@@ -80,7 +80,7 @@ const editItem = (val) => {
             />
         </div>
         <div
-            class="col-span-4 mx-auto overflow-hidden flex justify-center items-center rounded-xl bg-sky-400 w-full aspect-[1/0.75]"
+            class="col-span-4 mx-auto overflow-hidden rounded-xl bg-sky-400 w-full aspect-[1/0.75]"
         >
             <ProgressSpinner
                 v-if="loading"
@@ -89,9 +89,9 @@ const editItem = (val) => {
                 fill="transparent"
                 animationDuration=".5s"
             />
-            <Image
+            <img
                 :src="user.image ? user.image : placeholder"
-                class="w-full object-cover"
+                class="w-full !h-full object-cover"
                 v-else
                 alt="Image"
             />

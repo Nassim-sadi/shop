@@ -46,6 +46,7 @@
     "reset_password": "Reset password",
     "reset_password_message": "Enter your new password",
     "new_password": "New password",
+    "old_password": "Old password",
     "password": "Password",
     "confirm_password": "Confirm new password",
     "email.placeholder": "Email address",
@@ -57,7 +58,7 @@
     "update": "Update",
     "create": "Create",
     "auth.non_existing_email": "This email does not exist",
-    "settings.account": "Account",
+    "settings.account": "Personnel information",
     "settings.profile": "Profile",
     "settings.password": "Password",
     "settings.notifications": "Notifications",
@@ -73,5 +74,6 @@
     "yes": "Yes",
     "no": "No",
     "update.success": "Updated successfully",
-    "update.success_message": "Updated Personnel information successfully"
+    "update.success_message": "Updated Personnel information successfully",
+    "edit.password": "Change password"
 }

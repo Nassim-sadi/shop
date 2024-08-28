@@ -32,6 +32,7 @@ Route::middleware(["auth:sanctum"])->group(function () {
 
     Route::controller(UserController::class)->group(function () {
         Route::post('update', 'update');
+        Route::post('change-password', 'changePassword');
     });
 });
 
