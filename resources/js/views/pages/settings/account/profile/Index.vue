@@ -3,7 +3,7 @@ import placeholder from "@/assets/images/avatar/profile-placeholder.png";
 import axios from "@/plugins/axios";
 import emitter from "@/plugins/emitter";
 import { $t } from "@/plugins/i18n";
-import { defineEmits, defineProps, ref } from "vue";
+import { ref } from "vue";
 import Edit from "./sidebars/Edit.vue";
 const sidebar = ref(false);
 
@@ -24,11 +24,21 @@ const edit = () => {
     sidebar.value = true;
 };
 
+const uploadPercentage = ref(0);
+
 const editItem = (val) => {
     return new Promise((resolve, reject) => {
         axios
-            .post("api/admin/update", val)
+            .post("api/admin/update", val, {
+                onUploadProgress: (progressEvent) => {
+                    uploadPercentage.value = Math.round(
+                        (progressEvent.loaded * 100) / progressEvent.total,
+                    );
+                },
+            })
             .then((response) => {
+                uploadPercentage.value = 0;
+                sidebar.value = false;
                 emitter.emit("toast", {
                     summary: $t("update.success"),
                     message: $t("update.success_message"),
@@ -39,6 +49,7 @@ const editItem = (val) => {
                 resolve(response);
             })
             .catch((error) => {
+                uploadPercentage.value = 0;
                 console.log(error);
                 reject(error);
             });
@@ -47,7 +58,12 @@ const editItem = (val) => {
 </script>
 
 <template>
-    <Edit :current="user" v-model:isOpen="sidebar" @editItem="editItem" />
+    <Edit
+        :current="user"
+        v-model:isOpen="sidebar"
+        @editItem="editItem"
+        :progress="uploadPercentage"
+    />
 
     <div class="col-span-12 grid grid-cols-12 xl:col-span-6 card gap-8">
         <div

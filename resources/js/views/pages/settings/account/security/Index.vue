@@ -1,6 +1,5 @@
 <script setup>
 import { $t } from "@/plugins/i18n";
-import { defineProps } from "vue";
 defineProps({
     user: Object,
 });

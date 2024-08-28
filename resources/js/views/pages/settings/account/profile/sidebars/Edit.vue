@@ -11,7 +11,7 @@ import {
 import imageCompression from "browser-image-compression";
 import _ from "lodash";
 import { useConfirm } from "primevue/useconfirm";
-import { computed, defineEmits, defineProps, ref, toRefs, watch } from "vue";
+import { computed, ref, toRefs, watch } from "vue";
 
 const confirm = useConfirm();
 
@@ -23,6 +23,10 @@ const props = defineProps({
     isOpen: {
         type: Boolean,
         required: true,
+    },
+    progress: {
+        type: Number,
+        required: false,
     },
 });
 
@@ -91,7 +95,6 @@ const updateItem = () => {
 
         $emit("editItem", formData);
         v$.value.$reset();
-        $emit("update:isOpen", false);
     }
 };
 
@@ -149,9 +152,12 @@ watch(
     >
         <div class="flex flex-col min-h-full">
             <div
-                class="cursor-pointer mb-10 w-full aspect-[1/0.75] flex justify-center items-center rounded-xl overflow-hidden"
+                class="cursor-pointer mb-10 w-full aspect-[1/0.75] rounded-xl overflow-hidden relative"
             >
-                <label for="image" class="w-full">
+                <label
+                    for="image"
+                    class="w-full absolute top-0 right-0 left-0 bottom-0"
+                >
                     <input
                         type="file"
                         id="image"
@@ -161,6 +167,12 @@ watch(
                     />
                     <Image :src="previewImage" class="w-full object-cover" />
                 </label>
+                <div
+                    class="mb-5 absolute z-10 right-2 left-2 bottom-0"
+                    v-if="progress > 0"
+                >
+                    <ProgressBar :value="progress"></ProgressBar>
+                </div>
             </div>
 
             <FloatLabel class="mb-5">
@@ -212,6 +224,8 @@ watch(
                     :disabled="isEdited"
                 />
             </div>
+
+            {{ progress }}
         </div>
     </Drawer>
 </template>
