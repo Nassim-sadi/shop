@@ -72,8 +72,6 @@ const updateItem = () => {
 
 const cancelEdit = () => {
     if (isEdited.value) {
-        console.log(isEdited.value);
-
         confirm.require({
             header: $t("cancel.edit"),
             message: $t("cancel.edit.message"),
@@ -111,11 +109,7 @@ const isEdited = computed(() => {
 watch(
     () => isOpen.value,
     (val) => {
-        if (val) {
-            console.log("sup");
-        } else {
-            v$.value.$reset();
-        }
+        if (!val) v$.value.$reset();
     },
 );
 </script>

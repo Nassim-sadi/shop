@@ -91,8 +91,6 @@ const updateItem = () => {
         formData.append("id", current.value.id);
         formData.append("firstname", editedUser.value.firstname);
         formData.append("lastname", editedUser.value.lastname);
-        console.log(formData);
-
         $emit("editItem", formData);
         v$.value.$reset();
     }
@@ -178,9 +176,11 @@ watch(
                 </div>
             </div>
 
-            <label for="firstname" class="mb-5 text-surface-700">{{
-                $t("firstname")
-            }}</label>
+            <label
+                for="firstname"
+                class="mb-5 text-surface-700 dark:text-surface-0"
+                >{{ $t("firstname") }}</label
+            >
             <InputText
                 id="firstname"
                 v-model="editedUser.firstname"
@@ -196,9 +196,11 @@ watch(
                 <Message severity="error">{{ error.$message }}</Message>
             </div>
 
-            <label for="lastname" class="mb-5 text-surface-700">{{
-                $t("lastname")
-            }}</label>
+            <label
+                for="lastname"
+                class="mb-5 text-surface-700 dark:text-surface-0"
+                >{{ $t("lastname") }}</label
+            >
             <InputText
                 id="lastname"
                 v-model="editedUser.lastname"

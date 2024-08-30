@@ -8,7 +8,7 @@
     "overlay": "Overlay",
     "static": "Static",
     "login": "Login",
-    "settings": "Setting",
+    "settings": "Settings",
     "profile": "Profile",
     "logout": "Logout",
     "getUserErrorSummary": "Error while fetching user",

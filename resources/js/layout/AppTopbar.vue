@@ -8,18 +8,18 @@ const confirm = useConfirm();
 
 import router from "@/router/Index";
 
+import placeholder from "@/assets/images/avatar/profile-placeholder.png";
 import { $t } from "@/plugins/i18n";
 import { authStore } from "@/store/AuthStore";
 const auth = authStore();
 const appName = ref(import.meta.env.VITE_APP_NAME);
-
 const menu = ref();
 const items = ref([
     {
         label: "Options",
         items: [
             {
-                label: $t("profile"),
+                label: $t("settings"),
                 icon: "pi pi-user",
                 command: () => {
                     router.push({ name: "settings" });
@@ -176,8 +176,11 @@ const confirmLogout = () => {
                         aria-haspopup="true"
                         aria-controls="overlay_menu"
                     >
-                        <i class="pi pi-user"></i>
-                        <span>Profile</span>
+                        <Avatar
+                            :image="user.image ? user.image : placeholder"
+                            class="w-full h-full"
+                            shape="circle"
+                        />
                     </button>
                 </div>
             </div>
@@ -215,8 +218,8 @@ const confirmLogout = () => {
                     <!-- TODO : add image to user -->
                     <Avatar
                         :image="
-                            user.picture
-                                ? user.picture
+                            user.image
+                                ? user.image
                                 : 'https://images.pexels.com/photos/26347258/pexels-photo-26347258/free-photo-of-homme-portrait-jeune-homme-arriere-plan-rouge.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1'
                         "
                         class="mr-2"
