@@ -1,30 +1,20 @@
 <script setup>
 import axios from "@/plugins/axios";
+import { authStore } from "@/store/AuthStore";
 import { onMounted, ref } from "vue";
-const user = ref({});
+const auth = authStore();
 
 import Profile from "./profile/Index.vue";
 import Security from "./security/Index.vue";
 let loading = ref(false);
 const getUser = async () => {
     loading.value = true;
-    return new Promise((resolve, reject) => {
-        axios
-            .get("api/admin/user")
-            .then((response) => {
-                user.value = response.data;
-                loading.value = false;
-                resolve(response);
-            })
-            .catch((error) => {
-                loading.value = false;
-                reject(error);
-            });
-    });
+    await auth.getUser();
+    loading.value = false;
 };
 
 const updateUser = (val) => {
-    user.value = val;
+    auth.user = val;
 };
 
 onMounted(async () => {
@@ -33,8 +23,12 @@ onMounted(async () => {
 </script>
 <template>
     <div class="grid grid-cols-12 gap-8">
-        <Profile :user="user" :loading="loading" @update:user="updateUser" />
-        <Security :user="user" />
+        <Profile
+            :user="auth.user"
+            :loading="loading"
+            @update:user="updateUser"
+        />
+        <Security :user="auth.user" />
     </div>
 </template>
 <style lang="scss" scoped></style>

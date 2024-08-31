@@ -1,4 +1,5 @@
 <script setup>
+import placeholder from "@/assets/images/avatar/profile-placeholder.png";
 import { $t } from "@/plugins/i18n";
 import useVuelidate from "@vuelidate/core";
 import {
@@ -129,7 +130,7 @@ watch(
                 editedUser.value = { ...current.value };
                 previewImage.value = current.value.image
                     ? current.value.image
-                    : "https://placehold.co/600x400";
+                    : placeholder;
             }, 50);
         } else {
             v$.value.$reset();

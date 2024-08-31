@@ -215,16 +215,6 @@ const confirmLogout = () => {
                 <div
                     class="relative overflow-hidden w-full border-0 bg-transparent flex items-start p-2 pl-4 rounded-none transition-colors duration-200"
                 >
-                    <!-- TODO : add image to user -->
-                    <Avatar
-                        :image="
-                            user.image
-                                ? user.image
-                                : 'https://images.pexels.com/photos/26347258/pexels-photo-26347258/free-photo-of-homme-portrait-jeune-homme-arriere-plan-rouge.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1'
-                        "
-                        class="mr-2"
-                        shape="circle"
-                    />
                     <span class="inline-flex flex-col items-start">
                         <span class="font-bold">{{
                             user.firstname + " " + user.lastname

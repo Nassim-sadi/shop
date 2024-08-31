@@ -65,9 +65,11 @@ const editItem = (val) => {
         :progress="uploadPercentage"
     />
 
-    <div class="col-span-12 grid grid-cols-12 xl:col-span-6 card gap-8">
+    <div
+        class="grid grid-cols-12 col-span-12 md:col-span-6 lg:col-span-4 card gap-8"
+    >
         <div
-            class="font-semibold text-surface-900 dark:text-surface-0 text-xl col-span-12 flex justify-between"
+            class="font-semibold text-surface-900 dark:text-surface-0 text-xl col-span-12 flex justify-between items-baseline"
         >
             <h3>
                 {{ $t("settings.account") }}
@@ -80,57 +82,26 @@ const editItem = (val) => {
             />
         </div>
         <div
-            class="col-span-4 mx-auto overflow-hidden rounded-xl bg-sky-400 w-full aspect-[1/0.75]"
+            class="col-span-3 mx-auto overflow-hidden rounded-xl bg-sky-400 aspect-[1/0.75]"
         >
-            <ProgressSpinner
-                v-if="loading"
-                style="width: 50px; height: 50px"
-                strokeWidth="8"
-                fill="transparent"
-                animationDuration=".5s"
-            />
+            <Skeleton class="w-full h-full" v-if="loading" />
             <img
-                :src="user.image ? user.image : placeholder"
+                :src="user?.image || placeholder"
                 class="w-full !h-full object-cover"
-                v-else
                 alt="Image"
+                v-else
             />
         </div>
 
-        <div class="col-span-8">
-            <div class="col-span-12 flex">
-                <p class="font-semibold text-surface-900 dark:text-surface-0">
-                    <i class="pi pi-envelope"></i>
-                    {{ $t("auth.email") }} :&#160;
-                </p>
-                <p>{{ user.email }}</p>
-            </div>
+        <div class="col-span-9">
+            <p class="font-semibold">{{ $t("firstname") }} :&#160;</p>
+            <p>{{ user.firstname }}</p>
 
-            <div class="col-span-12 flex">
-                <p class="">
-                    <i class="pi pi-user"></i>
-                    {{ $t("firstname") }} :&#160;
-                </p>
-                <p>{{ user.firstname }}</p>
-            </div>
+            <p class="font-semibold">{{ $t("lastname") }} :&#160;</p>
+            <p>{{ user.lastname }}</p>
 
-            <div class="col-span-12 flex">
-                <p class="">
-                    <i class="pi pi-user"></i>
-
-                    {{ $t("lastname") }} :&#160;
-                </p>
-                <p>{{ user.lastname }}</p>
-            </div>
-
-            <div class="col-span-12 flex">
-                <p class="">
-                    <i class="pi pi-"></i>
-
-                    {{ $t("role") }} :&#160;
-                </p>
-                <p>{{ user.role }}</p>
-            </div>
+            <p class="font-semibold">{{ $t("email") }} :&#160;</p>
+            <p>{{ user.email }}</p>
         </div>
     </div>
 </template>

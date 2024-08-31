@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\AuthController;
 use App\Http\Controllers\Admin\ResetPasswordController;
 use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Admin\EmailVerificationController;
 
 /*
 |--------------------------------------------------------------------------
@@ -16,6 +17,7 @@ use App\Http\Controllers\Admin\UserController;
 
 Route::controller(AuthController::class)->group(function () {
     Route::post('login', 'login');
+    Route::post('register', 'register');
 });
 
 
@@ -34,6 +36,11 @@ Route::middleware(["auth:sanctum"])->group(function () {
         Route::post('update', 'update');
         Route::post('change-password', 'changePassword');
     });
+    // todo : add email verification
+    // Route::controller(EmailVerificationController::class)->group(function () {
+    //     Route::get('/email/verify', 'VerificationController@verify')->name('verification.notice');
+    //     Route::get('email/resend', 'VerificationController@resend')->name('verification.resend');
+    // });
 });
 
 
