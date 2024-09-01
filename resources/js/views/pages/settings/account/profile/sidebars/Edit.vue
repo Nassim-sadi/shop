@@ -1,14 +1,9 @@
 <script setup>
 import placeholder from "@/assets/images/avatar/profile-placeholder.png";
 import { $t } from "@/plugins/i18n";
+import { alphaSpace } from "@/validators/CustomValidators";
 import useVuelidate from "@vuelidate/core";
-import {
-    alpha,
-    helpers,
-    maxLength,
-    minLength,
-    required,
-} from "@vuelidate/validators";
+import { helpers, maxLength, minLength, required } from "@vuelidate/validators";
 import imageCompression from "browser-image-compression";
 import _ from "lodash";
 import { useConfirm } from "primevue/useconfirm";
@@ -44,13 +39,13 @@ const rules = {
         required: helpers.withMessage("This field cannot be empty", required),
         maxLength: 255,
         minLength: minLength(3),
-        alpha,
+        alphaSpace,
     },
     lastname: {
         required: helpers.withMessage("This field cannot be empty", required),
         maxLength: 255,
         minLength: minLength(3),
-        alpha,
+        alphaSpace,
     },
 };
 

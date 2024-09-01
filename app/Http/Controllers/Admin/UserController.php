@@ -10,12 +10,7 @@ use Illuminate\Support\Facades\Hash;
 class UserController extends Controller
 
 {
-    public function edit(Request $request)
-    {
-        $user = $request->user();
 
-        return $user;
-    }
 
     public function update(Request $request)
     {

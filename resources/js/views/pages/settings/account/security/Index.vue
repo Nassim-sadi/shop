@@ -47,9 +47,7 @@ const changePassword = (val) => {
         :loading="loading"
     />
 
-    <div
-        class="grid grid-cols-12 col-span-12 md:col-span-6 lg:col-span-4 card gap-8"
-    >
+    <div class="grid grid-cols-12 col-span-12 md:col-span-6 card gap-8">
         <div
             class="font-semibold text-surface-900 dark:text-surface-0 text-xl col-span-12 flex justify-between"
         >

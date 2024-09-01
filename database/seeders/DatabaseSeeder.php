@@ -21,7 +21,6 @@ class DatabaseSeeder extends Seeder
             'email' => 'nacimbreeze@gmail.com',
             'password' => 'password',
             'image' => null,
-            'role' => 'admin',
             'status' => '1',
         ]);
     }

@@ -43,7 +43,6 @@ class AuthController extends Controller
     public function getUser(Request $request)
     {
         $user = $request->user();
-
         return new UserResource($user);
     }
 
