@@ -18,10 +18,10 @@ export const authStore = defineStore("authStore", {
         ],
     },
     actions: {
-        async login(user) {
+        async login(user, rememberMe) {
             return new Promise((resolve, reject) => {
                 axios
-                    .post("api/admin/login", user)
+                    .post("api/admin/login", user, { remember_me: rememberMe })
                     .then((response) => {
                         this.user = response.data.user;
                         this.token = response.data.authorization.token;
@@ -120,6 +120,24 @@ export const authStore = defineStore("authStore", {
                             severity: "error",
                         });
                         console.log(error);
+                        reject(error);
+                    });
+            });
+        },
+
+        async refresh() {
+            return new Promise((resolve, reject) => {
+                axios
+                    .post("api/admin/refresh")
+                    .then((response) => {
+                        this.user = response.data.user;
+                        this.token = response.data.authorization.token;
+                        resolve(response);
+                    })
+                    .catch((error) => {
+                        this.user = null;
+                        this.token = null;
+                        router.push({ name: "login" });
                         reject(error);
                     });
             });

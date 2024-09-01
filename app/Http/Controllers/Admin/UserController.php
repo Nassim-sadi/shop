@@ -28,7 +28,6 @@ class UserController extends Controller
         ]);
 
         if ($request->hasFile('image')) {
-            // Handle old image removal
             if ($user->image) {
                 $oldImage = basename(parse_url($user->image, PHP_URL_PATH));
                 $oldImagePath = public_path('/storage/images/profile/' . $oldImage);

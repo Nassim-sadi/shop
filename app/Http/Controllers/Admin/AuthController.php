@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\UserResource;
 use Illuminate\Auth\Events\Registered;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
@@ -29,7 +30,14 @@ class AuthController extends Controller
 
         $token = $user->createToken($user->name . '-AuthToken')->plainTextToken;
         event(new Registered($user));
-        return response()->json(['success' => 'User created successfully', 'user' => $user], 200);
+        return response()->json([
+            'status' => 'success',
+            'user' => $user,
+            'authorization' => [
+                'token' => $token,
+                'type' => 'bearer',
+            ]
+        ], 200);
     }
 
     public function getUser(Request $request)
@@ -41,37 +49,52 @@ class AuthController extends Controller
 
     public function login(Request $request)
     {
-
-        $request->validate([
+        $credentials = $request->validate([
             'email' => ['required', 'email'],
             'password' => ['required', 'min:8'],
         ]);
 
-        $user = User::where('email',  $request->email)->first();
+        $remember = $request->has('remember');
 
-        if (!$user || !Hash::check($request->password, $user->password)) {
+        if (Auth::attempt($credentials)) {
+            $user = request()->user();
+            if ($remember) {
+                $token = $user->createToken($user->name . '-AuthToken')->plainTextToken;
+            } else {
+                $token = $user->createToken($user->name . '-AuthToken', ['*'], now()->addHours(2))->plainTextToken;
+            }
             return response()->json([
-                'message' => ['Username or password incorrect'],
-                'status' => 'error',
-            ], 401);
+                'status' => 'success',
+                'user' => $user,
+                'authorization' => [
+                    'token' => $token,
+                    'type' => 'bearer',
+                ]
+            ], 200);
         }
 
-        $token = $user->createToken($user->name . '-AuthToken')->plainTextToken;
+        return back()->withErrors([
+            'email' => 'The provided credentials do not match our records.',
+        ])->onlyInput('email');
+    }
 
+    public function refresh(Request $request)
+    {
+        $request->user()->currentAccessToken()->delete();
+        $token = $request->user()->createToken($request->user()->name . '-AuthToken')->plainTextToken;
         return response()->json([
             'status' => 'success',
-            'user' => $user,
+            'user' => $request->user(),
             'authorization' => [
                 'token' => $token,
                 'type' => 'bearer',
             ]
-        ], 200);
+        ]);
     }
 
     public function logout(Request $request)
     {
         $request->user()->currentAccessToken()->delete();
-
         return response()->json(
             [
                 'status' => 'success',

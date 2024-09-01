@@ -28,6 +28,7 @@ Route::controller(ResetPasswordController::class)->group(function () {
 
 Route::middleware(["auth:sanctum"])->group(function () {
     Route::controller(AuthController::class)->group(function () {
+        Route::post('refresh', 'refresh');
         Route::post('logout', 'logout');
         Route::get('user', 'getUser');
     });

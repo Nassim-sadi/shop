@@ -228,6 +228,7 @@ watch(
                     icon="pi pi-check"
                     severity="success"
                     @click="updateItem"
+                    :loading="progress > 0"
                     :disabled="!isEdited"
                 />
             </div>

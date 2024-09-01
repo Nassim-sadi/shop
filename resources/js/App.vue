@@ -38,15 +38,20 @@ const checkAuth = () => {
     if (excludedRoutes.includes(route.name)) {
         return;
     }
+    // auth.refresh();
     auth.getUser();
 };
 
 onMounted(async () => {
     await router.isReady();
     await axios.get("/sanctum/csrf-cookie");
-    checkAuth();
+    await checkAuth();
     showToast();
 });
+
+const refresh = async () => {
+    await auth.refresh();
+};
 </script>
 
 <style lang="scss" scoped></style>
