@@ -5,7 +5,7 @@ import { alphaSpace } from "@/validators/CustomValidators";
 import useVuelidate from "@vuelidate/core";
 import { helpers, maxLength, minLength, required } from "@vuelidate/validators";
 import imageCompression from "browser-image-compression";
-import _ from "lodash";
+import isEqual from "lodash.isequal";
 import { useConfirm } from "primevue/useconfirm";
 import { computed, ref, toRefs, watch } from "vue";
 
@@ -76,7 +76,7 @@ const compressImage = async (image) => {
 
 const isEdited = computed(() => {
     return !(
-        _.isEqual(editedUser.value, current.value) &&
+        isEqual(editedUser.value, current.value) &&
         previewImage.value === current.value.image
     );
 });
