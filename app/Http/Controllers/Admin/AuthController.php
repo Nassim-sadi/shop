@@ -29,6 +29,7 @@ class AuthController extends Controller
         // login user
 
         $token = $user->createToken($user->name . '-AuthToken')->plainTextToken;
+        $user->assignRole('User');
         event(new Registered($user));
         return response()->json([
             'status' => 'success',

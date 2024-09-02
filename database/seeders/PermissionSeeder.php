@@ -17,50 +17,44 @@ class PermissionSeeder extends Seeder
     {
         app()[PermissionRegistrar::class]->forgetCachedPermissions();
 
-        // create permissions
-        Permission::create(['name' => 'edit users']);
-        Permission::create(['name' => 'delete users']);
-        Permission::create(['name' => 'publish users']);
-        Permission::create(['name' => 'unpublish users']);
+        // permissions array with names underscored
+        $permissions = [
+            'user_access',
+            'user_view',
+            'user_create',
+            'user_edit',
+            'user_delete',
+            'role_access',
+            'role_view',
+            'role_create',
+            'role_edit',
+            'role_delete',
+            'permission_access',
+            'permission_view',
+            'permission_create',
+            'permission_edit',
+            'permission_delete',
+        ];
 
-        // create roles and assign existing permissions
-        $employee = Role::create(['name' => 'employee']);
-        $employee->givePermissionTo('edit users');
-        $employee->givePermissionTo('delete users');
+        foreach ($permissions as $permission) {
+            Permission::create(['name' => $permission]);
+        }
 
-        $admin = Role::create(['name' => 'admin']);
-        $admin->givePermissionTo('publish users');
-        $admin->givePermissionTo('unpublish users');
+        Role::create(['name' => 'Super Admin']);
 
-        $super = Role::create(['name' => 'Super-Admin']);
-        // gets all permissions via Gate::before rule; see AuthServiceProvider
+        $role = Role::create(['name' => 'Admin']);
 
-        // create demo users
-        $user = \App\Models\User::factory()->create([
-            'firstname' => 'Example User',
-            'lastname' => 'User',
-            'email' => 'test@example.com',
-            'password' => bcrypt('password'),
 
+        $role->givePermissionTo([
+            'user_access',
+            'user_view',
+            'user_create',
+            'user_edit',
+            'user_delete',
         ]);
-        $user->assignRole($employee);
 
-        $user = \App\Models\User::factory()->create([
-            'firstname' => 'Example Admin User',
-            'lastname' => 'User',
-            'email' => 'admin@example.com',
-            'password' => bcrypt('password'),
-
-        ]);
-
-        $user->assignRole($admin);
-
-        $user = \App\Models\User::factory()->create([
-            'firstname' => 'Example super Admin User',
-            'lastname' => 'User',
-            'email' => 'superadmin@example.com',
-            'password' => bcrypt('password'),
-        ]);
-        $user->assignRole($super);
+        // create user role and assign some permissions
+        $role = Role::create(['name' => 'User']);
+        $role->givePermissionTo(['user_access']);
     }
 }

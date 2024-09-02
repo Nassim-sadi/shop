@@ -14,8 +14,10 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         // User::factory(100)->create();
-
-        User::factory()->create([
+        $this->call([
+            PermissionSeeder::class,
+        ]);
+        $user = User::factory()->create([
             'firstname' => 'nassim',
             'lastname' => 'sadi',
             'email' => 'nacimbreeze@gmail.com',
@@ -23,5 +25,7 @@ class DatabaseSeeder extends Seeder
             'image' => null,
             'status' => '1',
         ]);
+
+        $user->assignRole('Super Admin');
     }
 }
