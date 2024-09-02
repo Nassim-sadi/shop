@@ -5,7 +5,9 @@ namespace App\Http\Controllers\Admin;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Jobs\ActivityHistoryJob;
 use Illuminate\Support\Facades\Hash;
+use UA;
 
 class UserController extends Controller
 
@@ -15,7 +17,7 @@ class UserController extends Controller
     public function update(Request $request)
     {
         $user = $request->user();
-
+        $oldUser = clone $user;
         $request->validate([
             'image' => 'sometimes|required|image|mimes:jpeg,png,jpg,gif,svg,webp|max:2048',
             'firstname' => 'sometimes|required|string|max:255',
@@ -50,10 +52,20 @@ class UserController extends Controller
         if ($request->has('lastname')) {
             $user->lastname = $request->lastname;
         }
-
+        $changes = $user->getDirty();
         $user->save();
         $user->refresh();
+        $result = UA::parse($request->server('HTTP_USER_AGENT'));
 
+        ActivityHistoryJob::dispatch(
+            [
+                'model' => 'users',
+                'action' => 'update',
+                'data' => ['changes' => $changes, 'user' => $oldUser],
+                'user_id' => $request->user()->id,
+            ],
+            $result
+        );
         return response()->json(['success' => 'User updated successfully', 'user' => $user], 200);
     }
 

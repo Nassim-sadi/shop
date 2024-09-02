@@ -1,10 +1,10 @@
 <?php
 
+use App\Http\Controllers\Admin\ActivityHistoryController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\AuthController;
 use App\Http\Controllers\Admin\ResetPasswordController;
 use App\Http\Controllers\Admin\UserController;
-use App\Http\Controllers\Admin\EmailVerificationController;
 
 /*
 |--------------------------------------------------------------------------
@@ -37,6 +37,12 @@ Route::middleware(["auth:sanctum"])->group(function () {
         Route::post('update', 'update');
         Route::post('change-password', 'changePassword');
     });
+
+    Route::controller(ActivityHistoryController::class)->group(function () {
+        Route::get('activity-histories', 'get');
+    });
+
+
     // todo : add email verification
     // Route::controller(EmailVerificationController::class)->group(function () {
     //     Route::get('/email/verify', 'VerificationController@verify')->name('verification.notice');

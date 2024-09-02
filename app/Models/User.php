@@ -48,6 +48,8 @@ class User extends Authenticatable implements MustVerifyEmail
         ];
     }
 
+
+
     public function sendPasswordResetNotification($token)
     {
 

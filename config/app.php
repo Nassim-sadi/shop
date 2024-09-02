@@ -131,14 +131,14 @@ return [
 
     'providers' => ServiceProvider::defaultProviders()->merge([
 
-
         Ichtrojan\Otp\OtpServiceProvider::class,
+        Nebed\UserAgent\UserAgentServiceProvider::class,
 
     ])->toArray(),
 
     'aliases' => Facade::defaultAliases()->merge([
-
         'Otp' => Ichtrojan\Otp\Otp::class,
+        'UA' => Nebed\UserAgent\Facades\UserAgent::class
 
     ])->toArray(),
 
