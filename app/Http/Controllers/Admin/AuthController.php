@@ -54,11 +54,9 @@ class AuthController extends Controller
             'password' => ['required', 'min:8'],
         ]);
 
-        $remember = $request->has('remember');
-
         if (Auth::attempt($credentials)) {
             $user = request()->user();
-            if ($remember) {
+            if ($request->remember_me) {
                 $token = $user->createToken($user->name . '-AuthToken')->plainTextToken;
             } else {
                 $token = $user->createToken($user->name . '-AuthToken', ['*'], now()->addHours(2))->plainTextToken;
@@ -72,7 +70,6 @@ class AuthController extends Controller
                 ]
             ], 200);
         }
-
         return back()->withErrors([
             'email' => 'The provided credentials do not match our records.',
         ])->onlyInput('email');

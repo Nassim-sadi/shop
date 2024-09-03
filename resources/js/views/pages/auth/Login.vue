@@ -33,8 +33,9 @@ const login = () => {
         let user = {
             email: email.value,
             password: password.value,
+            remember_me: checked.value,
         };
-        auth.login(user, checked.value)
+        auth.login(user)
             .then((res) => {
                 router.push({ name: "dashboard" });
             })
