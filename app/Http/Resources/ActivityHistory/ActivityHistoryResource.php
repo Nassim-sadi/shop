@@ -12,7 +12,6 @@ class ActivityHistoryResource extends JsonResource
      *
      * @return array<int|string, mixed>
      */
-    public static $wrap = 'activity-history';
 
     public function toArray(Request $request): array
     {

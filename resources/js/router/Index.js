@@ -20,6 +20,12 @@ const router = createRouter({
                     name: "settings",
                     component: () => import("@/views/pages/settings/Index.vue"),
                 },
+                {
+                    path: "/activity-history",
+                    name: "activity-history",
+                    component: () =>
+                        import("@/views/pages/activityHistories/Index.vue"),
+                },
             ],
         },
         {
@@ -72,10 +78,6 @@ router.beforeEach((to, from, next) => {
             // if (
             //     to.name === "root" ||
             //     to.name === "profile" ||
-            //     to.name === "clients" ||
-            //     to.name === "advertising-board" ||
-            //     to.name === "users-planning" ||
-            //     to.name === "roles-planning" ||
             //     canNavigate(to.name)
             // ) {
             //     next();

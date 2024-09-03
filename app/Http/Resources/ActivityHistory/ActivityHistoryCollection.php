@@ -12,10 +12,11 @@ class ActivityHistoryCollection extends ResourceCollection
      *
      * @return array<int|string, mixed>
      */
+
     public function toArray(Request $request): array
     {
         return [
-            'data' => ActivityHistoryResource::collection($this->collection),
+            'activity_histories' => ActivityHistoryResource::collection($this->collection),
         ];
     }
 

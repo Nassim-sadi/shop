@@ -1,47 +1,46 @@
 export default [
     {
-        label: 'Home',
-        items: [{ label: 'Dashboard', icon: 'pi pi-fw pi-home', to: '/' }]
+        label: "Home",
+        items: [{ label: "Dashboard", icon: "pi pi-fw pi-home", to: "/" }],
     },
 
     {
-        label: 'Pages',
-        icon: 'pi pi-fw pi-briefcase',
-        to: '/pages',
+        label: "Pages",
+        icon: "pi pi-fw pi-briefcase",
+        to: "/pages",
         items: [
             // {
-            //     label: 'Landing',
-            //     icon: 'pi pi-fw pi-globe',
-            //     to: '/landing'
+            //     label: "Auth",
+            //     icon: "pi pi-fw pi-user",
+            //     items: [
+            //         {
+            //             label: "Login",
+            //             icon: "pi pi-fw pi-sign-in",
+            //             to: "/auth/login",
+            //         },
+            //         {
+            //             label: "Error",
+            //             icon: "pi pi-fw pi-times-circle",
+            //             to: "/auth/error",
+            //         },
+            //         {
+            //             label: "Access Denied",
+            //             icon: "pi pi-fw pi-lock",
+            //             to: "/auth/access",
+            //         },
+            //     ],
             // },
             {
-                label: 'Auth',
-                icon: 'pi pi-fw pi-user',
-                items: [
-                    {
-                        label: 'Login',
-                        icon: 'pi pi-fw pi-sign-in',
-                        to: '/auth/login'
-                    },
-                    {
-                        label: 'Error',
-                        icon: 'pi pi-fw pi-times-circle',
-                        to: '/auth/error'
-                    },
-                    {
-                        label: 'Access Denied',
-                        icon: 'pi pi-fw pi-lock',
-                        to: '/auth/access'
-                    }
-
-                ]
+                label: "Settings",
+                icon: "pi pi-fw pi-cog",
+                to: "/settings",
             },
-            ,
             {
-                label: 'Settings',
-                icon: 'pi pi-fw pi-cog',
-                to: '/settings'
-            }
+                label: "Activity History",
+                icon: "pi pi-fw pi-list",
+                to: "/activity-history",
+            },
+
             // {
             //     label: 'Crud',
             //     icon: 'pi pi-fw pi-pencil',
@@ -57,6 +56,6 @@ export default [
             //     icon: 'pi pi-fw pi-circle-off',
             //     to: '/pages/empty'
             // }
-        ]
+        ],
     },
-]
+];
