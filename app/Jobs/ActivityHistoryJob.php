@@ -13,31 +13,25 @@ class ActivityHistoryJob implements ShouldQueue
 {
     use Queueable, Dispatchable, InteractsWithQueue, SerializesModels;
 
-    public  $data;
-    public $result;
+
 
     /**
      * Create a new job instance.
      */
-    public function __construct($data, $result)
-    {
-        $this->data = $data;
-        $this->result = $result;
-    }
+    public function __construct(public $data, public $platform, public $browser) {}
 
     /**
      * Execute the job.
      */
     public function handle(): void
     {
-
         ActivityHistory::create([
             'user_id' => $this->data['user_id'],
             'model' => $this->data['model'],
             'action' => $this->data['action'],
             'data' => $this->data['data'],
-            'platform' => $this->result->os->family,
-            'browser' => $this->result->originalUserAgent,
+            'platform' => $this->platform,
+            'browser' => $this->browser,
         ]);
     }
 }

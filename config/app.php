@@ -138,7 +138,7 @@ return [
 
     'aliases' => Facade::defaultAliases()->merge([
         'Otp' => Ichtrojan\Otp\Otp::class,
-        'UA' => Nebed\UserAgent\Facades\UserAgent::class
+        'UA' => Nebed\UserAgent\Facades\UserAgent::class,
 
     ])->toArray(),
 

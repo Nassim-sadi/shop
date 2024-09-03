@@ -55,17 +55,20 @@ class UserController extends Controller
         $changes = $user->getDirty();
         $user->save();
         $user->refresh();
-        $result = UA::parse($request->server('HTTP_USER_AGENT'));
-
+        // log activity
+        $agent = UA::parse($request->server('HTTP_USER_AGENT'));
         ActivityHistoryJob::dispatch(
-            [
+            data: [
                 'model' => 'users',
                 'action' => 'update',
                 'data' => ['changes' => $changes, 'user' => $oldUser],
                 'user_id' => $request->user()->id,
             ],
-            $result
+            platform: $agent->os->family,
+            browser: $agent->ua->family,
+
         );
+
         return response()->json(['success' => 'User updated successfully', 'user' => $user], 200);
     }
 
