@@ -4,11 +4,7 @@ namespace App\Providers;
 
 use App\Http\Resources\UserResource;
 use Illuminate\Support\ServiceProvider;
-use Illuminate\Http\Resources\Json\JsonResource;
-use Illuminate\Cache\RateLimiting\Limit;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
-use Illuminate\Support\Facades\RateLimiter;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -26,6 +22,7 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         UserResource::withoutWrapping();
+
         Gate::before(function ($user, $ability) {
             if ($user->hasRole('Super-Admin')) {
                 return true;

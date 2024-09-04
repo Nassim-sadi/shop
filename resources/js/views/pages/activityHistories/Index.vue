@@ -1,8 +1,8 @@
 <script setup>
 import axios from "@/plugins/axios";
-import { ref, onMounted } from "vue";
+import { $t } from "@/plugins/i18n";
 import { format } from "date-fns";
-
+import { onMounted, ref } from "vue";
 const activities = ref([]);
 const loading = ref(false);
 const total = ref(0);
@@ -12,6 +12,9 @@ const start_date = ref("2024-01-01");
 const end_date = ref("2025-01-01");
 
 const getActivities = async () => {
+    console.log(per_page.value);
+    console.log(currentPage.value);
+
     loading.value = true;
     return new Promise((resolve, reject) => {
         axios
@@ -24,6 +27,7 @@ const getActivities = async () => {
                 },
             })
             .then((res) => {
+                console.log(res.data);
                 activities.value = res.data.data.activity_histories;
                 total.value = res.data.total;
                 currentPage.value = res.data.current_page;
@@ -32,6 +36,7 @@ const getActivities = async () => {
             })
             .catch((err) => {
                 console.log(err);
+                reject(err);
             })
             .finally(() => {
                 loading.value = false;
@@ -39,12 +44,19 @@ const getActivities = async () => {
     });
 };
 
+const onPageChange = (event) => {
+    currentPage.value = event.page + 1;
+    per_page.value = event.rows;
+    getActivities();
+};
+
 const headers = [
-    { text: "User", value: "user" },
-    { text: "Action", value: "action" },
-    { text: "Platform", value: "platform" },
-    { text: "Browser", value: "browser" },
-    { text: "Created", value: "created_at" },
+    { text: $t("user.title"), value: "user" },
+    { text: $t("activities.model"), value: "model" },
+    { text: $t("activities.action"), value: "action" },
+    { text: $t("activities.platform"), value: "platform" },
+    { text: $t("activities.browser"), value: "browser" },
+    { text: $t("activities.created_at"), value: "created_at" },
 ];
 
 onMounted(() => {
@@ -57,19 +69,20 @@ onMounted(() => {
         <DataTable
             :value="activities"
             tableStyle="min-width: 50rem"
-            responsiveLayout="scroll"
             :loading="loading"
             :rows="per_page"
             :paginator="true"
             :totalRecords="total"
-            @page="getActivities"
-            :dataKey="'id'"
+            @page="onPageChange"
+            dataKey="id"
+            :lazy="true"
             :rowHover="true"
         >
             <template #header>
                 <div class="flex flex-wrap items-center justify-between gap-2">
-                    <span class="text-xl font-bold">Activities</span>
-                    <Button icon="pi pi-refresh" rounded raised />
+                    <span class="text-xl font-bold">{{
+                        $t("activities.title")
+                    }}</span>
                 </div>
             </template>
             <Column
@@ -78,18 +91,24 @@ onMounted(() => {
                 :header="header.text"
             >
                 <template #body="slotProps" v-if="header.value === 'user'">
-                    <Avatar
-                        shape="circle"
-                        size="xlarge"
-                        :image="slotProps.data.user.image"
-                    />
-                    {{ slotProps.data.user.name }}
+                    <div class="flex items-center gap-2">
+                        <Avatar
+                            shape="circle"
+                            size="large"
+                            :image="slotProps.data.user.image"
+                        />
+                        {{
+                            slotProps.data.user.firstname +
+                            " " +
+                            slotProps.data.user.lastname
+                        }}
+                    </div>
                 </template>
             </Column>
-
             <template #footer>
                 In total there are
-                {{ activities ? activities.length : 0 }} activities.
+                {{ total }}
+                {{ $t("activities.name", total) }}.
             </template>
         </DataTable>
     </div>

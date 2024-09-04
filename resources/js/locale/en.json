@@ -75,5 +75,30 @@
     "no": "No",
     "update.success": "Updated successfully",
     "update.success_message": "Updated Personnel information successfully",
-    "edit.password": "Change password"
+    "edit.password": "Change password",
+    "user": {
+        "title": "User",
+        "title_plural": "Users",
+        "subtitle": "List of users",
+        "no_user": "No user found",
+        "name": "Name",
+        "email": "Email",
+        "role": "Role",
+        "created_at": "Created at",
+        "updated_at": "Updated at"
+    },
+    "activities": {
+        "name": "activity | activities",
+        "title": "Activities history",
+        "subtitle": "List of recent activities",
+        "date": "Date",
+        "action": "Action",
+        "no_activity": "No activity found",
+        "browser": "Browser",
+        "model": "Model",
+        "platform": "Platform",
+        "device": "Device",
+        "created_at": "Created at",
+        "updated_at": "Updated at"
+    }
 }

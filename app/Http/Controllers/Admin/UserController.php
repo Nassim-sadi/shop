@@ -17,12 +17,13 @@ class UserController extends Controller
     public function update(Request $request)
     {
         $user = $request->user();
-        $oldUser = clone $user;
         $request->validate([
             'image' => 'sometimes|required|image|mimes:jpeg,png,jpg,gif,svg,webp|max:2048',
             'firstname' => 'sometimes|required|string|max:255',
             'lastname' => 'sometimes|required|string|max:255',
         ]);
+
+        $oldUser = clone $user;
 
         if ($request->hasFile('image')) {
             if ($user->image) {

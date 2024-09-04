@@ -9,7 +9,6 @@ const instance = axios.create({
 instance.interceptors.request.use((config) => {
     const auth = authStore();
     config.headers.Accept = "application/json";
-    config.headers["Content-Type"] = "application/json";
     if (!auth.token) return config;
     config.headers.Authorization = `Bearer ${auth.token}`;
     return config;
