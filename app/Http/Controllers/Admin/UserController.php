@@ -7,6 +7,9 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Jobs\ActivityHistoryJob;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rules\NotIn;
+use Illuminate\Validation\Rules\Password;
 use UA;
 
 class UserController extends Controller
@@ -78,7 +81,7 @@ class UserController extends Controller
         $user = $request->user();
         $request->validate([
             'old_password' => 'required|string|min:8',
-            'password' => 'required|string|min:8|confirmed',
+            'password' => 'required|string|min:8|confirmed|different:password',
         ]);
 
         if (!Hash::check($request->old_password, $user->password)) {
