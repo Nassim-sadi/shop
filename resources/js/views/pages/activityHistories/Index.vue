@@ -3,6 +3,8 @@ import axios from "@/plugins/axios";
 import { $t } from "@/plugins/i18n";
 import { format } from "date-fns";
 import { onMounted, ref } from "vue";
+import Details from "./sidebars/Details.vue";
+
 const activities = ref([]);
 const loading = ref(false);
 const total = ref(0);
@@ -10,11 +12,10 @@ const currentPage = ref(1);
 const per_page = ref(10);
 const start_date = ref("2024-01-01");
 const end_date = ref("2025-01-01");
+const current = ref(null);
+const isOpen = ref(false);
 
 const getActivities = async () => {
-    console.log(per_page.value);
-    console.log(currentPage.value);
-
     loading.value = true;
     return new Promise((resolve, reject) => {
         axios
@@ -27,7 +28,6 @@ const getActivities = async () => {
                 },
             })
             .then((res) => {
-                console.log(res.data);
                 activities.value = res.data.data.activity_histories;
                 total.value = res.data.total;
                 currentPage.value = res.data.current_page;
@@ -59,6 +59,11 @@ const headers = [
     { text: $t("activities.created_at"), value: "created_at" },
 ];
 
+const openDetails = (data) => {
+    current.value = data;
+    isOpen.value = true;
+};
+
 onMounted(() => {
     getActivities();
 });
@@ -66,6 +71,7 @@ onMounted(() => {
 
 <template>
     <div class="card">
+        <Details :current="current" v-model:isOpen="isOpen" />
         <DataTable
             :value="activities"
             tableStyle="min-width: 50rem"
@@ -89,6 +95,7 @@ onMounted(() => {
                 v-for="header in headers"
                 :field="header.value"
                 :header="header.text"
+                :key="header.value"
             >
                 <template #body="slotProps" v-if="header.value === 'user'">
                     <div class="flex items-center gap-2">
@@ -103,6 +110,17 @@ onMounted(() => {
                             slotProps.data.user.lastname
                         }}
                     </div>
+                </template>
+            </Column>
+
+            <Column :header="$t('activities.action')">
+                <template #body="slotProps">
+                    <Button
+                        label="View"
+                        icon="pi pi-eye"
+                        class="p-button-text p-button-info"
+                        @click="openDetails(slotProps.data)"
+                    />
                 </template>
             </Column>
             <template #footer>

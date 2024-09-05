@@ -99,6 +99,7 @@
         "platform": "Platform",
         "device": "Device",
         "created_at": "Created at",
-        "updated_at": "Updated at"
+        "updated_at": "Updated at",
+        "details": "Activities history details"
     }
 }
