@@ -54,25 +54,27 @@ class AuthController extends Controller
             'password' => ['required', 'min:8'],
         ]);
 
-        if (Auth::attempt($credentials)) {
-            $user = request()->user();
-            if ($request->remember_me) {
-                $token = $user->createToken($user->name . '-AuthToken')->plainTextToken;
-            } else {
-                $token = $user->createToken($user->name . '-AuthToken', ['*'], now()->addHours(2))->plainTextToken;
-            }
+        $user = User::where('email', $credentials['email'])->first();
+
+        if (!$user || !Hash::check($credentials['password'], $user->password)) {
             return response()->json([
-                'status' => 'success',
-                'user' => $user,
-                'authorization' => [
-                    'token' => $token,
-                    'type' => 'bearer',
-                ]
-            ], 200);
+                'email' => 'The provided credentials do not match our records.',
+            ], 401);
         }
-        return back()->withErrors([
-            'email' => 'The provided credentials do not match our records.',
-        ])->onlyInput('email');
+
+        if ($request->remember_me) {
+            $token = $user->createToken($user->name . '-AuthToken')->plainTextToken;
+        } else {
+            $token = $user->createToken($user->name . '-AuthToken', ['*'], now()->addHours(2))->plainTextToken;
+        }
+        return response()->json([
+            'status' => 'success',
+            'user' => $user,
+            'authorization' => [
+                'token' => $token,
+                'type' => 'bearer',
+            ]
+        ], 200);
     }
 
     public function refresh(Request $request)
@@ -91,6 +93,7 @@ class AuthController extends Controller
 
     public function logout(Request $request)
     {
+
         $request->user()->currentAccessToken()->delete();
         return response()->json(
             [
