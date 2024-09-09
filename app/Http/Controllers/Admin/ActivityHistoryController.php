@@ -18,6 +18,8 @@ class ActivityHistoryController extends Controller
             ->where(function ($q) use ($request) {
                 $q->where('action', 'Like', '%' . $request->keyword . '%')
                     ->orWhere('model', 'Like', '%' . $request->keyword . '%')
+                    ->orWhere('platform', 'Like', '%' . $request->keyword . '%')
+                    ->orWhere('browser', 'Like', '%' . $request->keyword . '%')
                     ->orWhereHas('user', function ($q) use ($request) {
                         $q->where('firstname', 'Like', '%' . $request->keyword . '%')
                             ->orWhere('lastname', 'Like', '%' . $request->keyword . '%')

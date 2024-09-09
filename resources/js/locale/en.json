@@ -88,6 +88,7 @@
         "updated_at": "Updated at"
     },
     "activities": {
+        "by": "Activity By",
         "name": "activity | activities",
         "title": "Activities history",
         "subtitle": "List of recent activities",
@@ -100,6 +101,32 @@
         "device": "Device",
         "created_at": "Created at",
         "updated_at": "Updated at",
-        "details": "Activities history details"
+        "details": "Activities history details",
+        "os": "Operating System",
+        "self": "Self",
+        "total": "In total there are",
+        "role": "Role",
+        "models": {
+            "users": "Users",
+            "roles": "Roles"
+        }
+    },
+    "common": {
+        "yes": "Yes",
+        "no": "No",
+        "cancel": "Cancel",
+        "save": "Save",
+        "create": "Create",
+        "edit": "Edit",
+        "update": "Update",
+        "delete": "Delete",
+        "from": "From",
+        "to": "To",
+        "search": "Search",
+        "reset": "Reset",
+        "clear": "Clear",
+        "close": "Close",
+        "add": "Add",
+        "today": "Today"
     }
 }

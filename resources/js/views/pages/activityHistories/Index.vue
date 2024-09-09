@@ -1,30 +1,34 @@
 <script setup>
 import axios from "@/plugins/axios";
 import { $t } from "@/plugins/i18n";
+import { watchDebounced } from "@vueuse/core";
 import { format } from "date-fns";
+import { usePrimeVue } from "primevue/config";
 import { onMounted, ref } from "vue";
 import Details from "./sidebars/Details.vue";
-
 const activities = ref([]);
 const loading = ref(false);
 const total = ref(0);
 const currentPage = ref(1);
 const per_page = ref(10);
-const start_date = ref("2024-01-01");
-const end_date = ref("2025-01-01");
+const start_date = ref(new Date());
+const end_date = ref(new Date());
 const current = ref(null);
 const isOpen = ref(false);
+const keyword = ref("");
 
 const getActivities = async () => {
+    if (loading.value) return;
     loading.value = true;
     return new Promise((resolve, reject) => {
         axios
             .get("api/admin/activity-histories", {
                 params: {
+                    keyword: keyword.value,
                     page: currentPage.value,
                     per_page: per_page.value,
-                    start_date: start_date.value,
-                    end_date: end_date.value,
+                    start_date: format(start_date.value, "yyyy-MM-dd"),
+                    end_date: format(end_date.value, "yyyy-MM-dd"),
                 },
             })
             .then((res) => {
@@ -43,6 +47,16 @@ const getActivities = async () => {
             });
     });
 };
+
+watchDebounced(
+    keyword,
+    () => {
+        if (keyword.value.length >= 3 || keyword.value.length == 0) {
+            getActivities();
+        }
+    },
+    { debounce: 1000, maxWait: 1000 },
+);
 
 const onPageChange = (event) => {
     currentPage.value = event.page + 1;
@@ -66,7 +80,28 @@ const openDetails = (data) => {
 
 onMounted(() => {
     getActivities();
+    const primevue = usePrimeVue();
+    primevue.config.locale.today = $t("common.today");
+    primevue.config.locale.clear = $t("common.clear");
 });
+
+const actionColor = (action) => {
+    switch (action) {
+        case "create":
+            return "create";
+        case "update":
+            return "update";
+        case "delete":
+            return "delete";
+        default:
+            return "neutral";
+    }
+};
+
+const customLocal = {
+    today: $t("common.add"), // Custom text for "Today" button
+    clear: $t("common.add"), // Custom text for "Clear" button
+};
 </script>
 
 <template>
@@ -85,19 +120,66 @@ onMounted(() => {
             :rowHover="true"
         >
             <template #header>
-                <div class="flex flex-wrap items-center justify-between gap-2">
-                    <span class="text-xl font-bold">{{
-                        $t("activities.title")
-                    }}</span>
+                <h1 class="text-xl font-bold mb-4">
+                    {{ $t("activities.title") }}
+                </h1>
+                <div class="flex flex-wrap items-center gap-2 mb-4 w-full">
+                    <div class="flex items-baseline">
+                        <span class="mx-2">{{ $t("common.from") }}</span>
+                        <DatePicker
+                            showIcon
+                            v-model="start_date"
+                            date-format="yy-mm-dd"
+                            :max-date="
+                                end_date
+                                    ? new Date(end_date)
+                                    : new Date(2025, 0, 1)
+                            "
+                            :min-date="new Date(2024, 0, 1)"
+                            showButtonBar
+                            @clear-click="() => (start_date = new Date())"
+                        />
+                    </div>
+                    <div class="flex items-baseline">
+                        <span class="mx-2">{{ $t("common.to") }}</span>
+                        <DatePicker
+                            showIcon
+                            v-model="end_date"
+                            date-format="yy-mm-dd"
+                            :max-date="new Date()"
+                            :min-date="
+                                start_date
+                                    ? new Date(start_date)
+                                    : new Date(2024, 0, 1)
+                            "
+                            showButtonBar
+                            @clear-click="() => (end_date = new Date())"
+                        />
+                    </div>
+
+                    <IconField>
+                        <InputIcon class="pi pi-search" />
+                        <InputText
+                            v-model="keyword"
+                            :placeholder="$t('common.search')"
+                            @keyup.enter="getActivities"
+                        />
+                    </IconField>
+
+                    <Button
+                        :label="$t('common.search')"
+                        icon="pi pi-search"
+                        severity="primary"
+                        raised
+                        @click="getActivities"
+                        :disabled="!start_date || !end_date"
+                        :loading="loading"
+                    />
                 </div>
             </template>
-            <Column
-                v-for="header in headers"
-                :field="header.value"
-                :header="header.text"
-                :key="header.value"
-            >
-                <template #body="slotProps" v-if="header.value === 'user'">
+
+            <Column :header="$t('user.title')">
+                <template #body="slotProps">
                     <div class="flex items-center gap-2">
                         <Avatar
                             shape="circle"
@@ -113,6 +195,51 @@ onMounted(() => {
                 </template>
             </Column>
 
+            <Column :header="$t('activities.role')">
+                <template #body="slotProps">
+                    {{ slotProps.data.user.role.name }}
+                </template>
+            </Column>
+
+            <Column :header="$t('activities.model')">
+                <template #body="slotProps">
+                    {{
+                        slotProps.data.user.id == slotProps.data.data.user.id
+                            ? $t("activities.self")
+                            : $t("activities.models." + slotProps.data.model)
+                    }}
+                </template>
+            </Column>
+
+            <Column :header="$t('activities.action')">
+                <template #body="slotProps">
+                    <div
+                        :class="
+                            actionColor(slotProps.data.action) +
+                            ' ' +
+                            'text-center rounded-lg font-bold'
+                        "
+                    >
+                        {{ slotProps.data.action }}
+                    </div>
+                </template>
+            </Column>
+
+            <Column :header="$t('activities.platform')">
+                <template #body="slotProps">
+                    {{ slotProps.data.platform }}
+                </template>
+            </Column>
+
+            <Column :header="$t('activities.browser')">
+                <template #body="slotProps">
+                    {{ slotProps.data.browser }}
+                </template>
+            </Column>
+
+            <Column :header="$t('activities.created_at')" field="created_at">
+            </Column>
+
             <Column :header="$t('activities.action')">
                 <template #body="slotProps">
                     <Button
@@ -123,13 +250,32 @@ onMounted(() => {
                     />
                 </template>
             </Column>
+
             <template #footer>
-                In total there are
-                {{ total }}
+                {{ $t("activities.total") }}
+                <span class="font-bold text-primary">
+                    {{ total }}
+                </span>
                 {{ $t("activities.name", total) }}.
             </template>
         </DataTable>
     </div>
 </template>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.create {
+    @apply bg-green-500 text-surface-900;
+}
+
+.update {
+    @apply bg-yellow-500 text-surface-900;
+}
+
+.delete {
+    @apply bg-red-500 text-surface-900;
+}
+
+.neutral {
+    @apply bg-surface-500 text-surface-900;
+}
+</style>
