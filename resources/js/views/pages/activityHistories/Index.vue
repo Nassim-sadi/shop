@@ -97,11 +97,6 @@ const actionColor = (action) => {
             return "neutral";
     }
 };
-
-const customLocal = {
-    today: $t("common.add"), // Custom text for "Today" button
-    clear: $t("common.add"), // Custom text for "Clear" button
-};
 </script>
 
 <template>
@@ -118,7 +113,12 @@ const customLocal = {
             dataKey="id"
             :lazy="true"
             :rowHover="true"
+            :rowsPerPageOptions="[5, 10, 20, 30]"
         >
+            <template #empty>
+                <div class="text-center">{{ $t("common.no_data") }}</div>
+            </template>
+
             <template #header>
                 <h1 class="text-xl font-bold mb-4">
                     {{ $t("activities.title") }}

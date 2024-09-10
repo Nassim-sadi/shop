@@ -34,12 +34,12 @@ const showToast = () => {
 
 const excludedRoutes = ["login", "forgot-password", "reset-password"];
 
-const checkAuth = () => {
+const checkAuth = async () => {
     if (excludedRoutes.includes(route.name)) {
         return;
     }
     // auth.refresh();
-    auth.getUser();
+    await auth.getUser();
 };
 
 onMounted(async () => {

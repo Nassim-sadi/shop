@@ -94,6 +94,7 @@
         "subtitle": "List of recent activities",
         "date": "Date",
         "action": "Action",
+        "action_message": "Action on model",
         "no_activity": "No activity found",
         "browser": "Browser",
         "model": "Model",
@@ -106,6 +107,7 @@
         "self": "Self",
         "total": "In total there are",
         "role": "Role",
+        "changes": "Changes",
         "models": {
             "users": "Users",
             "roles": "Roles"
@@ -127,6 +129,11 @@
         "clear": "Clear",
         "close": "Close",
         "add": "Add",
-        "today": "Today"
+        "today": "Today",
+        "no_data": "No data found",
+        "time": "Time",
+        "firstname": "First name",
+        "lastname": "Last name",
+        "image": "Image"
     }
 }
