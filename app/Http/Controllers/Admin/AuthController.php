@@ -61,10 +61,12 @@ class AuthController extends Controller
             ], 401);
         }
 
+        $expiration = null;
         if ($request->remember_me) {
             $token = $user->createToken($user->name . '-AuthToken')->plainTextToken;
         } else {
             $token = $user->createToken($user->name . '-AuthToken', ['*'], now()->addHours(2))->plainTextToken;
+            $expiration = now()->addHours(2)->toDateTimeString();
         }
         return response()->json([
             'status' => 'success',
@@ -72,6 +74,8 @@ class AuthController extends Controller
             'authorization' => [
                 'token' => $token,
                 'type' => 'bearer',
+                'expires_at' => $expiration
+
             ]
         ], 200);
     }

@@ -134,6 +134,7 @@
         "time": "Time",
         "firstname": "First name",
         "lastname": "Last name",
-        "image": "Image"
+        "image": "Image",
+        "view_details": "View details"
     }
 }

@@ -177,7 +177,9 @@ const confirmLogout = () => {
                         aria-controls="overlay_menu"
                     >
                         <Avatar
-                            :image="user.image ? user.image : placeholder"
+                            :image="
+                                user && user.image ? user.image : placeholder
+                            "
                             class="w-full h-full"
                             shape="circle"
                         />

@@ -46,7 +46,7 @@ const filterChanges = (data) => {
         :header="$t('activities.details')"
         position="right"
         @update:visible="$emit('update:isOpen', $event)"
-        class="!w-full md:!w-100 lg:!w-[50rem]"
+        class="!w-full md:!w-100 lg:!w-[25rem]"
     >
         <div class="mb-4">
             <p class="font-bold">{{ $t("activities.by") }} :</p>

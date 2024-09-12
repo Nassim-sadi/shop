@@ -80,7 +80,7 @@ const editItem = (val) => {
             />
         </div>
         <div
-            class="col-span-3 mx-auto overflow-hidden rounded-xl bg-sky-400 aspect-[1/0.75]"
+            class="col-span-3 overflow-hidden rounded-xl bg-sky-400 aspect-[1/0.75]"
         >
             <Skeleton class="w-full h-full" v-if="loading" />
             <img

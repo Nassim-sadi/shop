@@ -64,39 +64,36 @@ const onPageChange = (event) => {
     getActivities();
 };
 
-const headers = [
-    { text: $t("user.title"), value: "user" },
-    { text: $t("activities.model"), value: "model" },
-    { text: $t("activities.action"), value: "action" },
-    { text: $t("activities.platform"), value: "platform" },
-    { text: $t("activities.browser"), value: "browser" },
-    { text: $t("activities.created_at"), value: "created_at" },
-];
-
 const openDetails = (data) => {
     current.value = data;
     isOpen.value = true;
 };
 
+const actionColorMap = {
+    create: "create",
+    update: "update",
+    delete: "delete",
+};
+
+const actionColor = (action) => {
+    return actionColorMap[action] || "neutral";
+};
+
+const roleColorMap = {
+    "Super Admin": "super",
+    Admin: "admin",
+    User: "user",
+};
+
+const roleColor = (role) => roleColorMap[role] || "neutral";
+
 onMounted(() => {
+    start_date.value.setDate(start_date.value.getDate() - 17);
     getActivities();
     const primevue = usePrimeVue();
     primevue.config.locale.today = $t("common.today");
     primevue.config.locale.clear = $t("common.clear");
 });
-
-const actionColor = (action) => {
-    switch (action) {
-        case "create":
-            return "create";
-        case "update":
-            return "update";
-        case "delete":
-            return "delete";
-        default:
-            return "neutral";
-    }
-};
 </script>
 
 <template>
@@ -124,8 +121,8 @@ const actionColor = (action) => {
                     {{ $t("activities.title") }}
                 </h1>
                 <div class="flex flex-wrap items-center gap-2 mb-4 w-full">
-                    <div class="flex items-baseline">
-                        <span class="mx-2">{{ $t("common.from") }}</span>
+                    <div class="flex gap-2 items-baseline">
+                        <span>{{ $t("common.from") }}</span>
                         <DatePicker
                             showIcon
                             v-model="start_date"
@@ -140,8 +137,8 @@ const actionColor = (action) => {
                             @clear-click="() => (start_date = new Date())"
                         />
                     </div>
-                    <div class="flex items-baseline">
-                        <span class="mx-2">{{ $t("common.to") }}</span>
+                    <div class="flex gap-2 items-baseline">
+                        <span>{{ $t("common.to") }}</span>
                         <DatePicker
                             showIcon
                             v-model="end_date"
@@ -197,7 +194,11 @@ const actionColor = (action) => {
 
             <Column :header="$t('activities.role')">
                 <template #body="slotProps">
-                    {{ slotProps.data.user.role.name }}
+                    <div
+                        :class="`${roleColor(slotProps.data.user.role.name)} highlight`"
+                    >
+                        {{ slotProps.data.user.role.name }}
+                    </div>
                 </template>
             </Column>
 
@@ -214,11 +215,7 @@ const actionColor = (action) => {
             <Column :header="$t('activities.action')">
                 <template #body="slotProps">
                     <div
-                        :class="
-                            actionColor(slotProps.data.action) +
-                            ' ' +
-                            'text-center rounded-lg font-bold'
-                        "
+                        :class="`${actionColor(slotProps.data.action)}  font-bold py-1 px-2 text-center rounded-lg`"
                     >
                         {{ slotProps.data.action }}
                     </div>
@@ -243,10 +240,14 @@ const actionColor = (action) => {
             <Column :header="$t('activities.action')">
                 <template #body="slotProps">
                     <Button
-                        label="View"
                         icon="pi pi-eye"
-                        class="p-button-text p-button-info"
+                        rounded
+                        size="large"
+                        text
+                        severity="info"
                         @click="openDetails(slotProps.data)"
+                        v-tooltip.bottom="$t('common.view_details')"
+                        class="action-btn"
                     />
                 </template>
             </Column>
@@ -277,5 +278,21 @@ const actionColor = (action) => {
 
 .neutral {
     @apply bg-surface-500 text-surface-900;
+}
+
+.super {
+    @apply bg-red-500 text-surface-0;
+}
+
+.admin {
+    @apply bg-surface-900 text-surface-0;
+}
+
+.user {
+    @apply bg-surface-900 text-surface-0;
+}
+
+.highlight {
+    @apply font-bold py-1 px-2 text-center rounded-lg;
 }
 </style>

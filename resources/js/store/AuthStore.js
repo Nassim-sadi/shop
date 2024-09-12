@@ -8,6 +8,7 @@ export const authStore = defineStore("authStore", {
     state: () => ({
         user: null,
         token: null,
+        tokenExpiration: null,
     }),
     persist: {
         enabled: true,
@@ -25,6 +26,8 @@ export const authStore = defineStore("authStore", {
                     .then((response) => {
                         this.user = response.data.user;
                         this.token = response.data.authorization.token;
+                        this.tokenExpiration =
+                            response.data.authorization.expires_at;
                         resolve(response);
                     })
                     .catch((error) => {
@@ -41,6 +44,7 @@ export const authStore = defineStore("authStore", {
                         console.log(response);
                         this.user = null;
                         this.token = null;
+                        this.tokenExpiration = null;
                         router.push({ name: "login" });
                         resolve(response);
                     })
