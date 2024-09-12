@@ -85,7 +85,8 @@
         "email": "Email",
         "role": "Role",
         "created_at": "Created at",
-        "updated_at": "Updated at"
+        "updated_at": "Updated at",
+        "profile": "User Profile"
     },
     "activities": {
         "by": "Activity By",

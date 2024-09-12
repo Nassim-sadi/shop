@@ -11,6 +11,7 @@ import { createPinia } from "pinia";
 import piniaPersist from "pinia-plugin-persist";
 import router from "./router/Index";
 
+import "@/assets/myStyles.scss";
 import "@/assets/styles.scss";
 import "@/assets/tailwind.css";
 

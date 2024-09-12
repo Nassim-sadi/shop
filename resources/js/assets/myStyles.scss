@@ -1,0 +1,43 @@
+// custom action buttons
+.action-btn {
+    &.p-button-icon-only {
+        &.p-button-info {
+            @apply bg-blue-500/5 !important;
+
+            &:hover {
+                @apply bg-blue-500/20 !important;
+            }
+        }
+
+        &.p-button-success {
+            @apply bg-green-500/5 !important;
+
+            &:hover {
+                @apply bg-green-500/20 !important;
+            }
+        }
+
+        &.p-button-warning {
+            @apply bg-yellow-500/5 !important;
+
+            &:hover {
+                @apply bg-yellow-500/20 !important;
+            }
+        }
+
+        &.p-button-danger {
+            @apply bg-red-500/5 !important;
+
+            &:hover {
+                @apply bg-red-500/20 !important;
+            }
+        }
+    }
+}
+
+// label for button
+.bold-label {
+    .p-button-label , .p-button-icon {
+        font-weight: 600;
+    }
+}

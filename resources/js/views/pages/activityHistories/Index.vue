@@ -137,6 +137,7 @@ onMounted(() => {
                             @clear-click="() => (start_date = new Date())"
                         />
                     </div>
+
                     <div class="flex gap-2 items-baseline">
                         <span>{{ $t("common.to") }}</span>
                         <DatePicker
@@ -166,18 +167,17 @@ onMounted(() => {
                     <Button
                         :label="$t('common.search')"
                         icon="pi pi-search"
-                        severity="primary"
-                        raised
                         @click="getActivities"
                         :disabled="!start_date || !end_date"
                         :loading="loading"
+                        class="bold-label"
                     />
                 </div>
             </template>
 
             <Column :header="$t('user.title')">
                 <template #body="slotProps">
-                    <div class="flex items-center gap-2">
+                    <div class="flex items-center gap-2 font-semibold">
                         <Avatar
                             shape="circle"
                             size="large"
