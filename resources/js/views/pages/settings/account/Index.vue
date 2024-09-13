@@ -1,5 +1,4 @@
 <script setup>
-import axios from "@/plugins/axios";
 import { authStore } from "@/store/AuthStore";
 import { onMounted, ref } from "vue";
 const auth = authStore();
@@ -14,7 +13,7 @@ const getUser = async () => {
 };
 
 const updateUser = (val) => {
-    auth.user = val;
+    auth.user = { ...auth.user, ...val };
 };
 
 onMounted(async () => {

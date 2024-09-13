@@ -19,7 +19,7 @@ const items = ref([
         label: "Options",
         items: [
             {
-                label: $t("settings"),
+                label: $t("settings.account"),
                 icon: "pi pi-user",
                 command: () => {
                     router.push({ name: "settings" });
@@ -131,14 +131,14 @@ const confirmLogout = () => {
 
             <div class="layout-topbar-menu hidden lg:block">
                 <div class="layout-topbar-menu-content items-center">
-                    <button type="button" class="layout-topbar-action">
+                    <!-- <button type="button" class="layout-topbar-action">
                         <i class="pi pi-calendar"></i>
                         <span>Calendar</span>
                     </button>
                     <button type="button" class="layout-topbar-action">
                         <i class="pi pi-inbox"></i>
                         <span>Messages</span>
-                    </button>
+                    </button> -->
                     <button
                         type="button"
                         @click="toggleProfileMenu"
@@ -160,7 +160,7 @@ const confirmLogout = () => {
             :model="items"
             ref="menu"
             id="overlay_menu"
-            class="w-full md:w-80 p-2"
+            class="w-full md:w-96 p-2"
             :popup="true"
         >
             <template #submenulabel="{ item }">
@@ -198,11 +198,18 @@ const confirmLogout = () => {
                             size="xlarge"
                         />
 
-                        <div class="inline-flex flex-col items-start text-lg">
-                            <span class="font-bold">{{
+                        <div class="inline-flex flex-col items-start gap-1">
+                            <span class="font-bold text-lg">{{
                                 user.firstname + " " + user.lastname
                             }}</span>
-                            <span>{{ user.roles.name }}</span>
+                            <span class="text-muted-color text-base">{{
+                                user.roles.name
+                            }}</span>
+                            <div class="flex items-center gap-2">
+                                <span class="pi pi-envelope"></span>
+
+                                <span class="text-sm"> {{ user.email }}</span>
+                            </div>
                         </div>
                     </div>
                 </div>

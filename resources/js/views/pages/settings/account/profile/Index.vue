@@ -44,7 +44,6 @@ const editItem = (val) => {
                     message: $t("update.success_message"),
                     severity: "success",
                 });
-
                 emit("update:user", response.data.user);
                 resolve(response);
             })
@@ -70,7 +69,7 @@ const editItem = (val) => {
             class="font-semibold text-surface-900 dark:text-surface-0 text-xl col-span-12 flex justify-between items-baseline"
         >
             <h3>
-                {{ $t("settings.account") }}
+                {{ $t("settings.personnel") }}
             </h3>
             <Button
                 text
