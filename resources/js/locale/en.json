@@ -90,7 +90,8 @@
         "created_at": "Created at",
         "updated_at": "Updated at",
         "profile": "User Profile",
-        "edit_profile": "Edit profile"
+        "edit_profile": "Edit profile",
+        "edit_password": "Edit password"
     },
     "activities": {
         "by": "Activity By",

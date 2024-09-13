@@ -12,6 +12,15 @@ defineProps({
 const loading = ref(false);
 
 const sidebar = ref(false);
+
+const edit = () => {
+    sidebar.value = true;
+};
+
+const popover = ref();
+const togglePopover = (event) => {
+    popover.value.toggle(event);
+};
 const changePassword = (val) => {
     loading.value = true;
     return new Promise((resolve, reject) => {
@@ -49,25 +58,44 @@ const changePassword = (val) => {
 
     <div class="grid grid-cols-12 col-span-12 md:col-span-6 card gap-8">
         <div
-            class="font-semibold text-surface-900 dark:text-surface-0 text-xl col-span-12 flex justify-between"
+            class="font-semibold text-surface-900 dark:text-surface-0 text-xl col-span-12 flex justify-between items-center"
         >
             <h3>
                 {{ $t("settings.security") }}
             </h3>
+
+            <div class="hidden lg:block">
+                <Button
+                    text
+                    class="bg-blue-100 dark:bg-blue-400/10 rounded-border"
+                    :label="$t('user.edit_password')"
+                    icon="pi pi-pencil"
+                    @click="edit"
+                />
+            </div>
+
+            <div class="block lg:hidden">
+                <Button text icon="pi pi-ellipsis-v" @click="togglePopover" />
+            </div>
+
+            <Popover ref="popover">
+                <Button
+                    text
+                    icon="pi pi-pencil"
+                    class="bg-blue-100 dark:bg-blue-400/10 rounded-border"
+                    :label="$t('user.edit_password')"
+                    @click="edit"
+                />
+            </Popover>
         </div>
 
         <div class="col-span-12">
             <div class="flex items-center">
                 <p class="font-semibold text-surface-900 dark:text-surface-0">
-                    <i class="pi pi-envelope"></i>
+                    <i class="pi pi-lock"></i>
                     {{ $t("auth.password") }} :&#160;
                 </p>
                 <p>*******</p>
-                <Button
-                    text
-                    label="Change Password"
-                    @click="sidebar = true"
-                ></Button>
             </div>
         </div>
     </div>

@@ -5,7 +5,9 @@ import emitter from "@/plugins/emitter";
 import { $t } from "@/plugins/i18n";
 import { ref } from "vue";
 import Edit from "./sidebars/Edit.vue";
+
 const sidebar = ref(false);
+const popover = ref();
 
 defineProps({
     user: {
@@ -25,6 +27,10 @@ const edit = () => {
 };
 
 const uploadPercentage = ref(0);
+
+const togglePopover = (event) => {
+    popover.value.toggle(event);
+};
 
 const editItem = (val) => {
     return new Promise((resolve, reject) => {
@@ -64,7 +70,7 @@ const editItem = (val) => {
         :progress="uploadPercentage"
     />
 
-    <div class="grid grid-cols-12 col-span-12 md:col-span-6 card gap-8">
+    <div class="grid grid-cols-12 col-span-12 md:col-span-6 card gap-8 mb-0">
         <div
             class="font-semibold text-surface-900 dark:text-surface-0 text-xl col-span-12 flex justify-between items-baseline"
         >
@@ -72,27 +78,29 @@ const editItem = (val) => {
                 {{ $t("settings.personnel") }}
             </h3>
 
-            <button
-                class="layout-topbar-menu-button layout-topbar-action"
-                v-styleclass="{
-                    selector: '@next',
-                    enterFromClass: 'hidden',
-                    enterActiveClass: 'animate-scalein',
-                    leaveToClass: 'hidden',
-                    leaveActiveClass: 'animate-fadeout',
-                    hideOnOutsideClick: true,
-                }"
-            >
-                <i class="pi pi-ellipsis-v"></i>
-            </button>
             <div class="hidden lg:block">
                 <Button
                     text
                     class="bg-blue-100 dark:bg-blue-400/10 rounded-border"
                     :label="$t('user.edit_profile')"
+                    icon="pi pi-user-edit"
                     @click="edit"
                 />
             </div>
+
+            <div class="block lg:hidden">
+                <Button text icon="pi pi-ellipsis-v" @click="togglePopover" />
+            </div>
+
+            <Popover ref="popover">
+                <Button
+                    text
+                    icon="pi pi-user-edit"
+                    class="bg-blue-100 dark:bg-blue-400/10 rounded-border"
+                    :label="$t('user.edit_profile')"
+                    @click="edit"
+                />
+            </Popover>
         </div>
         <div
             class="col-span-3 overflow-hidden rounded-xl bg-sky-400 aspect-[1/0.75]"
