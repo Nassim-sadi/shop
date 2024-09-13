@@ -215,7 +215,7 @@ onMounted(() => {
             <Column :header="$t('activities.action')">
                 <template #body="slotProps">
                     <div
-                        :class="`${actionColor(slotProps.data.action)}  font-bold py-1 px-2 text-center rounded-lg`"
+                        :class="`${actionColor(slotProps.data.action)} action`"
                     >
                         {{ slotProps.data.action }}
                     </div>
@@ -264,12 +264,16 @@ onMounted(() => {
 </template>
 
 <style lang="scss" scoped>
+.action {
+    @apply border-solid border-[1px] capitalize font-bold py-1 px-2 text-center rounded-lg;
+}
+
 .create {
     @apply bg-green-500 text-surface-900;
 }
 
 .update {
-    @apply bg-yellow-500 text-surface-900;
+    @apply bg-yellow-500/50 border-yellow-500  text-surface-900;
 }
 
 .delete {

@@ -89,7 +89,8 @@
         "role": "Role",
         "created_at": "Created at",
         "updated_at": "Updated at",
-        "profile": "User Profile"
+        "profile": "User Profile",
+        "edit_profile": "Edit profile"
     },
     "activities": {
         "by": "Activity By",

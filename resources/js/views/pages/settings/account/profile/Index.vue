@@ -71,12 +71,28 @@ const editItem = (val) => {
             <h3>
                 {{ $t("settings.personnel") }}
             </h3>
-            <Button
-                text
-                class="bg-blue-100 dark:bg-blue-400/10 rounded-border"
-                label="Edit Profile"
-                @click="edit"
-            />
+
+            <button
+                class="layout-topbar-menu-button layout-topbar-action"
+                v-styleclass="{
+                    selector: '@next',
+                    enterFromClass: 'hidden',
+                    enterActiveClass: 'animate-scalein',
+                    leaveToClass: 'hidden',
+                    leaveActiveClass: 'animate-fadeout',
+                    hideOnOutsideClick: true,
+                }"
+            >
+                <i class="pi pi-ellipsis-v"></i>
+            </button>
+            <div class="hidden lg:block">
+                <Button
+                    text
+                    class="bg-blue-100 dark:bg-blue-400/10 rounded-border"
+                    :label="$t('user.edit_profile')"
+                    @click="edit"
+                />
+            </div>
         </div>
         <div
             class="col-span-3 overflow-hidden rounded-xl bg-sky-400 aspect-[1/0.75]"

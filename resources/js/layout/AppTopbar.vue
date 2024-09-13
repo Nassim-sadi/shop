@@ -76,6 +76,7 @@ const confirmLogout = () => {
             >
                 <i class="pi pi-bars"></i>
             </button>
+
             <router-link to="/" class="layout-topbar-logo">
                 <Image :src="logo" alt="logo" class="logo" />
                 <span>{{ appName }}</span>
@@ -160,7 +161,7 @@ const confirmLogout = () => {
             :model="items"
             ref="menu"
             id="overlay_menu"
-            class="w-full md:w-96 p-2"
+            class="w-full md:w-80 p-2"
             :popup="true"
         >
             <template #submenulabel="{ item }">
@@ -205,7 +206,9 @@ const confirmLogout = () => {
                             <span class="text-muted-color text-base">{{
                                 user.roles.name
                             }}</span>
-                            <div class="flex items-center gap-2">
+                            <div
+                                class="flex items-center gap-2 text-muted-color"
+                            >
                                 <span class="pi pi-envelope"></span>
 
                                 <span class="text-sm"> {{ user.email }}</span>
