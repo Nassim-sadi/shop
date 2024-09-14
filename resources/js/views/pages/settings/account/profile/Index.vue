@@ -70,9 +70,9 @@ const editItem = (val) => {
         :progress="uploadPercentage"
     />
 
-    <div class="grid grid-cols-12 col-span-12 md:col-span-6 card gap-8 mb-0">
+    <div class="grid grid-cols-12 col-span-12 lg:col-span-6 card mb-0">
         <div
-            class="font-semibold text-surface-900 dark:text-surface-0 text-xl col-span-12 flex justify-between items-baseline"
+            class="font-semibold text-surface-900 dark:text-surface-0 text-xl col-span-12 flex justify-between items-baseline mb-8"
         >
             <h3>
                 {{ $t("settings.personnel") }}
@@ -102,29 +102,51 @@ const editItem = (val) => {
                 />
             </Popover>
         </div>
-        <div
-            class="col-span-3 overflow-hidden rounded-xl bg-sky-400 aspect-[1/0.75]"
-        >
-            <Skeleton class="w-full h-full" v-if="loading" />
-            <img
-                :src="user?.image || placeholder"
-                class="w-full !h-full object-cover"
+
+        <div class="col-span-12 sm:col-span-3 flex items-center justify-center">
+            <Skeleton
+                class="mb-4 md:mb-0 custom-avatar"
+                v-if="loading"
+                shape="circle"
+            />
+            <Avatar
+                :image="user?.image || placeholder"
                 alt="Image"
+                shape="circle"
+                size="xlarge"
+                class="mb-4 md:mb-0 custom-avatar"
                 v-else
             />
         </div>
 
-        <div class="col-span-9">
-            <p class="font-semibold">{{ $t("firstname") }} :&#160;</p>
-            <p>{{ user.firstname }}</p>
+        <div class="col-span-12 sm:col-span-9 text-wrap">
+            <p>
+                <span> {{ $t("firstname") }}:&#160; </span>
+                <span class="font-semibold">
+                    {{ user.firstname }}
+                </span>
+            </p>
 
-            <p class="font-semibold">{{ $t("lastname") }} :&#160;</p>
-            <p>{{ user.lastname }}</p>
-
-            <p class="font-semibold">{{ $t("email") }} :&#160;</p>
-            <p>{{ user.email }}</p>
+            <p>
+                <span> {{ $t("lastname") }}:&#160; </span>
+                <span class="font-semibold">
+                    {{ user.lastname }}
+                </span>
+            </p>
+            <p>
+                <span> {{ $t("email") }}:&#160; </span>
+                <span class="font-semibold">
+                    {{ user.email }}
+                </span>
+            </p>
         </div>
     </div>
 </template>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.custom-avatar {
+    width: 6rem !important;
+    height: 6rem !important;
+    aspect-ratio: 1 / 1;
+}
+</style>

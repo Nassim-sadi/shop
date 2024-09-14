@@ -116,7 +116,7 @@ const confirmLogout = () => {
                 </div>
             </div>
 
-            <button
+            <!-- <button
                 class="layout-topbar-menu-button layout-topbar-action"
                 v-styleclass="{
                     selector: '@next',
@@ -132,14 +132,14 @@ const confirmLogout = () => {
 
             <div class="layout-topbar-menu hidden lg:block">
                 <div class="layout-topbar-menu-content items-center">
-                    <!-- <button type="button" class="layout-topbar-action">
+                    <button type="button" class="layout-topbar-action">
                         <i class="pi pi-calendar"></i>
                         <span>Calendar</span>
                     </button>
                     <button type="button" class="layout-topbar-action">
                         <i class="pi pi-inbox"></i>
                         <span>Messages</span>
-                    </button> -->
+                    </button>
                     <button
                         type="button"
                         @click="toggleProfileMenu"
@@ -155,7 +155,19 @@ const confirmLogout = () => {
                         />
                     </button>
                 </div>
-            </div>
+            </div> -->
+            <button
+                type="button"
+                @click="toggleProfileMenu"
+                aria-haspopup="true"
+                aria-controls="overlay_menu"
+            >
+                <Avatar
+                    :image="user && user.image ? user.image : placeholder"
+                    shape="circle"
+                    size="large"
+                />
+            </button>
         </div>
         <Menu
             :model="items"
