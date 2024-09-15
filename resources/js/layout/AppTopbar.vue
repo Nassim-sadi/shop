@@ -66,9 +66,7 @@ const confirmLogout = () => {
 </script>
 
 <template>
-    <div
-        class="layout-topbar shadow-md shadow-primary/10 rounded-bl-2xl rounded-br-2xl"
-    >
+    <div class="layout-topbar rounded-bl-2xl rounded-br-2xl">
         <div class="layout-topbar-logo-container">
             <button
                 class="layout-menu-button layout-topbar-action"

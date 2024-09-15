@@ -1,7 +1,14 @@
 export default [
     {
         label: "Home",
-        items: [{ label: "Dashboard", icon: "pi pi-fw pi-home", to: "/" }],
+        items: [
+            {
+                label: "Dashboard",
+                icon: "pi pi-fw pi-home",
+                to: "/",
+                color: "#238E3A",
+            },
+        ],
     },
 
     {
@@ -34,11 +41,13 @@ export default [
                 label: "Settings",
                 icon: "pi pi-fw pi-cog",
                 to: "/settings",
+                color: "#9C27B0",
             },
             {
                 label: "Activity History",
                 icon: "pi pi-fw pi-list",
                 to: "/activity-history",
+                color: "#830123",
             },
 
             // {

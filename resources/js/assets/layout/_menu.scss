@@ -58,11 +58,13 @@
         list-style-type: none;
 
         a {
+            margin-bottom: 0.25rem;
             display: flex;
             align-items: center;
             position: relative;
             outline: 0 none;
             color: var(--text-color);
+
             cursor: pointer;
             padding: 0.75rem 1rem;
             border-radius: var(--content-border-radius);
@@ -82,10 +84,16 @@
 
             &.active-route {
                 font-weight: 700;
-                color: var(--primary-color);
+                color: var(--nav-color);
+
+                &::before {
+                    width: 100%;
+                    border-bottom-right-radius: 2rem;
+                    border-top-right-radius: 2rem;
+                }
             }
 
-            &::after {
+            &::before {
                 position: absolute;
                 top: 0;
                 bottom: 0;
@@ -96,13 +104,17 @@
                 border-radius: 0;
                 left: -16px;
                 width: 0;
-                background-color: var(--surface-hover);
-                border-radius: var(--content-border-radius);
+                background-color: var(--nav-color);
+                opacity: 0.1;
+                border-bottom-right-radius: 0.25rem;
+                border-top-right-radius: 0.25rem;
             }
 
             &:hover {
-                &::after {
+                &::before {
                     width: 100%;
+                    border-bottom-right-radius: 2rem;
+                    border-top-right-radius: 2rem;
                 }
             }
 
