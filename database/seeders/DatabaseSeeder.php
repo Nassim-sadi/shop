@@ -13,10 +13,28 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(100)->create();
+
         $this->call([
             PermissionSeeder::class,
         ]);
+
+        function getRandomRole()
+        {
+            $randomNumber = rand(0, 99);
+            if ($randomNumber < 5) {
+                return 'Super Admin';
+            } elseif ($randomNumber < 15) {
+                return 'Admin';
+            } else {
+                return 'User';
+            }
+        }
+
+        User::factory(100)->create()->after(function ($user) {
+            $user->assignRole(getRandomRole());
+        });
+
+
         $user = User::factory()->create([
             'firstname' => 'nassim',
             'lastname' => 'sadi',

@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\ActivityHistoryController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\AuthController;
 use App\Http\Controllers\Admin\ResetPasswordController;
+use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\UserController;
 
 /*
@@ -36,10 +37,15 @@ Route::middleware(["auth:sanctum"])->group(function () {
     Route::controller(UserController::class)->group(function () {
         Route::post('update', 'update');
         Route::post('change-password', 'changePassword');
+        Route::get('users', 'getUsers');
     });
 
     Route::controller(ActivityHistoryController::class)->group(function () {
         Route::get('activity-histories', 'get');
+    });
+
+    Route::controller(RoleController::class)->group(function () {
+        Route::get('roles', 'getRoles');
     });
 
 

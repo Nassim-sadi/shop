@@ -87,11 +87,14 @@
         "name": "Name",
         "email": "Email",
         "role": "Role",
+        "status": "Status",
         "created_at": "Created at",
         "updated_at": "Updated at",
         "profile": "User Profile",
         "edit_profile": "Edit profile",
-        "edit_password": "Edit password"
+        "edit_password": "Edit password",
+        "verified_at": "Verified at",
+        "statusQuery": "Select status"
     },
     "activities": {
         "by": "Activity By",
@@ -106,8 +109,6 @@
         "model": "Model",
         "platform": "Platform",
         "device": "Device",
-        "created_at": "Created at",
-        "updated_at": "Updated at",
         "details": "Activities history details",
         "os": "Operating System",
         "self": "Self",
@@ -141,6 +142,10 @@
         "firstname": "First name",
         "lastname": "Last name",
         "image": "Image",
-        "view_details": "View details"
+        "view_details": "View details",
+        "active": "Active",
+        "inactive": "Inactive",
+        "created_at": "Created at",
+        "updated_at": "Updated at"
     }
 }

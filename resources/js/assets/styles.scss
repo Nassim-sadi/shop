@@ -8,14 +8,16 @@
 
 @font-face {
     font-family: "Noto";
-    src: url("@/assets/fonts/Noto_Sans/NotoSans-Regular.ttf") format("truetype");
+    src: url("@/assets/fonts/Noto_Sans/NotoSans-VariableFont_wdth,wght.ttf")
+        format("truetype");
     font-style: normal;
     font-weight: 100 1000;
 }
 
 @font-face {
     font-family: "Noto";
-    src: url("@/assets/fonts/Noto_Sans/NotoSans-Italic.ttf") format("truetype");
+    src: url("@/assets/fonts/Noto_Sans/NotoSans-Italic-VariableFont_wdth,wght.ttf")
+        format("truetype");
     font-style: italic;
     font-weight: 100 1000;
 }

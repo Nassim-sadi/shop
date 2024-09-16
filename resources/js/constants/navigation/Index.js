@@ -50,6 +50,13 @@ export default [
                 color: "#830123",
             },
 
+            {
+                label: "Users",
+                icon: "pi pi-fw pi-users",
+                to: "/users",
+                color: "#3366bb",
+            },
+
             // {
             //     label: 'Crud',
             //     icon: 'pi pi-fw pi-pencil',

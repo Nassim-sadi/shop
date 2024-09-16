@@ -4,9 +4,10 @@ import { $t } from "@/plugins/i18n";
 import { watchDebounced } from "@vueuse/core";
 import { format } from "date-fns";
 import { usePrimeVue } from "primevue/config";
+import placeholder from "@/assets/images/avatar/profile-placeholder.png";
 import { onMounted, ref } from "vue";
 import Details from "./sidebars/Details.vue";
-const activities = ref([]);
+const users = ref([]);
 const loading = ref(false);
 const total = ref(0);
 const currentPage = ref(1);
@@ -16,23 +17,69 @@ const end_date = ref(new Date());
 const current = ref(null);
 const isOpen = ref(false);
 const keyword = ref("");
+const status = ref(null);
+const statusOptions = [
+    { label: "All", value: null },
+    { label: "Active", value: 1 },
+    { label: "Inactive", value: 0 },
+];
 
-const getActivities = async () => {
+const role = ref(null);
+const roleOptions = ref([{ label: "All", value: null }]);
+
+const getRoles = async () => {
+    return new Promise((resolve, reject) => {
+        axios
+            .get("api/admin/roles")
+            .then((res) => {
+                console.log(res.data);
+                roleOptions.value = [
+                    ...roleOptions.value,
+                    ...res.data.roles.map((role) => {
+                        return {
+                            label: role.name,
+                            value: role.id,
+                        };
+                    }),
+                ];
+                resolve(res.data);
+            })
+            .catch((err) => {
+                console.log(err);
+                reject(err);
+            })
+            .finally(() => {
+                console.log("done getting roles");
+            });
+    });
+};
+
+const getUsers = async () => {
     if (loading.value) return;
+    let params = {
+        keyword: keyword.value,
+        page: currentPage.value,
+        per_page: per_page.value,
+        start_date: format(start_date.value, "yyyy-MM-dd"),
+        end_date: format(end_date.value, "yyyy-MM-dd"),
+    };
+
+    if (status.value !== null) {
+        params.status = status.value;
+    }
+
+    if (role.value !== null) {
+        params.role = role.value;
+    }
     loading.value = true;
     return new Promise((resolve, reject) => {
         axios
-            .get("api/admin/activity-histories", {
-                params: {
-                    keyword: keyword.value,
-                    page: currentPage.value,
-                    per_page: per_page.value,
-                    start_date: format(start_date.value, "yyyy-MM-dd"),
-                    end_date: format(end_date.value, "yyyy-MM-dd"),
-                },
+            .get("api/admin/users", {
+                params: params,
             })
             .then((res) => {
-                activities.value = res.data.data;
+                console.log(res.data);
+                users.value = res.data.data;
                 total.value = res.data.total;
                 currentPage.value = res.data.current_page;
                 per_page.value = res.data.per_page;
@@ -44,6 +91,7 @@ const getActivities = async () => {
             })
             .finally(() => {
                 loading.value = false;
+                console.log("done getting users");
             });
     });
 };
@@ -52,7 +100,7 @@ watchDebounced(
     keyword,
     () => {
         if (keyword.value.length >= 3 || keyword.value.length == 0) {
-            getActivities();
+            getUsers();
         }
     },
     { debounce: 1000, maxWait: 1000 },
@@ -61,7 +109,7 @@ watchDebounced(
 const onPageChange = (event) => {
     currentPage.value = event.page + 1;
     per_page.value = event.rows;
-    getActivities();
+    getUsers();
 };
 
 const openDetails = (data) => {
@@ -87,12 +135,10 @@ const roleColorMap = {
 
 const roleColor = (role) => roleColorMap[role] || "neutral";
 
-onMounted(() => {
+onMounted(async () => {
+    await getRoles();
     start_date.value.setDate(start_date.value.getDate() - 17);
-    getActivities();
-    const primevue = usePrimeVue();
-    primevue.config.locale.today = $t("common.today");
-    primevue.config.locale.clear = $t("common.clear");
+    await getUsers();
 });
 </script>
 
@@ -100,7 +146,7 @@ onMounted(() => {
     <div class="card">
         <Details :current="current" v-model:isOpen="isOpen" />
         <DataTable
-            :value="activities"
+            :value="users"
             tableStyle="min-width: 50rem"
             :loading="loading"
             :rows="per_page"
@@ -160,14 +206,30 @@ onMounted(() => {
                         <InputText
                             v-model="keyword"
                             :placeholder="$t('common.search')"
-                            @keyup.enter="getActivities"
+                            @keyup.enter="getUsers"
                         />
                     </IconField>
+
+                    <Select
+                        v-model="status"
+                        :options="statusOptions"
+                        optionLabel="label"
+                        optionValue="value"
+                        :placeholder="$t('user.statusQuery')"
+                    />
+
+                    <Select
+                        v-model="role"
+                        :options="roleOptions"
+                        optionLabel="label"
+                        optionValue="value"
+                        :placeholder="$t('user.statusQuery')"
+                    />
 
                     <Button
                         :label="$t('common.search')"
                         icon="pi pi-search"
-                        @click="getActivities"
+                        @click="getUsers"
                         :disabled="!start_date || !end_date"
                         :loading="loading"
                         class="bold-label"
@@ -175,18 +237,18 @@ onMounted(() => {
                 </div>
             </template>
 
-            <Column :header="$t('user.title')">
+            <Column :header="$t('user.name')">
                 <template #body="slotProps">
                     <div class="flex items-center gap-2 font-semibold">
                         <Avatar
                             shape="circle"
                             size="large"
-                            :image="slotProps.data.user.image"
+                            :image="slotProps.data.image || placeholder"
                         />
                         {{
-                            slotProps.data.user.firstname +
+                            slotProps.data.firstname +
                             " " +
-                            slotProps.data.user.lastname
+                            slotProps.data.lastname
                         }}
                     </div>
                 </template>
@@ -195,34 +257,49 @@ onMounted(() => {
             <Column :header="$t('activities.role')">
                 <template #body="slotProps">
                     <div
-                        :class="`${roleColor(slotProps.data.user.role.name)} highlight`"
+                        :class="`${roleColor(slotProps.data.role.name)} highlight`"
                     >
-                        {{ slotProps.data.user.role.name }}
+                        {{ slotProps.data.role.name }}
                     </div>
                 </template>
             </Column>
 
-            <Column :header="$t('activities.model')">
+            <Column :header="$t('user.email')">
                 <template #body="slotProps">
-                    {{
-                        slotProps.data.user.id == slotProps.data.data.user.id
-                            ? $t("activities.self")
-                            : $t("activities.models." + slotProps.data.model)
-                    }}
+                    {{ slotProps.data.email }}
+                    <span
+                        class="pi pi-verified text-green-500 font-bold"
+                        v-if="slotProps.data.email_verified_at"
+                        v-tooltip.bottom="
+                            $t('user.verified_at') +
+                            ' ' +
+                            slotProps.data.email_verified_at
+                        "
+                    ></span>
                 </template>
             </Column>
 
-            <Column :header="$t('activities.action')">
+            <Column :header="$t('user.status')">
                 <template #body="slotProps">
-                    <div
-                        :class="`${actionColor(slotProps.data.action)} action`"
+                    <span
+                        :class="
+                            slotProps.data.status
+                                ? 'text-green-500'
+                                : 'text-red-500'
+                        "
+                        class="font-bold"
                     >
-                        {{ slotProps.data.action }}
-                    </div>
+                        {{ slotProps.data.status }}
+                        {{
+                            slotProps.data.status
+                                ? $t("common.active")
+                                : $t("common.inactive")
+                        }}
+                    </span>
                 </template>
             </Column>
 
-            <Column :header="$t('activities.platform')">
+            <!--    <Column :header="$t('activities.platform')">
                 <template #body="slotProps">
                     {{ slotProps.data.platform }}
                 </template>
@@ -232,9 +309,12 @@ onMounted(() => {
                 <template #body="slotProps">
                     {{ slotProps.data.browser }}
                 </template>
-            </Column>
+            </Column>-->
 
             <Column :header="$t('common.created_at')" field="created_at">
+            </Column>
+
+            <Column :header="$t('common.updated_at')" field="created_at">
             </Column>
 
             <Column :header="$t('activities.action')">
@@ -263,40 +343,4 @@ onMounted(() => {
     </div>
 </template>
 
-<style lang="scss" scoped>
-.action {
-    @apply border-solid border-[1px] capitalize font-bold py-1 px-2 text-center rounded-lg;
-}
-
-.create {
-    @apply bg-green-500 text-surface-900;
-}
-
-.update {
-    @apply bg-yellow-500/50 border-yellow-500  text-surface-900;
-}
-
-.delete {
-    @apply bg-red-500 text-surface-900;
-}
-
-.neutral {
-    @apply bg-surface-500 text-surface-900;
-}
-
-.super {
-    @apply bg-red-500 text-surface-0;
-}
-
-.admin {
-    @apply bg-surface-900 text-surface-0;
-}
-
-.user {
-    @apply bg-surface-900 text-surface-0;
-}
-
-.highlight {
-    @apply font-bold py-1 px-2 text-center rounded-lg;
-}
-</style>
+<style lang="scss" scoped></style>

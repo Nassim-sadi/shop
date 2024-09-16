@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Resources\ActivityHistory;
+namespace App\Http\Resources\Users;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -8,6 +8,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
 class UserResource extends JsonResource
 {
     public static $wrap = 'user';
+
     /**
      * Transform the resource into an array.
      *
@@ -20,12 +21,15 @@ class UserResource extends JsonResource
             'firstname' => $this->firstname,
             'lastname' => $this->lastname,
             'email' => $this->email,
+            'email_verified_at' => $this->email_verified_at->format('Y-m-d H:i'),
             'status' => $this->status,
             'image' => $this->image,
             'role' => [
                 'id' => $this->roles[0]->id,
                 'name' => $this->roles[0]->name
             ],
+            'created_at' => $this->created_at->format('Y-m-d H:i'),
+            'updated_at' => $this->updated_at->format('Y-m-d H:i'),
         ];
     }
 }

@@ -37,8 +37,24 @@
 
 // label for button
 .bold-label {
-    .p-button-label , .p-button-icon {
+    .p-button-label,
+    .p-button-icon {
         font-weight: 600;
     }
 }
 
+.super {
+    @apply bg-red-500 text-surface-0;
+}
+
+.admin {
+    @apply bg-surface-900 text-surface-0;
+}
+
+.user {
+    @apply bg-surface-900 text-surface-0;
+}
+
+.highlight {
+    @apply font-bold py-1 px-2 text-center rounded-lg;
+}

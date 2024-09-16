@@ -5,11 +5,11 @@ namespace App\Http\Controllers\Admin;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Http\Resources\Users\UserCollection;
 use App\Jobs\ActivityHistoryJob;
+use App\Models\User;
+use Debugbar;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\Rules\NotIn;
-use Illuminate\Validation\Rules\Password;
 use UA;
 
 class UserController extends Controller
@@ -91,5 +91,29 @@ class UserController extends Controller
         $user->password = Hash::make($request->password);
         $user->save();
         return response()->json(['success' => 'Password changed successfully'], 200);
+    }
+
+    public function getUsers(Request $request)
+    {
+        // $this->authorize('view', ActivityHistory::class);
+
+        $users = User::whereDate('created_at', '>=', $request->start_date)
+            ->whereDate('created_at', '<=', $request->end_date)
+            ->where(function ($q) use ($request) {
+                $q->where('firstname', 'Like', '%' . $request->keyword . '%')
+                    ->orWhere('lastname', 'Like', '%' . $request->keyword . '%')
+                    ->orWhere('email', 'Like', '%' . $request->keyword . '%');
+            })->when(isset($request->role) && $request->role !== '', function ($query) use ($request) {
+                $query->whereHas('roles', function ($q) use ($request) {
+                    $q->where('id', $request->role);
+                });
+            })
+            ->when(isset($request->status) && $request->status !== '', function ($q) use ($request) {
+                $q->where('status', $request->status);
+            })
+            ->orderBy('created_at', 'DESC')
+            ->paginate($request->per_page);
+
+        return new UserCollection($users);
     }
 }

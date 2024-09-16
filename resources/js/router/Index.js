@@ -26,6 +26,11 @@ const router = createRouter({
                     component: () =>
                         import("@/views/pages/activityHistories/Index.vue"),
                 },
+                {
+                    path: "/users",
+                    name: "users",
+                    component: () => import("@/views/pages/users/Index.vue"),
+                },
             ],
         },
         {
