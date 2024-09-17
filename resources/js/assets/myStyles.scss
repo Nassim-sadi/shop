@@ -32,6 +32,14 @@
                 @apply bg-red-500/20 !important;
             }
         }
+
+        &.p-button-help {
+            @apply bg-purple-500/5 !important;
+
+            &:hover {
+                @apply bg-purple-500/20 !important;
+            }
+        }
     }
 }
 

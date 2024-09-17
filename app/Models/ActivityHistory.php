@@ -16,6 +16,22 @@ class ActivityHistory extends Model
         'data' => 'object',
     ];
 
+    public function getCreatedAtAttribute($value)
+    {
+        return $this->formatDate($value);
+    }
+
+    public function getUpdatedAtAttribute($value)
+    {
+        return $this->formatDate($value);
+    }
+
+    protected function formatDate($value)
+    {
+        $format = env('DATE_FORMAT', 'Y-m-d H:i:s'); // default format
+        return \Carbon\Carbon::parse($value)->format($format);
+    }
+
     public function user()
     {
         return $this->belongsTo(User::class);

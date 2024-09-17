@@ -146,8 +146,4 @@ const checkActiveRoute = (item) => {
     </li>
 </template>
 
-<style lang="scss" scoped>
-.test {
-    color: var(--nav-color);
-}
-</style>
+<style lang="scss" scoped></style>

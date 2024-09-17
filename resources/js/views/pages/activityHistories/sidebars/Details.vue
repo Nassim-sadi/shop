@@ -131,6 +131,10 @@ const filterChanges = (data) => {
                 </p>
             </div>
         </div>
+
+        <pre>
+            <code>{{ current }}</code>
+        </pre>
     </Drawer>
 </template>
 

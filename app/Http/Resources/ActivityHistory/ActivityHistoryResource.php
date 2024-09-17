@@ -22,7 +22,7 @@ class ActivityHistoryResource extends JsonResource
             'data' => $this->data,
             'platform' => $this->platform,
             'browser' => $this->browser,
-            'created_at' => $this->created_at->format('Y-m-d H:i'),
+            'created_at' => $this->created_at,
             'user' => new UserResource($this->user),
         ];
     }

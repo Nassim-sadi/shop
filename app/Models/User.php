@@ -7,12 +7,13 @@ use Illuminate\Notifications\Notifiable;
 use App\Notifications\ResetPasswordNotification;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
-    use HasFactory, Notifiable, HasApiTokens, HasRoles;
+    use HasFactory, Notifiable, HasApiTokens, HasRoles, SoftDeletes;
 
     /**
      * The attributes that are mass assignable.
@@ -46,6 +47,27 @@ class User extends Authenticatable implements MustVerifyEmail
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    public function getCreatedAtAttribute($value)
+    {
+        return $this->formatDate($value);
+    }
+
+    public function getUpdatedAtAttribute($value)
+    {
+        return $this->formatDate($value);
+    }
+
+    public function getEmailVerifiedAtAttribute($value)
+    {
+        return $value ? $this->formatDate($value) : null;
+    }
+
+    protected function formatDate($value)
+    {
+        $format = env('DATE_FORMAT', 'Y-m-d H:i:s'); // default format
+        return \Carbon\Carbon::parse($value)->format($format);
     }
 
 

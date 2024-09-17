@@ -32,12 +32,14 @@ Route::middleware(["auth:sanctum"])->group(function () {
         Route::post('refresh', 'refresh');
         Route::post('logout', 'logout');
         Route::get('user', 'getUser');
+        Route::post('update', 'update');
+        Route::post('change-password', 'changePassword');
     });
 
     Route::controller(UserController::class)->group(function () {
-        Route::post('update', 'update');
-        Route::post('change-password', 'changePassword');
         Route::get('users', 'getUsers');
+        Route::post('users/change-status', 'changeStatus');
+        Route::post('users/delete', 'delete');
     });
 
     Route::controller(ActivityHistoryController::class)->group(function () {

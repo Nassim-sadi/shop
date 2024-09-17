@@ -1,12 +1,13 @@
 <script setup>
+import placeholder from "@/assets/images/avatar/profile-placeholder.png";
 import axios from "@/plugins/axios";
 import { $t } from "@/plugins/i18n";
+import { authStore } from "@/store/AuthStore";
 import { watchDebounced } from "@vueuse/core";
 import { format } from "date-fns";
-import { usePrimeVue } from "primevue/config";
-import placeholder from "@/assets/images/avatar/profile-placeholder.png";
 import { onMounted, ref } from "vue";
 import Details from "./sidebars/Details.vue";
+
 const users = ref([]);
 const loading = ref(false);
 const total = ref(0);
@@ -18,11 +19,14 @@ const current = ref(null);
 const isOpen = ref(false);
 const keyword = ref("");
 const status = ref(null);
+
 const statusOptions = [
     { label: "All", value: null },
     { label: "Active", value: 1 },
     { label: "Inactive", value: 0 },
 ];
+
+const auth = authStore();
 
 const role = ref(null);
 const roleOptions = ref([{ label: "All", value: null }]);
@@ -32,7 +36,6 @@ const getRoles = async () => {
         axios
             .get("api/admin/roles")
             .then((res) => {
-                console.log(res.data);
                 roleOptions.value = [
                     ...roleOptions.value,
                     ...res.data.roles.map((role) => {
@@ -48,38 +51,30 @@ const getRoles = async () => {
                 console.log(err);
                 reject(err);
             })
-            .finally(() => {
-                console.log("done getting roles");
-            });
+            .finally(() => {});
     });
 };
 
 const getUsers = async () => {
     if (loading.value) return;
-    let params = {
-        keyword: keyword.value,
-        page: currentPage.value,
-        per_page: per_page.value,
-        start_date: format(start_date.value, "yyyy-MM-dd"),
-        end_date: format(end_date.value, "yyyy-MM-dd"),
-    };
-
-    if (status.value !== null) {
-        params.status = status.value;
-    }
-
-    if (role.value !== null) {
-        params.role = role.value;
-    }
     loading.value = true;
     return new Promise((resolve, reject) => {
         axios
             .get("api/admin/users", {
-                params: params,
+                params: {
+                    keyword: keyword.value,
+                    page: currentPage.value,
+                    per_page: per_page.value,
+                    start_date: format(start_date.value, "yyyy-MM-dd"),
+                    end_date: format(end_date.value, "yyyy-MM-dd"),
+                    status: status.value,
+                    role: role.value,
+                },
             })
             .then((res) => {
-                console.log(res.data);
                 users.value = res.data.data;
+                console.log(users.value);
+
                 total.value = res.data.total;
                 currentPage.value = res.data.current_page;
                 per_page.value = res.data.per_page;
@@ -91,7 +86,6 @@ const getUsers = async () => {
             })
             .finally(() => {
                 loading.value = false;
-                console.log("done getting users");
             });
     });
 };
@@ -117,16 +111,6 @@ const openDetails = (data) => {
     isOpen.value = true;
 };
 
-const actionColorMap = {
-    create: "create",
-    update: "update",
-    delete: "delete",
-};
-
-const actionColor = (action) => {
-    return actionColorMap[action] || "neutral";
-};
-
 const roleColorMap = {
     "Super Admin": "super",
     Admin: "admin",
@@ -134,6 +118,59 @@ const roleColorMap = {
 };
 
 const roleColor = (role) => roleColorMap[role] || "neutral";
+
+const reset = () => {
+    keyword.value = "";
+    status.value = null;
+    role.value = null;
+    getUsers();
+};
+
+const changeStatus = async (data, index) => {
+    console.log(data);
+    return new Promise((resolve, reject) => {
+        axios
+            .post("api/admin/users/change-status", {
+                id: data.id,
+                status: !data.status ? 1 : 0,
+            })
+            .then((res) => {
+                updateItem(res.data.status, index);
+                resolve(res.data);
+            })
+            .catch((err) => {
+                console.log(err);
+                reject(err);
+            })
+            .finally(() => {
+                console.log("done changing status");
+            });
+    });
+};
+
+const updateItem = (status, index) => {
+    users.value[index].status = status;
+};
+
+const deleteItem = (data, index) => {
+    return new Promise((resolve, reject) => {
+        axios
+            .post("api/admin/users/delete", {
+                id: data.id,
+            })
+            .then((res) => {
+                users.value.splice(index, 1);
+                resolve(res.data);
+            })
+            .catch((err) => {
+                console.log(err);
+                reject(err);
+            })
+            .finally(() => {
+                console.log("done deleting");
+            });
+    });
+};
 
 onMounted(async () => {
     await getRoles();
@@ -156,7 +193,7 @@ onMounted(async () => {
             dataKey="id"
             :lazy="true"
             :rowHover="true"
-            :rowsPerPageOptions="[5, 10, 20, 30]"
+            :rowsPerPageOptions="[5, 10, 20, 30, 50, 100]"
         >
             <template #empty>
                 <div class="text-center">{{ $t("common.no_data") }}</div>
@@ -164,7 +201,7 @@ onMounted(async () => {
 
             <template #header>
                 <h1 class="text-xl font-bold mb-4">
-                    {{ $t("activities.title") }}
+                    {{ $t("user.page") }}
                 </h1>
                 <div class="flex flex-wrap items-center gap-2 mb-4 w-full">
                     <div class="flex gap-2 items-baseline">
@@ -234,6 +271,17 @@ onMounted(async () => {
                         :loading="loading"
                         class="bold-label"
                     />
+
+                    <Button
+                        :label="$t('common.reset')"
+                        icon="pi pi-undo"
+                        @click="reset"
+                        :loading="loading"
+                        class="bold-label"
+                        v-tooltip.bottom="$t('common.reset')"
+                        :disabled="!start_date || !end_date"
+                        severity="secondary"
+                    />
                 </div>
             </template>
 
@@ -299,18 +347,6 @@ onMounted(async () => {
                 </template>
             </Column>
 
-            <!--    <Column :header="$t('activities.platform')">
-                <template #body="slotProps">
-                    {{ slotProps.data.platform }}
-                </template>
-            </Column>
-
-            <Column :header="$t('activities.browser')">
-                <template #body="slotProps">
-                    {{ slotProps.data.browser }}
-                </template>
-            </Column>-->
-
             <Column :header="$t('common.created_at')" field="created_at">
             </Column>
 
@@ -320,7 +356,7 @@ onMounted(async () => {
             <Column :header="$t('activities.action')">
                 <template #body="slotProps">
                     <Button
-                        icon="pi pi-eye"
+                        icon="ti ti-eye"
                         rounded
                         size="large"
                         text
@@ -329,6 +365,32 @@ onMounted(async () => {
                         v-tooltip.bottom="$t('common.view_details')"
                         class="action-btn"
                     />
+
+                    <template v-if="slotProps.data.id !== auth.user.id">
+                        <Button
+                            icon="ti ti-status-change"
+                            rounded
+                            size="large"
+                            text
+                            severity="help"
+                            @click="
+                                changeStatus(slotProps.data, slotProps.index)
+                            "
+                            v-tooltip.bottom="$t('common.change_status')"
+                            class="action-btn"
+                        />
+
+                        <Button
+                            icon="ti ti-trash"
+                            rounded
+                            size="large"
+                            text
+                            severity="danger"
+                            @click="deleteItem(slotProps.data, slotProps.index)"
+                            v-tooltip.bottom="$t('common.delete')"
+                            class="action-btn"
+                        />
+                    </template>
                 </template>
             </Column>
 
