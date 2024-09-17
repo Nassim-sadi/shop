@@ -276,7 +276,7 @@ onMounted(async () => {
 
                     <Button
                         :label="$t('common.search')"
-                        icon="pi pi-search"
+                        icon="ti ti-search"
                         @click="getUsers"
                         :disabled="!start_date || !end_date"
                         :loading="loading"
@@ -285,7 +285,7 @@ onMounted(async () => {
 
                     <Button
                         :label="$t('common.reset')"
-                        icon="pi pi-undo"
+                        icon="ti ti-restore"
                         @click="reset"
                         :loading="loading"
                         class="bold-label"
@@ -327,7 +327,7 @@ onMounted(async () => {
                 <template #body="slotProps">
                     {{ slotProps.data.email }}
                     <span
-                        class="pi pi-verified text-green-500 font-bold"
+                        class="ti ti-rosette-discount-check-filled text-green-500 font-bold"
                         v-if="slotProps.data.email_verified_at"
                         v-tooltip.bottom="
                             $t('user.verified_at') +
