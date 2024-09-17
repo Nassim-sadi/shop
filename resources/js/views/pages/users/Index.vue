@@ -1,13 +1,13 @@
 <script setup>
 import placeholder from "@/assets/images/avatar/profile-placeholder.png";
 import axios from "@/plugins/axios";
+import emitter from "@/plugins/emitter";
 import { $t } from "@/plugins/i18n";
 import { authStore } from "@/store/AuthStore";
 import { watchDebounced } from "@vueuse/core";
 import { format } from "date-fns";
 import { onMounted, ref } from "vue";
 import Details from "./sidebars/Details.vue";
-
 const users = ref([]);
 const loading = ref(false);
 const total = ref(0);
@@ -136,6 +136,11 @@ const changeStatus = async (data, index) => {
             })
             .then((res) => {
                 updateItem(res.data.status, index);
+                emitter.emit("toast", {
+                    summary: $t("status.success.title"),
+                    message: $t("status.success.user.change_status"),
+                    severity: "success",
+                });
                 resolve(res.data);
             })
             .catch((err) => {
@@ -160,6 +165,12 @@ const deleteItem = (data, index) => {
             })
             .then((res) => {
                 users.value.splice(index, 1);
+                total.value--;
+                emitter.emit("toast", {
+                    summary: $t("status.success.title"),
+                    message: $t("status.success.user.delete"),
+                    severity: "success",
+                });
                 resolve(res.data);
             })
             .catch((err) => {
@@ -193,7 +204,7 @@ onMounted(async () => {
             dataKey="id"
             :lazy="true"
             :rowHover="true"
-            :rowsPerPageOptions="[5, 10, 20, 30, 50, 100]"
+            :rowsPerPageOptions="[5, 10, 20, 30]"
         >
             <template #empty>
                 <div class="text-center">{{ $t("common.no_data") }}</div>
@@ -260,7 +271,7 @@ onMounted(async () => {
                         :options="roleOptions"
                         optionLabel="label"
                         optionValue="value"
-                        :placeholder="$t('user.statusQuery')"
+                        :placeholder="$t('user.roleQuery')"
                     />
 
                     <Button

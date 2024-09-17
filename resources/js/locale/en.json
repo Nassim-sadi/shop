@@ -95,7 +95,8 @@
         "edit_password": "Edit password",
         "verified_at": "Verified at",
         "page": "Users",
-        "statusQuery": "Select status"
+        "statusQuery": "Select status",
+        "roleQuery": "Select role"
     },
     "activities": {
         "by": "Activity By",
@@ -149,5 +150,40 @@
         "created_at": "Created at",
         "updated_at": "Updated at",
         "change_status": "Change status"
+    },
+    "status": {
+        "success": {
+            "title": "Success",
+            "user": {
+                "create": "User created successfully",
+                "update": "User updated successfully",
+                "delete": "User deleted successfully",
+                "change_status": "User status changed successfully"
+            },
+            "role": {
+                "create": "Role created successfully",
+                "update": "Role updated successfully",
+                "delete": "Role deleted successfully",
+                "change_status": "Role status changed successfully"
+            }
+        },
+        "error": {
+            "title": "Error",
+            "user": {
+                "create": "User creation failed",
+                "update": "User update failed",
+                "delete": "User deletion failed",
+                "change_status": "User status change failed"
+            },
+            "role": {
+                "create": "Role creation failed",
+                "update": "Role update failed",
+                "delete": "Role deletion failed",
+                "change_status": "Role status change failed"
+            }
+        },
+        "warning": "Warning",
+        "info": "Info",
+        "danger": "Danger"
     }
 }

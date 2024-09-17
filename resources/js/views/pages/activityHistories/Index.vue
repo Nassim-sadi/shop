@@ -277,11 +277,11 @@ onMounted(() => {
 }
 
 .delete {
-    @apply bg-red-500 text-surface-900;
+    @apply bg-red-500 text-slate-200;
 }
 
 .neutral {
-    @apply bg-surface-500 text-surface-900;
+    @apply bg-surface-500 text-slate-200;
 }
 
 .super {
