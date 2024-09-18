@@ -20,6 +20,7 @@ class UserController extends Controller
     public function getUsers(Request $request)
     {
         // $this->authorize('view', ActivityHistory::class);
+        $user = $request->user();
 
         $users = User::whereDate('created_at', '>=', $request->start_date)
             ->whereDate('created_at', '<=', $request->end_date)
@@ -36,6 +37,15 @@ class UserController extends Controller
                 $q->where('status', $request->status);
             })
             ->orderBy('created_at', 'DESC')
+            ->when($user->hasRole("Super Admin"), function ($q) use ($request) {
+                $q->when(isset($request->deleted) && $request->deleted !== '', function ($q) use ($request) {
+                    if ($request->deleted === 'with') {
+                        return $q->withTrashed();
+                    } elseif ($request->deleted === 'only') {
+                        return $q->onlyTrashed();
+                    }
+                });
+            })
             ->paginate($request->per_page);
 
         return new UserCollection($users);
@@ -90,6 +100,55 @@ class UserController extends Controller
             platform: $agent->os->family,
             browser: $agent->ua->family,
         );
+        return response()->json(['success' => 'User deleted successfully', 'deleted_at' => $user->deleted_at], 200);
+    }
+
+    public function forceDelete(Request $request)
+    {
+        $request->validate([
+            'id' => 'required|exists:users,id|not_in:' . $request->user()->id,
+        ]);
+        $user = User::onlyTrashed()->find($request->id);
+        $user->forceDelete();
+        // log activity
+        $agent = UA::parse($request->server('HTTP_USER_AGENT'));
+        ActivityHistoryJob::dispatch(
+            data: [
+                'model' => 'users',
+                'action' => 'forceDelete',
+                'data' => ['user' => $user],
+                'user_id' => $request->user()->id,
+            ],
+            platform: $agent->os->family,
+            browser: $agent->ua->family,
+        );
         return response()->json(['success' => 'User deleted successfully'], 200);
+    }
+
+
+
+    public function restore(Request $request)
+    {
+
+        $request->validate([
+            'id' => 'required|exists:users,id|not_in:' . $request->user()->id,
+        ]);
+        $user = User::withTrashed()->find($request->id);
+        $user->restore();
+
+        // log activity
+        $agent = UA::parse($request->server('HTTP_USER_AGENT'));
+        ActivityHistoryJob::dispatch(
+            data: [
+                'model' => 'users',
+                'action' => 'restore',
+                'data' => ['user' => $user],
+                'user_id' => $request->user()->id,
+            ],
+            platform: $agent->os->family,
+            browser: $agent->ua->family,
+        );
+
+        return response()->json(['success' => 'User restored successfully', 'user' => $user], 200);
     }
 }

@@ -40,6 +40,8 @@ Route::middleware(["auth:sanctum"])->group(function () {
         Route::get('users', 'getUsers');
         Route::post('users/change-status', 'changeStatus');
         Route::post('users/delete', 'delete');
+        Route::post('users/delete-permanently', 'forceDelete');
+        Route::post('users/restore', 'restore');
     });
 
     Route::controller(ActivityHistoryController::class)->group(function () {

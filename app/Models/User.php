@@ -64,6 +64,11 @@ class User extends Authenticatable implements MustVerifyEmail
         return $value ? $this->formatDate($value) : null;
     }
 
+    public function getDeletedAtAttribute($value)
+    {
+        return $value ? $this->formatDate($value) : null;
+    }
+
     protected function formatDate($value)
     {
         $format = env('DATE_FORMAT', 'Y-m-d H:i:s'); // default format

@@ -6,7 +6,7 @@ import { $t } from "@/plugins/i18n";
 import { authStore } from "@/store/AuthStore";
 import { watchDebounced } from "@vueuse/core";
 import { format } from "date-fns";
-import { onMounted, ref } from "vue";
+import { computed, onMounted, ref } from "vue";
 import Details from "./sidebars/Details.vue";
 const users = ref([]);
 const loading = ref(false);
@@ -24,6 +24,14 @@ const statusOptions = [
     { label: "All", value: null },
     { label: "Active", value: 1 },
     { label: "Inactive", value: 0 },
+];
+
+const deleted = ref(null);
+
+const deletedOptions = [
+    { label: "Non-deleted", value: null },
+    { label: "All", value: "with" },
+    { label: "Deleted only", value: "only" },
 ];
 
 const auth = authStore();
@@ -55,6 +63,10 @@ const getRoles = async () => {
     });
 };
 
+const isSuper = computed(() => {
+    return auth.user.roles.name === "Super Admin";
+});
+
 const getUsers = async () => {
     if (loading.value) return;
     loading.value = true;
@@ -69,6 +81,7 @@ const getUsers = async () => {
                     end_date: format(end_date.value, "yyyy-MM-dd"),
                     status: status.value,
                     role: role.value,
+                    deleted: deleted.value,
                 },
             })
             .then((res) => {
@@ -123,11 +136,11 @@ const reset = () => {
     keyword.value = "";
     status.value = null;
     role.value = null;
+    deleted.value = null;
     getUsers();
 };
 
 const changeStatus = async (data, index) => {
-    console.log(data);
     return new Promise((resolve, reject) => {
         axios
             .post("api/admin/users/change-status", {
@@ -147,9 +160,7 @@ const changeStatus = async (data, index) => {
                 console.log(err);
                 reject(err);
             })
-            .finally(() => {
-                console.log("done changing status");
-            });
+            .finally(() => {});
     });
 };
 
@@ -164,8 +175,13 @@ const deleteItem = (data, index) => {
                 id: data.id,
             })
             .then((res) => {
-                users.value.splice(index, 1);
-                total.value--;
+                if (deleted.value !== null) {
+                    users.value[index].deleted_at = res.data.deleted_at;
+                } else {
+                    users.value.splice(index, 1);
+                    total.value--;
+                }
+
                 emitter.emit("toast", {
                     summary: $t("status.success.title"),
                     message: $t("status.success.user.delete"),
@@ -182,6 +198,64 @@ const deleteItem = (data, index) => {
             });
     });
 };
+
+const deleteItemPermanently = (data, index) => {
+    return new Promise((resolve, reject) => {
+        axios
+            .post("api/admin/users/delete-permanently", { id: data.id })
+            .then((res) => {
+                users.value.splice(index, 1);
+                total.value--;
+                emitter.emit("toast", {
+                    summary: $t("status.success.title"),
+                    message: $t("status.success.user.perma_delete"),
+                    severity: "success",
+                });
+                resolve(res.data);
+            })
+            .catch((err) => {
+                console.log(err);
+                reject(err);
+            })
+            .finally(() => {
+                console.log("done deleting");
+            });
+    });
+};
+
+const restoreItem = (data, index) => {
+    return new Promise((resolve, reject) => {
+        axios
+            .post("api/admin/users/restore", {
+                id: data.id,
+            })
+            .then((res) => {
+                if (deleted.value === "only") {
+                    users.value.splice(index, 1);
+                    total.value--;
+                } else {
+                    users.value[index].deleted_at = null;
+                }
+                emitter.emit("toast", {
+                    summary: $t("status.success.title"),
+                    message: $t("status.success.user.restore"),
+                    severity: "success",
+                });
+                resolve(res.data);
+            })
+            .catch((err) => {
+                console.log(err);
+                reject(err);
+            })
+            .finally(() => {
+                console.log("done restoring");
+            });
+    });
+};
+
+const rowClass = computed(() => (data) => {
+    return [{ "!bg-red-600/10": data.deleted_at ? true : false }];
+});
 
 onMounted(async () => {
     await getRoles();
@@ -205,6 +279,7 @@ onMounted(async () => {
             :lazy="true"
             :rowHover="true"
             :rowsPerPageOptions="[5, 10, 20, 30]"
+            :row-class="rowClass"
         >
             <template #empty>
                 <div class="text-center">{{ $t("common.no_data") }}</div>
@@ -214,7 +289,7 @@ onMounted(async () => {
                 <h1 class="text-xl font-bold mb-4">
                     {{ $t("user.page") }}
                 </h1>
-                <div class="flex flex-wrap items-center gap-2 mb-4 w-full">
+                <div class="flex flex-wrap gap-2 mb-4 w-full">
                     <div class="flex gap-2 items-baseline">
                         <span>{{ $t("common.from") }}</span>
                         <DatePicker
@@ -272,6 +347,15 @@ onMounted(async () => {
                         optionLabel="label"
                         optionValue="value"
                         :placeholder="$t('user.roleQuery')"
+                    />
+
+                    <Select
+                        v-if="isSuper"
+                        v-model="deleted"
+                        :options="deletedOptions"
+                        optionLabel="label"
+                        optionValue="value"
+                        :placeholder="$t('user.deletedQuery')"
                     />
 
                     <Button
@@ -377,7 +461,12 @@ onMounted(async () => {
                         class="action-btn"
                     />
 
-                    <template v-if="slotProps.data.id !== auth.user.id">
+                    <template
+                        v-if="
+                            slotProps.data.id !== auth.user.id &&
+                            !slotProps.data.deleted_at
+                        "
+                    >
                         <Button
                             icon="ti ti-status-change"
                             rounded
@@ -399,6 +488,47 @@ onMounted(async () => {
                             severity="danger"
                             @click="deleteItem(slotProps.data, slotProps.index)"
                             v-tooltip.bottom="$t('common.delete')"
+                            class="action-btn"
+                        />
+                    </template>
+                    <template
+                        v-if="
+                            slotProps.data.deleted_at &&
+                            isSuper &&
+                            slotProps.data.id !== auth.user.id
+                        "
+                    >
+                        <Button
+                            v-if="
+                                slotProps.data.deleted_at &&
+                                isSuper &&
+                                slotProps.data.id !== auth.user.id
+                            "
+                            icon="ti ti-trash"
+                            rounded
+                            size="large"
+                            text
+                            severity="danger"
+                            @click="
+                                deleteItemPermanently(
+                                    slotProps.data,
+                                    slotProps.index,
+                                )
+                            "
+                            v-tooltip.bottom="$t('common.perma_delete')"
+                            class="action-btn"
+                        />
+
+                        <Button
+                            icon="ti ti-restore"
+                            rounded
+                            size="large"
+                            text
+                            severity="success"
+                            @click="
+                                restoreItem(slotProps.data, slotProps.index)
+                            "
+                            v-tooltip.bottom="$t('common.restore')"
                             class="action-btn"
                         />
                     </template>

@@ -96,7 +96,8 @@
         "verified_at": "Verified at",
         "page": "Users",
         "statusQuery": "Select status",
-        "roleQuery": "Select role"
+        "roleQuery": "Select role",
+        "deletedQuery": "Select deleted"
     },
     "activities": {
         "by": "Activity By",
@@ -149,7 +150,9 @@
         "inactive": "Inactive",
         "created_at": "Created at",
         "updated_at": "Updated at",
-        "change_status": "Change status"
+        "change_status": "Change status",
+        "restore": "Restore",
+        "perma_delete": "Delete permanently"
     },
     "status": {
         "success": {
@@ -158,6 +161,7 @@
                 "create": "User created successfully",
                 "update": "User updated successfully",
                 "delete": "User deleted successfully",
+                "perma_delete": "User permanently deleted successfully",
                 "change_status": "User status changed successfully"
             },
             "role": {
