@@ -15,7 +15,6 @@
     "logout.confirm.message": "Are you sure you want to logout?",
     "logout.confirm.header": "Logout",
     "cancel": "Cancel",
-    "confirm": "Confirm",
     "auth.forgot_password": "Forgot password",
     "auth.forgot_password_message": "Please provide your email address, We will send you a code to reset your password",
     "auth.sent_email_success": "We have sent you a link to your email address. Please check your inbox and follow the instruction to reset your password. ",
@@ -162,7 +161,8 @@
                 "update": "User updated successfully",
                 "delete": "User deleted successfully",
                 "perma_delete": "User permanently deleted successfully",
-                "change_status": "User status changed successfully"
+                "change_status": "User status changed successfully",
+                "restore": "User restored successfully"
             },
             "role": {
                 "create": "Role created successfully",
@@ -189,5 +189,10 @@
         "warning": "Warning",
         "info": "Info",
         "danger": "Danger"
+    },
+    "confirm": {
+        "title": "Confirm",
+        "header": "Confirmation",
+        "message_default": "Are you sure you want to proceed ?"
     }
 }

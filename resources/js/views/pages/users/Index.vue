@@ -6,8 +6,11 @@ import { $t } from "@/plugins/i18n";
 import { authStore } from "@/store/AuthStore";
 import { watchDebounced } from "@vueuse/core";
 import { format } from "date-fns";
+import { useConfirm } from "primevue/useconfirm";
 import { computed, onMounted, ref } from "vue";
 import Details from "./sidebars/Details.vue";
+
+const Confirm = useConfirm();
 const users = ref([]);
 const loading = ref(false);
 const total = ref(0);
@@ -19,6 +22,26 @@ const current = ref(null);
 const isOpen = ref(false);
 const keyword = ref("");
 const status = ref(null);
+
+const confirm = (myFunction, params) => {
+    Confirm.require({
+        message: $t("confirm.message_default"),
+        header: $t("confirm.header"),
+        icon: "pi pi-exclamation-triangle",
+        rejectProps: {
+            label: $t("cancel"),
+            severity: "secondary",
+            outlined: true,
+        },
+        acceptProps: {
+            label: $t("confirm"),
+        },
+        accept: () => {
+            myFunction(...params);
+        },
+        reject: () => {},
+    });
+};
 
 const statusOptions = [
     { label: "All", value: null },
@@ -69,6 +92,7 @@ const isSuper = computed(() => {
 
 const getUsers = async () => {
     if (loading.value) return;
+    loadingStates.value = [];
     loading.value = true;
     return new Promise((resolve, reject) => {
         axios
@@ -86,8 +110,6 @@ const getUsers = async () => {
             })
             .then((res) => {
                 users.value = res.data.data;
-                console.log(users.value);
-
                 total.value = res.data.total;
                 currentPage.value = res.data.current_page;
                 per_page.value = res.data.per_page;
@@ -141,6 +163,9 @@ const reset = () => {
 };
 
 const changeStatus = async (data, index) => {
+    if (loadingStates.value[data.id]) return;
+    setLoadingState(data.id, true);
+
     return new Promise((resolve, reject) => {
         axios
             .post("api/admin/users/change-status", {
@@ -160,7 +185,9 @@ const changeStatus = async (data, index) => {
                 console.log(err);
                 reject(err);
             })
-            .finally(() => {});
+            .finally(() => {
+                setLoadingState(data.id, false);
+            });
     });
 };
 
@@ -169,6 +196,9 @@ const updateItem = (status, index) => {
 };
 
 const deleteItem = (data, index) => {
+    if (loadingStates.value[data.id]) return;
+    setLoadingState(data.id, true);
+
     return new Promise((resolve, reject) => {
         axios
             .post("api/admin/users/delete", {
@@ -194,12 +224,15 @@ const deleteItem = (data, index) => {
                 reject(err);
             })
             .finally(() => {
-                console.log("done deleting");
+                setLoadingState(data.id, false);
             });
     });
 };
 
 const deleteItemPermanently = (data, index) => {
+    if (loadingStates.value[data.id]) return;
+    setLoadingState(data.id, true);
+
     return new Promise((resolve, reject) => {
         axios
             .post("api/admin/users/delete-permanently", { id: data.id })
@@ -218,12 +251,14 @@ const deleteItemPermanently = (data, index) => {
                 reject(err);
             })
             .finally(() => {
-                console.log("done deleting");
+                setLoadingState(data.id, false);
             });
     });
 };
 
 const restoreItem = (data, index) => {
+    if (loadingStates.value[data.id]) return;
+    setLoadingState(data.id, true);
     return new Promise((resolve, reject) => {
         axios
             .post("api/admin/users/restore", {
@@ -248,7 +283,7 @@ const restoreItem = (data, index) => {
                 reject(err);
             })
             .finally(() => {
-                console.log("done restoring");
+                setLoadingState(data.id, false);
             });
     });
 };
@@ -256,6 +291,12 @@ const restoreItem = (data, index) => {
 const rowClass = computed(() => (data) => {
     return [{ "!bg-red-600/10": data.deleted_at ? true : false }];
 });
+
+const loadingStates = ref({}); // Holds loading state for each user
+
+const setLoadingState = (userId, isLoading) => {
+    loadingStates.value[userId] = isLoading;
+};
 
 onMounted(async () => {
     await getRoles();
@@ -459,6 +500,7 @@ onMounted(async () => {
                         @click="openDetails(slotProps.data)"
                         v-tooltip.bottom="$t('common.view_details')"
                         class="action-btn"
+                        :loading="loadingStates[slotProps.data.id]"
                     />
 
                     <template
@@ -474,10 +516,14 @@ onMounted(async () => {
                             text
                             severity="help"
                             @click="
-                                changeStatus(slotProps.data, slotProps.index)
+                                confirm(changeStatus, [
+                                    slotProps.data,
+                                    slotProps.index,
+                                ])
                             "
                             v-tooltip.bottom="$t('common.change_status')"
                             class="action-btn"
+                            :loading="loadingStates[slotProps.data.id]"
                         />
 
                         <Button
@@ -486,9 +532,15 @@ onMounted(async () => {
                             size="large"
                             text
                             severity="danger"
-                            @click="deleteItem(slotProps.data, slotProps.index)"
+                            @click="
+                                confirm(deleteItem, [
+                                    slotProps.data,
+                                    slotProps.index,
+                                ])
+                            "
                             v-tooltip.bottom="$t('common.delete')"
                             class="action-btn"
+                            :loading="loadingStates[slotProps.data.id]"
                         />
                     </template>
                     <template
@@ -510,13 +562,18 @@ onMounted(async () => {
                             text
                             severity="danger"
                             @click="
-                                deleteItemPermanently(
+                                // deleteItemPermanently(
+                                //     slotProps.data,
+                                //     slotProps.index,
+                                // )
+                                confirm(deleteItemPermanently, [
                                     slotProps.data,
                                     slotProps.index,
-                                )
+                                ])
                             "
                             v-tooltip.bottom="$t('common.perma_delete')"
                             class="action-btn"
+                            :loading="loadingStates[slotProps.data.id]"
                         />
 
                         <Button
@@ -526,10 +583,14 @@ onMounted(async () => {
                             text
                             severity="success"
                             @click="
-                                restoreItem(slotProps.data, slotProps.index)
+                                confirm(restoreItem, [
+                                    slotProps.data,
+                                    slotProps.index,
+                                ])
                             "
                             v-tooltip.bottom="$t('common.restore')"
                             class="action-btn"
+                            :loading="loadingStates[slotProps.data.id]"
                         />
                     </template>
                 </template>

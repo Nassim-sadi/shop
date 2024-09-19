@@ -38,6 +38,8 @@ const filterChanges = (data) => {
     });
     return result;
 };
+
+import { PerfectScrollbar } from "vue3-perfect-scrollbar";
 </script>
 
 <template>
