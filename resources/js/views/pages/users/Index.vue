@@ -9,7 +9,7 @@ import { format } from "date-fns";
 import { useConfirm } from "primevue/useconfirm";
 import { computed, onMounted, ref } from "vue";
 import Details from "./sidebars/Details.vue";
-
+import Edit from "./sidebars/Edit.vue";
 const Confirm = useConfirm();
 const users = ref([]);
 const loading = ref(false);
@@ -20,9 +20,11 @@ const start_date = ref(new Date());
 const end_date = ref(new Date());
 const current = ref(null);
 const isOpen = ref(false);
+const isEditOpen = ref(false);
 const keyword = ref("");
 const status = ref(null);
-
+const uploadPercentage = ref(0);
+const currentIndex = ref(null);
 const confirm = (myFunction, params) => {
     Confirm.require({
         message: $t("confirm.message_default"),
@@ -152,6 +154,12 @@ const roleColorMap = {
     User: "user",
 };
 
+const openEdit = (val, index) => {
+    current.value = val;
+    currentIndex.value = index;
+    isEditOpen.value = true;
+};
+
 const roleColor = (role) => roleColorMap[role] || "neutral";
 
 const reset = () => {
@@ -173,7 +181,7 @@ const changeStatus = async (data, index) => {
                 status: !data.status ? 1 : 0,
             })
             .then((res) => {
-                updateItem(res.data.status, index);
+                updateItemStatus(res.data.status, index);
                 emitter.emit("toast", {
                     summary: $t("status.success.title"),
                     message: $t("status.success.user.change_status"),
@@ -191,7 +199,7 @@ const changeStatus = async (data, index) => {
     });
 };
 
-const updateItem = (status, index) => {
+const updateItemStatus = (status, index) => {
     users.value[index].status = status;
 };
 
@@ -288,6 +296,43 @@ const restoreItem = (data, index) => {
     });
 };
 
+const editItem = (val) => {
+    return new Promise((resolve, reject) => {
+        axios
+            .post("api/admin/users/update", val, {
+                onUploadProgress: (progressEvent) => {
+                    uploadPercentage.value = Math.round(
+                        (progressEvent.loaded * 100) / progressEvent.total,
+                    );
+                },
+            })
+            .then((response) => {
+                uploadPercentage.value = 0;
+                isEditOpen.value = false;
+                console.log(response.data);
+                updateItem(response.data.user);
+                emitter.emit("toast", {
+                    summary: $t("update.success"),
+                    message: $t("update.success_message"),
+                    severity: "success",
+                });
+                resolve(response);
+            })
+            .catch((error) => {
+                uploadPercentage.value = 0;
+                console.log(error);
+                reject(error);
+            });
+    });
+};
+
+const updateItem = (data) => {
+    console.log(data);
+    console.log(currentIndex.value);
+    console.log(users.value[currentIndex.value]);
+    users.value[currentIndex.value] = data;
+};
+
 const rowClass = computed(() => (data) => {
     return [{ "!bg-red-600/10": data.deleted_at ? true : false }];
 });
@@ -308,6 +353,11 @@ onMounted(async () => {
 <template>
     <div class="card">
         <Details :current="current" v-model:isOpen="isOpen" />
+        <Edit
+            :current="current"
+            v-model:isOpen="isEditOpen"
+            @editItem="editItem"
+        ></Edit>
         <DataTable
             :value="users"
             tableStyle="min-width: 50rem"
@@ -499,6 +549,18 @@ onMounted(async () => {
                         severity="info"
                         @click="openDetails(slotProps.data)"
                         v-tooltip.bottom="$t('common.view_details')"
+                        class="action-btn"
+                        :loading="loadingStates[slotProps.data.id]"
+                    />
+
+                    <Button
+                        icon="ti ti-edit"
+                        rounded
+                        size="large"
+                        text
+                        severity="success"
+                        @click="openEdit(slotProps.data, slotProps.index)"
+                        v-tooltip.bottom="$t('common.edit')"
                         class="action-btn"
                         :loading="loadingStates[slotProps.data.id]"
                     />

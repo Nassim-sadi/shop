@@ -48,7 +48,7 @@ import { PerfectScrollbar } from "vue3-perfect-scrollbar";
         :header="$t('activities.details')"
         position="right"
         @update:visible="$emit('update:isOpen', $event)"
-        class="!w-full md:!w-[30rem] lg:!w-[25rem]"
+        class="!w-full md:!w-[30rem] lg:!w-[25rem] sidebar"
         blockScroll
     >
         {{ current }}

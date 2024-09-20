@@ -73,6 +73,7 @@ const actionColorMap = {
     create: "create",
     update: "update",
     delete: "delete",
+    forceDelete: "forceDelete",
 };
 
 const actionColor = (action) => {
@@ -277,7 +278,11 @@ onMounted(() => {
 }
 
 .delete {
-    @apply bg-red-500 text-slate-200;
+    @apply bg-red-300 text-slate-200;
+}
+
+.forceDelete {
+    @apply bg-red-700 text-slate-200;
 }
 
 .neutral {

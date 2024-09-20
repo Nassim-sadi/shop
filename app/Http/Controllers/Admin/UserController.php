@@ -4,11 +4,12 @@ namespace App\Http\Controllers\Admin;
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-use App\Http\Resources\UserResource;
 use App\Http\Resources\Users\UserCollection;
+use App\Http\Resources\Users\UserResource;
 use App\Jobs\ActivityHistoryJob;
 use App\Models\User;
 use Debugbar;
+use Str;
 use UA;
 
 class UserController extends Controller
@@ -150,5 +151,65 @@ class UserController extends Controller
         );
 
         return response()->json(['success' => 'User restored successfully', 'user' => $user], 200);
+    }
+
+    public function update(Request $request)
+    {
+        $request->validate([
+            'id' => 'required|exists:users',
+            'image' => 'sometimes|required|image|mimes:jpeg,png,jpg,gif,svg,webp|max:2048',
+            'firstname' => 'sometimes|required|string|max:255',
+            'lastname' => 'sometimes|required|string|max:255',
+        ]);
+
+        $user = User::find($request->id);
+        $oldUser = clone $user;
+
+        if ($request->hasFile('image')) {
+            if ($user->image) {
+                $oldImage = basename(parse_url($user->image, PHP_URL_PATH));
+                $oldImagePath = public_path('/storage/images/profile/' . $oldImage);
+
+                if (file_exists($oldImagePath)) {
+                    unlink($oldImagePath);
+                }
+            }
+
+            // Handle new image upload
+            $image = $request->file('image');
+            $originalName = pathinfo($image->getClientOriginalName(), PATHINFO_FILENAME);
+            $extension = $image->extension();
+            $imageName = Str::slug($originalName) . '-' . time() . '.' . $extension;
+            $destinationPath = public_path('/storage/images/profile');
+            $image->move($destinationPath, $imageName);
+            $user->image = $imageName;
+        }
+
+        // Update other user details
+        if ($request->has('firstname')) {
+            $user->firstname = $request->firstname;
+        }
+
+        if ($request->has('lastname')) {
+            $user->lastname = $request->lastname;
+        }
+        $changes = $user->getDirty();
+        $user->save();
+        $user->refresh();
+        // log activity
+        $agent = UA::parse($request->server('HTTP_USER_AGENT'));
+        ActivityHistoryJob::dispatch(
+            data: [
+                'model' => 'users',
+                'action' => 'update',
+                'data' => ['changes' => $changes, 'user' => $oldUser],
+                'user_id' => $request->user()->id,
+            ],
+            platform: $agent->os->family,
+            browser: $agent->ua->family,
+
+        );
+
+        return response()->json(['success' => 'User updated successfully', 'user' => new UserResource($user)], 200);
     }
 }

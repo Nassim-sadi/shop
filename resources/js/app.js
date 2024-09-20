@@ -9,11 +9,13 @@ import emitter from "@/plugins/emitter";
 import { i18n } from "@/plugins/i18n";
 import { createPinia } from "pinia";
 import piniaPersist from "pinia-plugin-persist";
+import { PerfectScrollbarPlugin } from "vue3-perfect-scrollbar";
 import router from "./router/Index";
 
 import "@/assets/myStyles.scss";
 import "@/assets/styles.scss";
 import "@/assets/tailwind.css";
+import "vue3-perfect-scrollbar/style.css";
 
 const app = createApp(App);
 
@@ -23,7 +25,6 @@ app.use(router);
 
 const pinia = createPinia();
 pinia.use(piniaPersist);
-
 app.use(PrimeVue, {
     ripple: true,
     theme: {
@@ -34,6 +35,7 @@ app.use(PrimeVue, {
     },
 });
 app.use(ToastService);
+app.use(PerfectScrollbarPlugin);
 app.use(ConfirmationService);
 app.use(i18n);
 app.use(pinia);
