@@ -1,9 +1,9 @@
 <script setup>
+import placeholder from "@/assets/images/avatar/profile-placeholder.png";
 import browsers from "@/constants/images/browsers";
 import os from "@/constants/images/os";
 import { $t } from "@/plugins/i18n";
 import { computed, toRefs } from "vue";
-
 const props = defineProps({
     current: {
         required: true,
@@ -45,95 +45,50 @@ import { PerfectScrollbar } from "vue3-perfect-scrollbar";
 <template>
     <Drawer
         :visible="isOpen"
-        :header="$t('activities.details')"
+        :header="$t('users.details')"
         position="right"
         @update:visible="$emit('update:isOpen', $event)"
         class="!w-full md:!w-[30rem] lg:!w-[25rem] sidebar"
         blockScroll
     >
-        {{ current }}
-        <!-- <div class="mb-4">
-            <p class="font-bold">{{ $t("activities.by") }} :</p>
+        <div class="mb-4">
             <div class="flex items-center gap-2 mt-2">
                 <Avatar
-                    :image="current.user.image"
+                    :image="current.image || placeholder"
                     shape="circle"
                     size="large"
                 ></Avatar>
-                {{ current.user.firstname + " " + current.user.lastname }}
+                {{ current.firstname + " " + current.lastname }}
             </div>
 
             <p class="font-bold mt-2">{{ $t("user.email") }} :</p>
-            {{ current.user.email }}
+            {{ current.email }}
+        </div>
+
+        <div class="mb-4">
+            <p class="font-bold">{{ $t("user.verified_at") }} :</p>
+            {{ current.email_verified_at }}
         </div>
 
         <div class="mb-4">
             <p class="font-bold">{{ $t("activities.role") }} :</p>
-            {{ current.user.role.name }}
+            {{ current.role.name }}
         </div>
 
         <div class="mb-4">
-            <p class="font-bold">{{ $t("activities.browser") }} :</p>
-            <div class="flex gap-2 items-center mt-2">
-                <Image
-                    :src="browsers[current.browser]"
-                    class="w-8 object-contain block"
-                />
-
-                {{ current.browser }}
-            </div>
+            <p class="font-bold">{{ $t("user.status") }} :</p>
+            {{ current.status ? $t("common.active") : $t("common.inactive") }}
         </div>
 
         <div class="mb-4">
-            <p class="font-bold">{{ $t("activities.os") }} :</p>
-            <div class="flex items-center gap-2 mt-2">
-                <Image
-                    :src="
-                        os[
-                            current.platform === 'Other'
-                                ? 'Other'
-                                : current.platform
-                        ]
-                    "
-                    class="w-8 object-contain block"
-                />
-                {{ current.platform }}
-            </div>
-        </div>
-
-        <div class="mb-4">
-            <p class="font-bold">{{ $t("activities.action_message") }} :</p>
-            {{ current.action }} =>
-            {{
-                current.user.id == current.data.user.id
-                    ? $t("activities.self")
-                    : $t("activities.models." + current.model)
-            }}
-        </div>
-
-        <div class="mb-4">
-            <p class="font-bold">{{ $t("common.time") }} :</p>
+            <p class="font-bold">{{ $t("common.created_at") }} :</p>
             {{ current.created_at }}
         </div>
 
-        <div class="mb-4" v-if="changes">
-            <p class="font-bold">{{ $t("activities.changes") }} :</p>
-            <div v-for="(change, key, index) in changes" :key="index">
-                <p>{{ $t("common." + key) }}</p>
-                <p>
-                    <span class="font-bold bg-orange-500 text-white"
-                        >{{ $t("common.from") }} :</span
-                    >
-                    {{ change.prevValue }}
-                </p>
-                <p>
-                    <span class="font-bold bg-green-500 text-white"
-                        >{{ $t("common.to") }} :</span
-                    >
-                    {{ change.newValue }}
-                </p>
-            </div>
-        </div> -->
+        <div class="mb-4">
+            <p class="font-bold">{{ $t("common.updated_at") }} :</p>
+            {{ current.updated_at }}
+        </div>
     </Drawer>
 </template>
 

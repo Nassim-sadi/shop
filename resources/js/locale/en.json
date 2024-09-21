@@ -79,7 +79,7 @@
     "update.success_message": "Updated Personnel information successfully",
     "edit.password": "Change password",
     "user": {
-        "title": "User",
+        "title": "User | Users",
         "title_plural": "Users",
         "subtitle": "List of users",
         "no_user": "No user found",
@@ -97,6 +97,9 @@
         "statusQuery": "Select status",
         "roleQuery": "Select role",
         "deletedQuery": "Select deleted"
+    },
+    "users": {
+        "details": "User details"
     },
     "activities": {
         "by": "Activity By",

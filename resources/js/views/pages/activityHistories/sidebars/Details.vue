@@ -16,6 +16,7 @@ const props = defineProps({
 
 const changes = computed(() => {
     if (props.current.data && props.current.data.changes) {
+        return props.current.data;
         return filterChanges(props.current.data);
     } else {
         return null;
@@ -26,19 +27,19 @@ const $emit = defineEmits(["update:isOpen"]);
 
 const { isOpen, current } = toRefs(props);
 
-const filterChanges = (data) => {
-    const { user, changes } = data;
-    const result = {};
-    Object.keys(changes).forEach((key) => {
-        if (user[key] !== changes[key]) {
-            result[key] = {
-                prevValue: user[key],
-                newValue: changes[key],
-            };
-        }
-    });
-    return result;
-};
+// const filterChanges = (data) => {
+//     const { changed, changes } = data;
+//     const result = {};
+//     Object.keys(changes).forEach((key) => {
+//         if (changed[key] !== changes[key]) {
+//             result[key] = {
+//                 prevValue: changed[key],
+//                 newValue: changes[key],
+//             };
+//         }
+//     });
+//     return result;
+// };
 </script>
 
 <template>
@@ -114,28 +115,30 @@ const filterChanges = (data) => {
                 {{ current.created_at }}
             </div>
 
-            <div class="mb-4" v-if="changes">
+            <div class="mb-4">
+                {{ current.data.changes }}
+            </div>
+
+            <!-- <div class="mb-4" v-if="changes">
                 <p class="font-bold">{{ $t("activities.changes") }} :</p>
                 <div v-for="(change, key, index) in changes" :key="index">
                     <p>{{ $t("common." + key) }}</p>
                     <p>
-                        <span class="font-bold bg-orange-500 text-white"
+                        <span
+                            class="font-bold bg-orange-500 text-white rounded-xl px-2 py-1 m-4"
                             >{{ $t("common.from") }} :</span
                         >
                         {{ change.prevValue }}
                     </p>
                     <p>
-                        <span class="font-bold bg-green-500 text-white"
+                        <span
+                            class="font-bold bg-green-500 text-white rounded-xl px-2 py-1 m-4"
                             >{{ $t("common.to") }} :</span
                         >
                         {{ change.newValue }}
                     </p>
                 </div>
-            </div>
-
-            <pre>
-            <code>{{ current }}</code>
-        </pre>
+            </div> -->
         </Drawer>
     </PerfectScrollbar>
 </template>

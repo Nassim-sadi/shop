@@ -223,6 +223,13 @@ onMounted(() => {
                 </template>
             </Column>
 
+            <!--  TODO : add operation on whom -->
+            <!-- <Column :header="$t('activities.model')">
+                <template #body="slotProps">
+                    {{ slotProps.data.data.user.id }}
+                </template>
+            </Column> -->
+
             <Column :header="$t('activities.platform')">
                 <template #body="slotProps">
                     {{ slotProps.data.platform }}
