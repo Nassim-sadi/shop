@@ -55,7 +55,6 @@ class UserController extends Controller
     public function changeStatus(Request $request)
     {
         // $this->authorize('changeStatus', User::class);
-        debugbar()->info($request->status);
         // add validation to id not same as current user
         $request->validate([
             'status' => 'required|in:0,1',

@@ -40,9 +40,9 @@ class PermissionSeeder extends Seeder
             Permission::create(['name' => $permission]);
         }
 
-        Role::create(['name' => 'Super Admin']);
+        Role::create(['name' => 'Super Admin', 'color' => 'FABC3F', 'text_color' => '000000']);
 
-        $role = Role::create(['name' => 'Admin']);
+        $role = Role::create(['name' => 'Admin', 'color' => 'FFEC9E', 'text_color' => '000000']);
 
 
         $role->givePermissionTo([
@@ -54,7 +54,7 @@ class PermissionSeeder extends Seeder
         ]);
 
         // create user role and assign some permissions
-        $role = Role::create(['name' => 'User']);
+        $role = Role::create(['name' => 'User', 'color' => '606C5D', 'text_color' => 'ffffff']);
         $role->givePermissionTo(['user_access']);
     }
 }

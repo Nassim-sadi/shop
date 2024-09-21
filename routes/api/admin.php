@@ -51,6 +51,7 @@ Route::middleware(["auth:sanctum"])->group(function () {
 
     Route::controller(RoleController::class)->group(function () {
         Route::get('roles', 'getRoles');
+        Route::post('roles/create', 'create');
     });
 
 

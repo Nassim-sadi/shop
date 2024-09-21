@@ -4,8 +4,10 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Roles\RolesCollection;
+use App\Jobs\ActivityHistoryJob;
 use Illuminate\Http\Request;
 use Spatie\Permission\Models\Role;
+use UA;
 
 class RoleController extends Controller
 {
@@ -22,39 +24,47 @@ class RoleController extends Controller
     /**
      * Show the form for creating a new resource.
      */
-    public function create()
+    public function create(Request $request)
     {
-        //
+
+        // $this->authorize('view', ActivityHistory::class);
+        $request->validate([
+            'name' => 'required|unique:roles,name,except,id',
+            'description' => 'sometimes|string|max:255',
+            'color' => ['required', 'regex:/^(?:[0-9a-f]{3}){1,2}$/i'],
+            'text_color'
+            => ['required', 'regex:/^(?:[0-9a-f]{3}){1,2}$/i'],
+        ]);
+
+
+        $role = Role::create([
+            'name' => $request->name,
+            'description' => $request->description,
+            'color' => $request->color,
+            'text_color' => $request->text_color,
+        ]);
+        // log activity
+        $agent = UA::parse($request->server('HTTP_USER_AGENT'));
+        ActivityHistoryJob::dispatch(
+            data: [
+                'model' => 'roles',
+                'action' => 'create',
+                'data' => ['role' => $role],
+                'user_id' => $request->user()->id,
+            ],
+            platform: $agent->os->family,
+            browser: $agent->ua->family,
+        );
+
+
+        return response()->json(['success' => 'Role created successfully', 'role' => $role], 200);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        //
-    }
-
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, string $id)
     {
         //
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(string $id)
     {
         //
