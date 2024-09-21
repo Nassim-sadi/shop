@@ -1,14 +1,12 @@
 <script setup>
 import placeholder from "@/assets/images/avatar/profile-placeholder.png";
 import { $t } from "@/plugins/i18n";
-import { alphaSpace } from "@/validators/CustomValidators";
+import { alphaSpace, firstname, lastname } from "@/validators/CustomValidators";
 import useVuelidate from "@vuelidate/core";
-import { helpers, maxLength, minLength, required } from "@vuelidate/validators";
 import imageCompression from "browser-image-compression";
 import isEqual from "lodash.isequal";
 import { useConfirm } from "primevue/useconfirm";
-import { computed, ref, toRefs, watch } from "vue";
-
+import { computed, onMounted, ref, toRefs, watch } from "vue";
 const confirm = useConfirm();
 
 const props = defineProps({
@@ -35,18 +33,8 @@ let editedUser = ref({});
 const formData = new FormData();
 
 const rules = {
-    firstname: {
-        required: helpers.withMessage("This field cannot be empty", required),
-        maxLength: 255,
-        minLength: minLength(3),
-        alphaSpace,
-    },
-    lastname: {
-        required: helpers.withMessage("This field cannot be empty", required),
-        maxLength: 255,
-        minLength: minLength(3),
-        alphaSpace,
-    },
+    firstname: firstname,
+    lastname: lastname,
 };
 
 const v$ = useVuelidate(rules, editedUser);
@@ -121,12 +109,8 @@ watch(
     () => isOpen.value,
     (val) => {
         if (val) {
-            setTimeout(() => {
-                editedUser.value = { ...current.value };
-                previewImage.value = current.value.image
-                    ? current.value.image
-                    : placeholder;
-            }, 50);
+            editedUser.value = { ...current.value };
+            previewImage.value = current.value.image;
         } else {
             v$.value.$reset();
             editedUser.value = {};
@@ -141,12 +125,12 @@ watch(
         header="Edit Profile"
         position="right"
         @update:visible="$emit('update:isOpen', $event)"
-        :dismissable="!isEdited"
-        :showCloseIcon="!isEdited"
+        :showCloseIcon="false"
+        :dismissable="false"
     >
         <div class="flex flex-col min-h-full">
             <div
-                class="cursor-pointer mb-10 w-full aspect-[1/0.75] rounded-xl overflow-hidden relative"
+                class="cursor-pointer mb-10 w-full aspect-[1/1] rounded-xl overflow-hidden relative"
             >
                 <label
                     for="image"
@@ -160,7 +144,7 @@ watch(
                         class="hidden"
                     />
                     <img
-                        :src="previewImage"
+                        :src="previewImage || placeholder"
                         class="w-full object-cover !h-full"
                     />
                 </label>

@@ -194,5 +194,8 @@
         "title": "Confirm",
         "header": "Confirmation",
         "message_default": "Are you sure you want to proceed ?"
+    },
+    "validation": {
+        "required": "This field is required"
     }
 }

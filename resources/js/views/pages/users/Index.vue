@@ -25,6 +25,10 @@ const keyword = ref("");
 const status = ref(null);
 const uploadPercentage = ref(0);
 const currentIndex = ref(null);
+const actionsPopover = ref();
+const togglePopover = (event) => {
+    actionsPopover.value.toggle(event);
+};
 const confirm = (myFunction, params) => {
     Confirm.require({
         message: $t("confirm.message_default"),
@@ -353,11 +357,13 @@ onMounted(async () => {
 <template>
     <div class="card">
         <Details :current="current" v-model:isOpen="isOpen" />
+
         <Edit
             :current="current"
             v-model:isOpen="isEditOpen"
             @editItem="editItem"
         ></Edit>
+
         <DataTable
             :value="users"
             tableStyle="min-width: 50rem"
@@ -474,6 +480,7 @@ onMounted(async () => {
             <Column :header="$t('user.name')">
                 <template #body="slotProps">
                     <div class="flex items-center gap-2 font-semibold">
+                        {{ slotProps.data.id }}
                         <Avatar
                             shape="circle"
                             size="large"
@@ -542,119 +549,130 @@ onMounted(async () => {
             <Column :header="$t('activities.action')">
                 <template #body="slotProps">
                     <Button
-                        icon="ti ti-eye"
+                        icon="ti ti-dots-vertical"
                         rounded
-                        size="large"
                         text
-                        severity="info"
-                        @click="openDetails(slotProps.data)"
-                        v-tooltip.bottom="$t('common.view_details')"
-                        class="action-btn"
-                        :loading="loadingStates[slotProps.data.id]"
-                    />
-
-                    <Button
-                        icon="ti ti-edit"
-                        rounded
                         size="large"
-                        text
-                        severity="success"
-                        @click="openEdit(slotProps.data, slotProps.index)"
-                        v-tooltip.bottom="$t('common.edit')"
-                        class="action-btn"
-                        :loading="loadingStates[slotProps.data.id]"
-                    />
-
-                    <template
-                        v-if="
-                            slotProps.data.id !== auth.user.id &&
-                            !slotProps.data.deleted_at
-                        "
+                        @click="togglePopover"
                     >
+                    </Button>
+                    <Popover ref="actionsPopover" class="popover">
                         <Button
-                            icon="ti ti-status-change"
+                            icon="ti ti-eye"
                             rounded
                             size="large"
                             text
-                            severity="help"
-                            @click="
-                                confirm(changeStatus, [
-                                    slotProps.data,
-                                    slotProps.index,
-                                ])
-                            "
-                            v-tooltip.bottom="$t('common.change_status')"
+                            :label="$t('common.view_details')"
+                            severity="info"
+                            @click="openDetails(slotProps.data)"
+                            v-tooltip.bottom="$t('common.view_details')"
                             class="action-btn"
                             :loading="loadingStates[slotProps.data.id]"
                         />
 
                         <Button
-                            icon="ti ti-trash"
+                            icon="ti ti-edit"
                             rounded
                             size="large"
                             text
-                            severity="danger"
-                            @click="
-                                confirm(deleteItem, [
-                                    slotProps.data,
-                                    slotProps.index,
-                                ])
-                            "
-                            v-tooltip.bottom="$t('common.delete')"
+                            :label="$t('common.edit')"
+                            severity="success"
+                            @click="openEdit(slotProps.data, slotProps.index)"
+                            v-tooltip.bottom="$t('common.edit')"
                             class="action-btn"
                             :loading="loadingStates[slotProps.data.id]"
                         />
-                    </template>
-                    <template
-                        v-if="
-                            slotProps.data.deleted_at &&
-                            isSuper &&
-                            slotProps.data.id !== auth.user.id
-                        "
-                    >
-                        <Button
+
+                        <template
+                            v-if="
+                                slotProps.data.id !== auth.user.id &&
+                                !slotProps.data.deleted_at
+                            "
+                        >
+                            <Button
+                                icon="ti ti-status-change"
+                                rounded
+                                size="large"
+                                text
+                                severity="help"
+                                :label="$t('common.change_status')"
+                                @click="
+                                    confirm(changeStatus, [
+                                        slotProps.data,
+                                        slotProps.index,
+                                    ])
+                                "
+                                v-tooltip.bottom="$t('common.change_status')"
+                                class="action-btn"
+                                :loading="loadingStates[slotProps.data.id]"
+                            />
+
+                            <Button
+                                icon="ti ti-trash"
+                                rounded
+                                size="large"
+                                text
+                                severity="danger"
+                                :label="$t('common.delete')"
+                                @click="
+                                    confirm(deleteItem, [
+                                        slotProps.data,
+                                        slotProps.index,
+                                    ])
+                                "
+                                v-tooltip.bottom="$t('common.delete')"
+                                class="action-btn"
+                                :loading="loadingStates[slotProps.data.id]"
+                            />
+                        </template>
+                        <template
                             v-if="
                                 slotProps.data.deleted_at &&
                                 isSuper &&
                                 slotProps.data.id !== auth.user.id
                             "
-                            icon="ti ti-trash"
-                            rounded
-                            size="large"
-                            text
-                            severity="danger"
-                            @click="
-                                // deleteItemPermanently(
-                                //     slotProps.data,
-                                //     slotProps.index,
-                                // )
-                                confirm(deleteItemPermanently, [
-                                    slotProps.data,
-                                    slotProps.index,
-                                ])
-                            "
-                            v-tooltip.bottom="$t('common.perma_delete')"
-                            class="action-btn"
-                            :loading="loadingStates[slotProps.data.id]"
-                        />
+                        >
+                            <Button
+                                icon="ti ti-trash"
+                                rounded
+                                size="large"
+                                :label="$t('common.perma_delete')"
+                                text
+                                severity="danger"
+                                @click="
+                                    // deleteItemPermanently(
+                                    //     slotProps.data,
+                                    //     slotProps.index,
+                                    // )
+                                    confirm(deleteItemPermanently, [
+                                        slotProps.data,
+                                        slotProps.index,
+                                    ])
+                                "
+                                v-tooltip.bottom="$t('common.perma_delete')"
+                                class="action-btn"
+                                :loading="loadingStates[slotProps.data.id]"
+                            />
 
-                        <Button
-                            icon="ti ti-restore"
-                            rounded
-                            size="large"
-                            text
-                            severity="success"
-                            @click="
-                                confirm(restoreItem, [
-                                    slotProps.data,
-                                    slotProps.index,
-                                ])
-                            "
-                            v-tooltip.bottom="$t('common.restore')"
-                            class="action-btn"
-                            :loading="loadingStates[slotProps.data.id]"
-                        />
-                    </template>
+                            <Button
+                                icon="ti ti-restore"
+                                rounded
+                                size="large"
+                                text
+                                :label="$t('common.restore')"
+                                severity="success"
+                                @click="
+                                    confirm(restoreItem, [
+                                        slotProps.data,
+                                        slotProps.index,
+                                    ])
+                                "
+                                v-tooltip.bottom="$t('common.restore')"
+                                class="action-btn"
+                                :loading="loadingStates[slotProps.data.id]"
+                            />
+                        </template>
+                    </Popover>
                 </template>
             </Column>
 
@@ -669,4 +687,8 @@ onMounted(async () => {
     </div>
 </template>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.popover .p-button {
+    @apply block !important;
+}
+</style>
