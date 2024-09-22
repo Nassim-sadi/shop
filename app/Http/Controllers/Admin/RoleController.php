@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\Roles\PermissionResource;
 use App\Http\Resources\Roles\RolesResource;
 use App\Jobs\ActivityHistoryJob;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
@@ -20,7 +21,7 @@ class RoleController extends Controller
     {
 
         // $this->authorize('view', ActivityHistory::class);
-        $roles = Role::with('permissions')->get(); // Eager load 'permissions'
+        $roles = Role::with('permissions')->withCount('users')->get(); // Eager load 'permissions'
         return RolesResource::collection($roles);
     }
 
@@ -68,5 +69,36 @@ class RoleController extends Controller
         // return all permissions
         // $this->authorize('view', ActivityHistory::class);
         return response()->json(['permissions' => PermissionResource::collection(Permission::all())], 200);
+    }
+
+    public function delete(Request $request)
+    {
+        // $this->authorize('view', ActivityHistory::class);
+        $request->validate([
+            'id' => 'required|exists:roles',
+        ]);
+        $role = Role::find($request->id);
+        if ($role->name === 'Super Admin') {
+            return response()->json(['error' => 'Super Admin role cannot be deleted'], 400);
+        }
+
+        if ($role->users->count() > 0) {
+            return response()->json(['error' => 'Role has users'], 400);
+        }
+        $role->permissions()->detach();
+        $role->delete();
+        // log activity
+        $agent = UA::parse($request->server('HTTP_USER_AGENT'));
+        ActivityHistoryJob::dispatch(
+            data: [
+                'model' => 'roles',
+                'action' => 'delete',
+                'data' => ['role' => $role],
+                'user_id' => $request->user()->id,
+            ],
+            platform: $agent->os->family,
+            browser: $agent->ua->family,
+        );
+        return response()->json(['success' => 'Role deleted successfully'], 200);
     }
 }

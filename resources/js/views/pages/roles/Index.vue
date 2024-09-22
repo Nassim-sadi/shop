@@ -95,26 +95,18 @@ const openEdit = () => {
 };
 
 const deleteItem = () => {
-    if (loadingStates.value[data.id]) return;
-    setLoadingState(data.id, true);
-
+    if (loadingStates.value[current.value.id]) return;
+    setLoadingState(current.value.id, true);
     return new Promise((resolve, reject) => {
         axios
-            .post("api/admin/permissions/delete", {
+            .post("api/admin/roles/delete", {
                 id: current.value.id,
             })
             .then((res) => {
-                if (deleted.value !== null) {
-                    permissions.value[currentIndex.value].deleted_at =
-                        res.data.deleted_at;
-                } else {
-                    permissions.value.splice(currentIndex.value, 1);
-                    total.value--;
-                }
-
+                roles.value.splice(currentIndex.value, 1);
                 emitter.emit("toast", {
                     summary: $t("status.success.title"),
-                    message: $t("status.success.user.delete"),
+                    message: $t("status.success.role.delete"),
                     severity: "success",
                 });
                 resolve(res.data);
@@ -124,7 +116,7 @@ const deleteItem = () => {
                 reject(err);
             })
             .finally(() => {
-                setLoadingState(data.id, false);
+                setLoadingState(current.value.id, false);
             });
     });
 };
@@ -301,36 +293,23 @@ onMounted(async () => {
                     v-tooltip.bottom="$t('common.view_details')"
                     class="action-btn"
                 />
-                <Button
-                    icon="ti ti-edit"
-                    rounded
-                    size="normal"
-                    text
-                    :label="$t('common.edit')"
-                    severity="success"
-                    @click="openEdit"
-                    v-tooltip.bottom="$t('common.edit')"
-                    class="action-btn"
-                    :loading="loadingStates[current.id]"
-                />
 
-                <template
-                    v-if="current.id !== auth.user.id && !current.deleted_at"
-                >
+                <template v-if="current.id !== auth.user.roles.id">
                     <Button
-                        icon="ti ti-status-change"
+                        icon="ti ti-edit"
                         rounded
                         size="normal"
                         text
-                        severity="help"
-                        :label="$t('common.change_status')"
-                        @click="confirm(changeStatus)"
-                        v-tooltip.bottom="$t('common.change_status')"
+                        :label="$t('common.edit')"
+                        severity="success"
+                        @click="openEdit"
+                        v-tooltip.bottom="$t('common.edit')"
                         class="action-btn"
                         :loading="loadingStates[current.id]"
                     />
 
                     <Button
+                        v-if="current.users_count === 0"
                         icon="ti ti-trash"
                         rounded
                         size="normal"
