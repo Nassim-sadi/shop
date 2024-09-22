@@ -8,7 +8,6 @@ import { watchDebounced } from "@vueuse/core";
 import { format } from "date-fns";
 import { useConfirm } from "primevue/useconfirm";
 import { computed, onMounted, ref } from "vue";
-import { PerfectScrollbar } from "vue3-perfect-scrollbar";
 import Details from "./sidebars/Details.vue";
 import Edit from "./sidebars/Edit.vue";
 const Confirm = useConfirm();
@@ -19,7 +18,7 @@ const currentPage = ref(1);
 const per_page = ref(10);
 const start_date = ref(new Date());
 const end_date = ref(new Date());
-const current = ref(null);
+const current = ref({});
 const isOpen = ref(false);
 const isEditOpen = ref(false);
 const keyword = ref("");
@@ -27,10 +26,11 @@ const status = ref(null);
 const uploadPercentage = ref(0);
 const currentIndex = ref(null);
 const actionsPopover = ref();
-const togglePopover = (event) => {
+const togglePopover = ({ event: event, current: data, index: index }) => {
+    current.value = data;
+    currentIndex.value = index;
     actionsPopover.value.toggle(event);
 };
-
 const confirm = (myFunction, params) => {
     Confirm.require({
         message: $t("confirm.message_default"),
@@ -42,10 +42,10 @@ const confirm = (myFunction, params) => {
             outlined: true,
         },
         acceptProps: {
-            label: $t("confirm"),
+            label: $t("confirm.title"),
         },
         accept: () => {
-            myFunction(...params);
+            myFunction(params ? [...params] : null);
         },
         reject: () => {},
     });
@@ -77,7 +77,7 @@ const getRoles = async () => {
             .then((res) => {
                 roleOptions.value = [
                     ...roleOptions.value,
-                    ...res.data.roles.map((role) => {
+                    ...res.data.map((role) => {
                         return {
                             label: role.name,
                             value: role.id,
@@ -146,24 +146,23 @@ watchDebounced(
 const onPageChange = (event) => {
     currentPage.value = event.page + 1;
     per_page.value = event.rows;
+    current.value = {};
+    currentIndex.value = null;
     getUsers();
 };
 
-const openDetails = (data) => {
-    current.value = data;
+const openDetails = () => {
     isOpen.value = true;
+};
+
+const openEdit = () => {
+    isEditOpen.value = true;
 };
 
 const roleColorMap = {
     "Super Admin": "super",
     Admin: "admin",
     User: "user",
-};
-
-const openEdit = (val, index) => {
-    current.value = val;
-    currentIndex.value = index;
-    isEditOpen.value = true;
 };
 
 const roleColor = (role) => roleColorMap[role] || "neutral";
@@ -176,18 +175,18 @@ const reset = () => {
     getUsers();
 };
 
-const changeStatus = async (data, index) => {
-    if (loadingStates.value[data.id]) return;
-    setLoadingState(data.id, true);
+const changeStatus = async () => {
+    if (loadingStates.value[current.value.id]) return;
+    setLoadingState(current.value.id, true);
 
     return new Promise((resolve, reject) => {
         axios
             .post("api/admin/users/change-status", {
-                id: data.id,
-                status: !data.status ? 1 : 0,
+                id: current.value.id,
+                status: !current.value.status ? 1 : 0,
             })
             .then((res) => {
-                updateItemStatus(res.data.status, index);
+                updateItemStatus(res.data.status);
                 emitter.emit("toast", {
                     summary: $t("status.success.title"),
                     message: $t("status.success.user.change_status"),
@@ -200,29 +199,30 @@ const changeStatus = async (data, index) => {
                 reject(err);
             })
             .finally(() => {
-                setLoadingState(data.id, false);
+                setLoadingState(current.value.id, false);
             });
     });
 };
 
-const updateItemStatus = (status, index) => {
-    users.value[index].status = status;
+const updateItemStatus = (status) => {
+    users.value[currentIndex.value].status = status;
 };
 
-const deleteItem = (data, index) => {
-    if (loadingStates.value[data.id]) return;
-    setLoadingState(data.id, true);
+const deleteItem = () => {
+    if (loadingStates.value[current.value.id]) return;
+    setLoadingState(current.value.id, true);
 
     return new Promise((resolve, reject) => {
         axios
             .post("api/admin/users/delete", {
-                id: data.id,
+                id: current.value.id,
             })
             .then((res) => {
                 if (deleted.value !== null) {
-                    users.value[index].deleted_at = res.data.deleted_at;
+                    users.value[currentIndex.value].deleted_at =
+                        res.data.deleted_at;
                 } else {
-                    users.value.splice(index, 1);
+                    users.value.splice(currentIndex.value, 1);
                     total.value--;
                 }
 
@@ -238,20 +238,22 @@ const deleteItem = (data, index) => {
                 reject(err);
             })
             .finally(() => {
-                setLoadingState(data.id, false);
+                setLoadingState(current.value.id, false);
             });
     });
 };
 
-const deleteItemPermanently = (data, index) => {
-    if (loadingStates.value[data.id]) return;
-    setLoadingState(data.id, true);
+const deleteItemPermanently = () => {
+    if (loadingStates.value[current.value.id]) return;
+    setLoadingState(current.value.id, true);
 
     return new Promise((resolve, reject) => {
         axios
-            .post("api/admin/users/delete-permanently", { id: data.id })
+            .post("api/admin/users/delete-permanently", {
+                id: current.value.id,
+            })
             .then((res) => {
-                users.value.splice(index, 1);
+                users.value.splice(currentIndex.value, 1);
                 total.value--;
                 emitter.emit("toast", {
                     summary: $t("status.success.title"),
@@ -265,25 +267,26 @@ const deleteItemPermanently = (data, index) => {
                 reject(err);
             })
             .finally(() => {
-                setLoadingState(data.id, false);
+                setLoadingState(current.value.id, false);
             });
     });
 };
 
-const restoreItem = (data, index) => {
-    if (loadingStates.value[data.id]) return;
-    setLoadingState(data.id, true);
+const restoreItem = () => {
+    if (loadingStates.value[current.value.id]) return;
+    setLoadingState(current.value.id, true);
+
     return new Promise((resolve, reject) => {
         axios
             .post("api/admin/users/restore", {
-                id: data.id,
+                id: current.value.id,
             })
             .then((res) => {
                 if (deleted.value === "only") {
-                    users.value.splice(index, 1);
+                    users.value.splice(currentIndex.value, 1);
                     total.value--;
                 } else {
-                    users.value[index].deleted_at = null;
+                    users.value[currentIndex.value].deleted_at = null;
                 }
                 emitter.emit("toast", {
                     summary: $t("status.success.title"),
@@ -297,7 +300,7 @@ const restoreItem = (data, index) => {
                 reject(err);
             })
             .finally(() => {
-                setLoadingState(data.id, false);
+                setLoadingState(current.value.id, false);
             });
     });
 };
@@ -333,9 +336,6 @@ const editItem = (val) => {
 };
 
 const updateItem = (data) => {
-    console.log(data);
-    console.log(currentIndex.value);
-    console.log(users.value[currentIndex.value]);
     users.value[currentIndex.value] = data;
 };
 
@@ -554,136 +554,15 @@ onMounted(async () => {
                         rounded
                         text
                         size="large"
-                        @click="togglePopover"
+                        @click="
+                            togglePopover({
+                                event: $event,
+                                current: slotProps.data,
+                                index: slotProps.index,
+                            })
+                        "
                     >
                     </Button>
-                    <Popover
-                        ref="actionsPopover"
-                        class="popover"
-                        position="right"
-                    >
-                        <div class="content">
-                            <Button
-                                icon="ti ti-eye"
-                                rounded
-                                size="normal"
-                                text
-                                :label="$t('common.view_details')"
-                                severity="info"
-                                @click="openDetails(slotProps.data)"
-                                v-tooltip.bottom="$t('common.view_details')"
-                                class="action-btn"
-                                :loading="loadingStates[slotProps.data.id]"
-                            />
-
-                            <Button
-                                icon="ti ti-edit"
-                                rounded
-                                size="normal"
-                                text
-                                :label="$t('common.edit')"
-                                severity="success"
-                                @click="
-                                    openEdit(slotProps.data, slotProps.index)
-                                "
-                                v-tooltip.bottom="$t('common.edit')"
-                                class="action-btn"
-                                :loading="loadingStates[slotProps.data.id]"
-                            />
-
-                            <template
-                                v-if="
-                                    slotProps.data.id !== auth.user.id &&
-                                    !slotProps.data.deleted_at
-                                "
-                            >
-                                <Button
-                                    icon="ti ti-status-change"
-                                    rounded
-                                    size="normal"
-                                    text
-                                    severity="help"
-                                    :label="$t('common.change_status')"
-                                    @click="
-                                        confirm(changeStatus, [
-                                            slotProps.data,
-                                            slotProps.index,
-                                        ])
-                                    "
-                                    v-tooltip.bottom="
-                                        $t('common.change_status')
-                                    "
-                                    class="action-btn"
-                                    :loading="loadingStates[slotProps.data.id]"
-                                />
-
-                                <Button
-                                    icon="ti ti-trash"
-                                    rounded
-                                    size="normal"
-                                    text
-                                    severity="danger"
-                                    :label="$t('common.delete')"
-                                    @click="
-                                        confirm(deleteItem, [
-                                            slotProps.data,
-                                            slotProps.index,
-                                        ])
-                                    "
-                                    v-tooltip.bottom="$t('common.delete')"
-                                    class="action-btn"
-                                    :loading="loadingStates[slotProps.data.id]"
-                                />
-                            </template>
-                            <template
-                                v-if="
-                                    slotProps.data.deleted_at &&
-                                    isSuper &&
-                                    slotProps.data.id !== auth.user.id
-                                "
-                            >
-                                <Button
-                                    icon="ti ti-trash"
-                                    rounded
-                                    size="normal"
-                                    :label="$t('common.perma_delete')"
-                                    text
-                                    severity="danger"
-                                    @click="
-                                        // deleteItemPermanently(
-                                        //     slotProps.data,
-                                        //     slotProps.index,
-                                        // )
-                                        confirm(deleteItemPermanently, [
-                                            slotProps.data,
-                                            slotProps.index,
-                                        ])
-                                    "
-                                    v-tooltip.bottom="$t('common.perma_delete')"
-                                    class="action-btn"
-                                    :loading="loadingStates[slotProps.data.id]"
-                                />
-
-                                <Button
-                                    icon="ti ti-restore"
-                                    rounded
-                                    size="normal"
-                                    text
-                                    :label="$t('common.restore')"
-                                    severity="success"
-                                    @click="
-                                        confirm(restoreItem, [
-                                            slotProps.data,
-                                            slotProps.index,
-                                        ])
-                                    "
-                                    v-tooltip.bottom="$t('common.restore')"
-                                    class="action-btn"
-                                    :loading="loadingStates[slotProps.data.id]"
-                                />
-                            </template>
-                        </div>
-                    </Popover>
                 </template>
             </Column>
 
@@ -695,6 +574,99 @@ onMounted(async () => {
                 {{ $t("user.title", total) }}.
             </template>
         </DataTable>
+
+        <Popover ref="actionsPopover" class="popover" position="right">
+            <div class="content">
+                <Button
+                    icon="ti ti-eye"
+                    rounded
+                    size="normal"
+                    text
+                    :label="$t('common.view_details')"
+                    severity="info"
+                    @click="openDetails"
+                    v-tooltip.bottom="$t('common.view_details')"
+                    class="action-btn"
+                    :loading="loadingStates[current.id]"
+                />
+
+                <Button
+                    icon="ti ti-edit"
+                    rounded
+                    size="normal"
+                    text
+                    :label="$t('common.edit')"
+                    severity="success"
+                    @click="openEdit"
+                    v-tooltip.bottom="$t('common.edit')"
+                    class="action-btn"
+                    :loading="loadingStates[current.id]"
+                />
+
+                <template
+                    v-if="current.id !== auth.user.id && !current.deleted_at"
+                >
+                    <Button
+                        icon="ti ti-status-change"
+                        rounded
+                        size="normal"
+                        text
+                        severity="help"
+                        :label="$t('common.change_status')"
+                        @click="confirm(changeStatus)"
+                        v-tooltip.bottom="$t('common.change_status')"
+                        class="action-btn"
+                        :loading="loadingStates[current.id]"
+                    />
+
+                    <Button
+                        icon="ti ti-trash"
+                        rounded
+                        size="normal"
+                        text
+                        severity="danger"
+                        :label="$t('common.delete')"
+                        @click="confirm(deleteItem)"
+                        v-tooltip.bottom="$t('common.delete')"
+                        class="action-btn"
+                        :loading="loadingStates[current.id]"
+                    />
+                </template>
+                <template
+                    v-if="
+                        current.deleted_at &&
+                        isSuper &&
+                        current.id !== auth.user.id
+                    "
+                >
+                    <Button
+                        icon="ti ti-trash"
+                        rounded
+                        size="normal"
+                        :label="$t('common.perma_delete')"
+                        text
+                        severity="danger"
+                        @click="confirm(deleteItemPermanently)"
+                        v-tooltip.bottom="$t('common.perma_delete')"
+                        class="action-btn"
+                        :loading="loadingStates[current.id]"
+                    />
+
+                    <Button
+                        icon="ti ti-restore"
+                        rounded
+                        size="normal"
+                        text
+                        :label="$t('common.restore')"
+                        severity="success"
+                        @click="confirm(restoreItem)"
+                        v-tooltip.bottom="$t('common.restore')"
+                        class="action-btn"
+                        :loading="loadingStates[current.id]"
+                    />
+                </template>
+            </div>
+        </Popover>
     </div>
 </template>
 
@@ -709,6 +681,7 @@ onMounted(async () => {
 .popover .content .action-btn {
     margin-left: 0 !important;
     margin-right: 0 !important;
+    margin: 0 !important;
     width: 100%;
     justify-content: flex-start;
 }

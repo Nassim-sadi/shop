@@ -156,6 +156,20 @@
         "restore": "Restore",
         "perma_delete": "Delete permanently"
     },
+    "roles": {
+        "page": "Roles",
+        "title": "Role | Roles",
+        "title_plural": "Roles",
+        "subtitle": "List of roles",
+        "name": "Name",
+        "description": "Description",
+        "no_description": "No description",
+        "color": "Color",
+        "text_color": "Text color",
+        "permissions": "Permissions",
+        "no_permissions": "No permissions for this role",
+        "all_permissions": "All permissions"
+    },
     "status": {
         "success": {
             "title": "Success",

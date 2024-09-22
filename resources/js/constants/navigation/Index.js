@@ -56,6 +56,12 @@ export default [
                 to: "/users",
                 color: "#3366bb",
             },
+            {
+                label: "Roles",
+                icon: "pi pi-fw pi-lock",
+                to: "/roles",
+                color: "#238E3A",
+            },
 
             // {
             //     label: 'Crud',

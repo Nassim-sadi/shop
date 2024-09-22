@@ -3,9 +3,11 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Http\Resources\Roles\RolesCollection;
+use App\Http\Resources\Roles\PermissionResource;
+use App\Http\Resources\Roles\RolesResource;
 use App\Jobs\ActivityHistoryJob;
 use Illuminate\Http\Request;
+use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 use UA;
 
@@ -18,7 +20,8 @@ class RoleController extends Controller
     {
 
         // $this->authorize('view', ActivityHistory::class);
-        return new RolesCollection(Role::all());
+        $roles = Role::with('permissions')->get(); // Eager load 'permissions'
+        return RolesResource::collection($roles);
     }
 
     /**
@@ -60,13 +63,10 @@ class RoleController extends Controller
         return response()->json(['success' => 'Role created successfully', 'role' => $role], 200);
     }
 
-    public function update(Request $request, string $id)
+    public function getPermissions(Request $request)
     {
-        //
-    }
-
-    public function destroy(string $id)
-    {
-        //
+        // return all permissions
+        // $this->authorize('view', ActivityHistory::class);
+        return response()->json(['permissions' => PermissionResource::collection(Permission::all())], 200);
     }
 }

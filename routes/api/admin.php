@@ -51,7 +51,10 @@ Route::middleware(["auth:sanctum"])->group(function () {
 
     Route::controller(RoleController::class)->group(function () {
         Route::get('roles', 'getRoles');
+        Route::get('roles/permissions', 'getPermissions');
         Route::post('roles/create', 'create');
+        Route::post('roles/update', 'update');
+        Route::post('roles/delete', 'delete');
     });
 
 

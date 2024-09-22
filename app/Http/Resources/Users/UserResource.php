@@ -26,7 +26,10 @@ class UserResource extends JsonResource
             'image' => $this->image,
             'role' => [
                 'id' => $this->roles[0]->id,
-                'name' => $this->roles[0]->name
+                'name' => $this->roles[0]->name,
+                'description' => $this->roles[0]->description,
+                'color' => $this->roles[0]->color,
+                'text_color' => $this->roles[0]->text_color
             ],
             'deleted_at' => $this->when($this->deleted_at, $this->deleted_at),
             'created_at' => $this->created_at,

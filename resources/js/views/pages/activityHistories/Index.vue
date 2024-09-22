@@ -206,9 +206,10 @@ onMounted(() => {
             <Column :header="$t('activities.model')">
                 <template #body="slotProps">
                     {{
-                        slotProps.data.user.id == slotProps.data.data.user.id
-                            ? $t("activities.self")
-                            : $t("activities.models." + slotProps.data.model)
+                        // slotProps.data.user.id == slotProps.data.data.user.id
+                        //     ? $t("activities.self")
+                        //     : $t("activities.models." + slotProps.data.model)
+                        $t("activities.models." + slotProps.data.model)
                     }}
                 </template>
             </Column>

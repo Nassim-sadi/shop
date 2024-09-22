@@ -104,9 +104,10 @@ const { isOpen, current } = toRefs(props);
                 <p class="font-bold">{{ $t("activities.action_message") }} :</p>
                 {{ current.action }} =>
                 {{
-                    current.user.id == current.data.user.id
-                        ? $t("activities.self")
-                        : $t("activities.models." + current.model)
+                    // current.user.id == current.data.user.id
+                    //     ? $t("activities.self")
+                    //     : $t("activities.models." + current.model)
+                    $t("activities.models." + current.model)
                 }}
             </div>
 
