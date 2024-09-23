@@ -14,9 +14,7 @@ use UA;
 
 class RoleController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+
     public function getRoles(Request $request)
     {
 
@@ -25,16 +23,14 @@ class RoleController extends Controller
         return RolesResource::collection($roles);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
+
     public function create(Request $request)
     {
 
         // $this->authorize('view', ActivityHistory::class);
         $request->validate([
             'name' => 'required|unique:roles,name,except,id',
-            'description' => 'sometimes|string|max:255',
+            'description' => 'nullable|string|max:255',
             'color' => ['required', 'regex:/^(?:[0-9a-f]{3}){1,2}$/i'],
             'text_color'
             => ['required', 'regex:/^(?:[0-9a-f]{3}){1,2}$/i'],
@@ -61,7 +57,7 @@ class RoleController extends Controller
         );
 
 
-        return response()->json(['success' => 'Role created successfully', 'role' => $role], 200);
+        return response()->json(['success' => 'Role created successfully', 'role' => RolesResource::make($role)], 200);
     }
 
     public function getPermissions(Request $request)

@@ -6,6 +6,7 @@ import { authStore } from "@/store/AuthStore";
 import { format } from "date-fns";
 import { useConfirm } from "primevue/useconfirm";
 import { computed, onMounted, ref } from "vue";
+import Create from "./sidebars/Create.vue";
 import Details from "./sidebars/Details.vue";
 import Edit from "./sidebars/Edit.vue";
 const Confirm = useConfirm();
@@ -14,6 +15,8 @@ const loading = ref(false);
 const current = ref({});
 const isOpen = ref(false);
 const isEditOpen = ref(false);
+const isCreateOpen = ref(false);
+const loadingCreate = ref(false);
 const currentIndex = ref(null);
 const actionsPopover = ref();
 const roles = ref([]);
@@ -73,7 +76,7 @@ const getPermissions = async () => {
         axios
             .get("api/admin/roles/permissions")
             .then((res) => {
-                permissions.value = res.data.data;
+                permissions.value = res.data.permissions;
                 resolve(res.data);
             })
             .catch((err) => {
@@ -92,6 +95,37 @@ const openDetails = () => {
 
 const openEdit = () => {
     isEditOpen.value = true;
+};
+
+const openCreate = () => {
+    isCreateOpen.value = true;
+};
+
+const createItem = (val) => {
+    console.log(val);
+    loadingCreate.value = true;
+    return new Promise((resolve, reject) => {
+        axios
+            .post("api/admin/roles/create", val)
+            .then((res) => {
+                console.log(res);
+                roles.value.unshift(res.data.role);
+                emitter.emit("toast", {
+                    summary: $t("status.success.title"),
+                    message: $t("status.success.role.create"),
+                    severity: "success",
+                });
+                resolve(res.data);
+            })
+            .catch((err) => {
+                console.log(err);
+                reject(err);
+            })
+            .finally(() => {
+                loadingCreate.value = false;
+                isCreateOpen.value = false;
+            });
+    });
 };
 
 const deleteItem = () => {
@@ -176,6 +210,14 @@ onMounted(async () => {
             v-model:isOpen="isEditOpen"
             @editItem="editItem"
         ></Edit>
+
+        <Create
+            v-model:isOpen="isCreateOpen"
+            @createItem="createItem"
+            :loading="loadingCreate"
+            :permissions="permissions"
+        />
+
         <DataTable
             :value="roles"
             tableStyle="min-width: 50rem"
@@ -188,9 +230,20 @@ onMounted(async () => {
             </template>
 
             <template #header>
-                <h1 class="text-xl font-bold mb-4">
-                    {{ $t("roles.page") }}
-                </h1>
+                <div class="flex justify-between align-center">
+                    <h1 class="text-xl font-bold mb-4">
+                        {{ $t("roles.page") }}
+                    </h1>
+
+                    <Button
+                        v-if="isSuper"
+                        icon="ti ti-plus"
+                        @click="openCreate"
+                        :label="$t('common.create')"
+                        severity="success"
+                        v-tooltip.bottom="$t('common.create')"
+                    />
+                </div>
             </template>
 
             <Column :header="$t('roles.name')">
@@ -218,7 +271,10 @@ onMounted(async () => {
                 <template #body="slotProps">
                     <div class="flex flex-wrap gap-2 font-semibold">
                         <template
-                            v-if="slotProps.data.permissions.length > 0"
+                            v-if="
+                                slotProps.data.permissions &&
+                                slotProps.data.permissions.length > 0
+                            "
                             v-for="permission in slotProps.data.permissions"
                         >
                             <span

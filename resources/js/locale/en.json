@@ -154,7 +154,8 @@
         "updated_at": "Updated at",
         "change_status": "Change status",
         "restore": "Restore",
-        "perma_delete": "Delete permanently"
+        "perma_delete": "Delete permanently",
+        "preview": "Preview"
     },
     "roles": {
         "page": "Roles",
@@ -168,7 +169,15 @@
         "text_color": "Text color",
         "permissions": "Permissions",
         "no_permissions": "No permissions for this role",
-        "all_permissions": "All permissions"
+        "all_permissions": "All permissions",
+        "create": "Create role",
+        "edit": "Edit role",
+        "update": "Update role",
+        "delete": "Delete role",
+        "details": "Role details",
+        "create_success": "Role created successfully",
+        "update_success": "Role updated successfully",
+        "delete_success": "Role deleted successfully"
     },
     "status": {
         "success": {
@@ -213,6 +222,7 @@
         "message_default": "Are you sure you want to proceed ?"
     },
     "validation": {
-        "required": "This field is required"
+        "required": "This field is required",
+        "invalid_color": "Invalid color code"
     }
 }
