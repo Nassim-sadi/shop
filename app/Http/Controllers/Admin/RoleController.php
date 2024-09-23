@@ -17,7 +17,6 @@ class RoleController extends Controller
 
     public function getRoles(Request $request)
     {
-
         // $this->authorize('view', ActivityHistory::class);
         $roles = Role::with('permissions')->withCount('users')->get(); // Eager load 'permissions'
         return RolesResource::collection($roles);
@@ -34,7 +33,23 @@ class RoleController extends Controller
             'color' => ['required', 'regex:/^(?:[0-9a-f]{3}){1,2}$/i'],
             'text_color'
             => ['required', 'regex:/^(?:[0-9a-f]{3}){1,2}$/i'],
+            'permissions' => 'required|array|min:1',
+            'permissions.*' => 'exists:permissions,id',
         ]);
+
+        // After validation, check if any other role has the same set of permissions
+        $roleWithSamePermissions = Role::whereHas('permissions', function ($query) use ($request) {
+            $query->whereIn('id', $request->permissions);
+        }, '=', count($request->permissions)) // Ensure exact match by counting
+            ->whereDoesntHave('permissions', function ($query) use ($request) {
+                $query->whereNotIn('id', $request->permissions);
+            })
+            ->where('id', '!=', $role->id ?? null) // Exclude the current role (if updating)
+            ->first();
+
+        if ($roleWithSamePermissions) {
+            return response()->json(['permissions' => 'Another role has the same set of permissions.'], 400);
+        }
 
 
         $role = Role::create([
@@ -43,6 +58,13 @@ class RoleController extends Controller
             'color' => $request->color,
             'text_color' => $request->text_color,
         ]);
+
+
+        // Assign permissions
+        $role->syncPermissions($request->permissions);
+        //load permissions
+        $role->load('permissions');
+
         // log activity
         $agent = UA::parse($request->server('HTTP_USER_AGENT'));
         ActivityHistoryJob::dispatch(
@@ -62,7 +84,6 @@ class RoleController extends Controller
 
     public function getPermissions(Request $request)
     {
-        // return all permissions
         // $this->authorize('view', ActivityHistory::class);
         return response()->json(['permissions' => PermissionResource::collection(Permission::all())], 200);
     }
@@ -74,13 +95,15 @@ class RoleController extends Controller
             'id' => 'required|exists:roles',
         ]);
         $role = Role::find($request->id);
-        if ($role->name === 'Super Admin') {
+
+        if ($role->name === 'Super Admin' || $role->name === 'user') {
             return response()->json(['error' => 'Super Admin role cannot be deleted'], 400);
         }
 
         if ($role->users->count() > 0) {
             return response()->json(['error' => 'Role has users'], 400);
         }
+
         $role->permissions()->detach();
         $role->delete();
         // log activity

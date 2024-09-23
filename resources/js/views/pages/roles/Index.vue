@@ -18,13 +18,8 @@ const isEditOpen = ref(false);
 const isCreateOpen = ref(false);
 const loadingCreate = ref(false);
 const currentIndex = ref(null);
-const actionsPopover = ref();
 const roles = ref([]);
-const togglePopover = ({ event: event, current: data, index: index }) => {
-    current.value = data;
-    currentIndex.value = index;
-    actionsPopover.value.toggle(event);
-};
+const nonChangingRoles = ["Super Admin", "User"];
 
 const confirm = (myFunction, params) => {
     Confirm.require({
@@ -40,7 +35,11 @@ const confirm = (myFunction, params) => {
             label: $t("confirm.title"),
         },
         accept: () => {
-            myFunction(params ? [...params] : null);
+            if (params) {
+                myFunction(...params);
+            } else {
+                myFunction();
+            }
         },
         reject: () => {},
     });
@@ -89,11 +88,14 @@ const getPermissions = async () => {
     });
 };
 
-const openDetails = () => {
+const openDetails = (item) => {
+    current.value = item;
     isOpen.value = true;
 };
 
-const openEdit = () => {
+const openEdit = (item, index) => {
+    current.value = item;
+    currentIndex.value = index;
     isEditOpen.value = true;
 };
 
@@ -102,14 +104,13 @@ const openCreate = () => {
 };
 
 const createItem = (val) => {
-    console.log(val);
     loadingCreate.value = true;
     return new Promise((resolve, reject) => {
         axios
             .post("api/admin/roles/create", val)
             .then((res) => {
-                console.log(res);
-                roles.value.unshift(res.data.role);
+                roles.value.push(res.data.role);
+                filterRolesWithPermissionsId();
                 emitter.emit("toast", {
                     summary: $t("status.success.title"),
                     message: $t("status.success.role.create"),
@@ -128,16 +129,16 @@ const createItem = (val) => {
     });
 };
 
-const deleteItem = () => {
-    if (loadingStates.value[current.value.id]) return;
-    setLoadingState(current.value.id, true);
+const deleteItem = (item, index) => {
+    if (loadingStates.value[item.id]) return;
+    setLoadingState(item.id, true);
     return new Promise((resolve, reject) => {
         axios
             .post("api/admin/roles/delete", {
-                id: current.value.id,
+                id: item.id,
             })
             .then((res) => {
-                roles.value.splice(currentIndex.value, 1);
+                roles.value.splice(index, 1);
                 emitter.emit("toast", {
                     summary: $t("status.success.title"),
                     message: $t("status.success.role.delete"),
@@ -150,7 +151,7 @@ const deleteItem = () => {
                 reject(err);
             })
             .finally(() => {
-                setLoadingState(current.value.id, false);
+                setLoadingState(item.id, false);
             });
     });
 };
@@ -185,6 +186,24 @@ const editItem = (val) => {
     });
 };
 
+const filteredRoles = ref([]);
+const filterRolesWithPermissionsId = () => {
+    filteredRoles.value = roles.value
+        .filter((role) => role.name !== "Super Admin")
+        .map((role) => {
+            // return  role name and permissions
+            return {
+                name: role.name,
+                color: role.color,
+                permissions: role.permissions.map((permission) => {
+                    return permission.id;
+                }),
+            };
+        });
+
+    console.log(filteredRoles.value);
+};
+
 const updateItem = (data) => {
     permissions.value[currentIndex.value] = data;
 };
@@ -198,6 +217,8 @@ const setLoadingState = (userId, isLoading) => {
 onMounted(async () => {
     await getRoles();
     await getPermissions();
+    filterRolesWithPermissionsId();
+    console.log(filteredRoles.value);
 });
 </script>
 
@@ -216,6 +237,7 @@ onMounted(async () => {
             @createItem="createItem"
             :loading="loadingCreate"
             :permissions="permissions"
+            :filteredRoles="filteredRoles"
         />
 
         <DataTable
@@ -278,7 +300,7 @@ onMounted(async () => {
                             v-for="permission in slotProps.data.permissions"
                         >
                             <span
-                                class="highlight text-green-700 bg-lime-300 border-green-800 border-2"
+                                class="highlight text-lime-600 bg-lime-300 border-lime-600 border-2"
                             >
                                 {{ permission.name }}
                             </span>
@@ -311,19 +333,51 @@ onMounted(async () => {
             <Column :header="$t('activities.action')">
                 <template #body="slotProps">
                     <Button
-                        icon="ti ti-dots-vertical"
+                        icon="ti ti-eye"
                         rounded
+                        size="normal"
                         text
-                        size="large"
-                        @click="
-                            togglePopover({
-                                event: $event,
-                                current: slotProps.data,
-                                index: slotProps.index,
-                            })
-                        "
+                        severity="info"
+                        @click="openDetails(slotProps.data)"
+                        v-tooltip.bottom="$t('common.view_details')"
+                        class="action-btn"
+                    />
+                    <template
+                        v-if="!nonChangingRoles.includes(slotProps.data.name)"
                     >
-                    </Button>
+                        <Button
+                            icon="ti ti-edit"
+                            rounded
+                            size="normal"
+                            text
+                            severity="success"
+                            @click="openEdit(slotProps.data, slotProps.index)"
+                            v-tooltip.bottom="$t('common.edit')"
+                            class="action-btn"
+                            :loading="loadingStates[slotProps.data.id]"
+                        />
+
+                        <Button
+                            v-if="
+                                !slotProps.data.users_count ||
+                                slotProps.data.users_count === 0
+                            "
+                            icon="ti ti-trash"
+                            rounded
+                            size="normal"
+                            text
+                            severity="danger"
+                            @click="
+                                confirm(deleteItem, [
+                                    slotProps.data,
+                                    slotProps.index,
+                                ])
+                            "
+                            v-tooltip.bottom="$t('common.delete')"
+                            class="action-btn"
+                            :loading="loadingStates[slotProps.data.id]"
+                        />
+                    </template>
                 </template>
             </Column>
 
@@ -335,105 +389,7 @@ onMounted(async () => {
                 {{ $t("roles.title", roles.length) }}.
             </template>
         </DataTable>
-
-        <Popover ref="actionsPopover" class="popover">
-            <div class="content">
-                <Button
-                    icon="ti ti-eye"
-                    rounded
-                    size="normal"
-                    text
-                    :label="$t('common.view_details')"
-                    severity="info"
-                    @click="openDetails"
-                    v-tooltip.bottom="$t('common.view_details')"
-                    class="action-btn"
-                />
-
-                <template v-if="current.id !== auth.user.roles.id">
-                    <Button
-                        icon="ti ti-edit"
-                        rounded
-                        size="normal"
-                        text
-                        :label="$t('common.edit')"
-                        severity="success"
-                        @click="openEdit"
-                        v-tooltip.bottom="$t('common.edit')"
-                        class="action-btn"
-                        :loading="loadingStates[current.id]"
-                    />
-
-                    <Button
-                        v-if="current.users_count === 0"
-                        icon="ti ti-trash"
-                        rounded
-                        size="normal"
-                        text
-                        severity="danger"
-                        :label="$t('common.delete')"
-                        @click="confirm(deleteItem)"
-                        v-tooltip.bottom="$t('common.delete')"
-                        class="action-btn"
-                        :loading="loadingStates[current.id]"
-                    />
-                </template>
-                <template
-                    v-if="
-                        current.deleted_at &&
-                        isSuper &&
-                        current.id !== auth.user.id
-                    "
-                >
-                    <Button
-                        icon="ti ti-trash"
-                        rounded
-                        size="normal"
-                        :label="$t('common.perma_delete')"
-                        text
-                        severity="danger"
-                        @click="
-                            confirm(deleteItemPermanently, [
-                                current,
-                                currentIndex,
-                            ])
-                        "
-                        v-tooltip.bottom="$t('common.perma_delete')"
-                        class="action-btn"
-                        :loading="loadingStates[current.id]"
-                    />
-
-                    <Button
-                        icon="ti ti-restore"
-                        rounded
-                        size="normal"
-                        text
-                        :label="$t('common.restore')"
-                        severity="success"
-                        @click="confirm(restoreItem)"
-                        v-tooltip.bottom="$t('common.restore')"
-                        class="action-btn"
-                        :loading="loadingStates[current.id]"
-                    />
-                </template>
-            </div>
-        </Popover>
     </div>
 </template>
 
-<style lang="scss" scoped>
-.popover .content {
-    display: flex !important;
-    flex-direction: column;
-    align-items: flex-start;
-    width: 100%;
-}
-
-.popover .content .action-btn {
-    margin-left: 0 !important;
-    margin-right: 0 !important;
-    margin: 0 !important;
-    width: 100%;
-    justify-content: flex-start;
-}
-</style>
+<style lang="scss" scoped></style>

@@ -177,7 +177,8 @@
         "details": "Role details",
         "create_success": "Role created successfully",
         "update_success": "Role updated successfully",
-        "delete_success": "Role deleted successfully"
+        "delete_success": "Role deleted successfully",
+        "select_permission": "Select permission"
     },
     "status": {
         "success": {
@@ -223,6 +224,9 @@
     },
     "validation": {
         "required": "This field is required",
-        "invalid_color": "Invalid color code"
+        "invalid_color": "Invalid color code",
+        "role_permission_exists": "An existing role already has these permissions",
+        "existing_role_name": "An existing role already has this name",
+        "existing_role_color": "An existing role already has this color"
     }
 }

@@ -159,6 +159,7 @@ const confirmLogout = () => {
                 @click="toggleProfileMenu"
                 aria-haspopup="true"
                 aria-controls="overlay_menu"
+                style="display: flex"
             >
                 <Avatar
                     :image="user && user.image ? user.image : placeholder"
