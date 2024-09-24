@@ -399,4 +399,9 @@ onMounted(async () => {
     </div>
 </template>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.action-btn {
+    margin-left: 0.125rem;
+    margin-right: 0.125rem;
+}
+</style>

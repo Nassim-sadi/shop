@@ -178,7 +178,8 @@
         "create_success": "Role created successfully",
         "update_success": "Role updated successfully",
         "delete_success": "Role deleted successfully",
-        "select_permission": "Select permission"
+        "select_permission": "Select permission",
+        "users_count": "Users count"
     },
     "status": {
         "success": {
