@@ -17,6 +17,7 @@ const isOpen = ref(false);
 const isEditOpen = ref(false);
 const isCreateOpen = ref(false);
 const loadingCreate = ref(false);
+const loadingEdit = ref(false);
 const currentIndex = ref(null);
 const roles = ref([]);
 const nonChangingRoles = ["Super Admin", "User"];
@@ -93,8 +94,13 @@ const openDetails = (item) => {
     isOpen.value = true;
 };
 
+const filteredRolesWithoutCurrent = ref([]);
+
 const openEdit = (item, index) => {
     current.value = item;
+    filteredRolesWithoutCurrent.value = filteredRoles.value.filter(
+        (role) => role.name !== current.value.name,
+    );
     currentIndex.value = index;
     isEditOpen.value = true;
 };
@@ -139,6 +145,7 @@ const deleteItem = (item, index) => {
             })
             .then((res) => {
                 roles.value.splice(index, 1);
+                filterRolesWithPermissionsId();
                 emitter.emit("toast", {
                     summary: $t("status.success.title"),
                     message: $t("status.success.role.delete"),
@@ -157,20 +164,18 @@ const deleteItem = (item, index) => {
 };
 
 const editItem = (val) => {
+    console.log(val);
+    loadingEdit.value = true;
+
     return new Promise((resolve, reject) => {
         axios
-            .post("api/admin/permissions/update", val, {
-                onUploadProgress: (progressEvent) => {
-                    uploadPercentage.value = Math.round(
-                        (progressEvent.loaded * 100) / progressEvent.total,
-                    );
-                },
-            })
+            .post("api/admin/roles/update", val)
             .then((response) => {
-                uploadPercentage.value = 0;
                 isEditOpen.value = false;
                 console.log(response.data);
-                updateItem(response.data.user);
+                updateItem(response.data.role);
+                filterRolesWithPermissionsId();
+
                 emitter.emit("toast", {
                     summary: $t("update.success"),
                     message: $t("update.success_message"),
@@ -182,6 +187,9 @@ const editItem = (val) => {
                 uploadPercentage.value = 0;
                 console.log(error);
                 reject(error);
+            })
+            .finally(() => {
+                loadingEdit.value = false;
             });
     });
 };
@@ -205,10 +213,10 @@ const filterRolesWithPermissionsId = () => {
 };
 
 const updateItem = (data) => {
-    permissions.value[currentIndex.value] = data;
+    roles.value[currentIndex.value] = data;
 };
 
-const loadingStates = ref({}); // Holds loading state for each user
+const loadingStates = ref({});
 
 const setLoadingState = (userId, isLoading) => {
     loadingStates.value[userId] = isLoading;
@@ -218,7 +226,6 @@ onMounted(async () => {
     await getRoles();
     await getPermissions();
     filterRolesWithPermissionsId();
-    console.log(filteredRoles.value);
 });
 </script>
 
@@ -227,9 +234,12 @@ onMounted(async () => {
         <Details :current="current" v-model:isOpen="isOpen" />
 
         <Edit
-            :current="current"
             v-model:isOpen="isEditOpen"
             @editItem="editItem"
+            :loading="loadingEdit"
+            :permissions="permissions"
+            :filteredRoles="filteredRolesWithoutCurrent"
+            :current="current"
         ></Edit>
 
         <Create
