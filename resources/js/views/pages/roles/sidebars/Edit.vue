@@ -52,11 +52,6 @@ function arraysAreEqual(arr1, arr2) {
 }
 
 function isValidPermission() {
-    // check if selected permissions are not in filtered roles
-    // first check if array is not empty
-    // if (selectedPermissions.value.length === 0) {
-    //     return false;
-    // }
     for (let i = 0; i < filteredRoles.value.length; i++) {
         if (
             arraysAreEqual(
@@ -80,7 +75,6 @@ const validateColor = (value) => {
 };
 
 const validateName = (value) => {
-    // check name if same as in filtered roles
     for (let i = 0; i < filteredRoles.value.length; i++) {
         if (filteredRoles.value[i].name === value) {
             return false;
@@ -128,7 +122,6 @@ const editItem = () => {
     v$.value.$touch();
     permission_v$.value.$touch();
     if (v$.value.$invalid || permission_v$.value.$invalid) return;
-    console.log(editedItem.value);
     editedItem.value.permissions = selectedPermissions.value;
     $emit("editItem", editedItem.value);
     v$.value.$reset();
@@ -170,8 +163,14 @@ const cancelConfirm = () => {
 };
 
 const isEdited = computed(() => {
-    return !isEqual(editedItem.value, current.value);
+    return !(
+        isEqual(editedItem.value, editedItemBackup.value) &&
+        isEqual(selectedPermissions.value, permissionBackup.value)
+    );
 });
+
+const permissionBackup = ref([]);
+const editedItemBackup = ref({});
 
 watch(
     () => isOpen.value,
@@ -188,9 +187,11 @@ watch(
         } else {
             const { permissions, ...rest } = current.value;
             editedItem.value = { ...rest };
+            editedItemBackup.value = { ...editedItem.value };
             selectedPermissions.value = current.value.permissions.map(
                 (permission) => permission.id,
             );
+            permissionBackup.value = [...selectedPermissions.value];
         }
     },
 );
@@ -208,8 +209,7 @@ watch(
         class="!w-full md:!w-[30rem] lg:!w-[25rem]"
     >
         <div class="flex flex-col min-h-full">
-            {{ filteredRoles }}
-
+            {{ test }}
             <label for="name" class="mb-5">{{ $t("roles.name") }}</label>
             <InputText
                 id="name"

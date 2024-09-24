@@ -117,6 +117,7 @@ const createItem = (val) => {
             .then((res) => {
                 roles.value.push(res.data.role);
                 filterRolesWithPermissionsId();
+                isCreateOpen.value = false;
                 emitter.emit("toast", {
                     summary: $t("status.success.title"),
                     message: $t("status.success.role.create"),
@@ -130,7 +131,6 @@ const createItem = (val) => {
             })
             .finally(() => {
                 loadingCreate.value = false;
-                isCreateOpen.value = false;
             });
     });
 };
@@ -164,17 +164,14 @@ const deleteItem = (item, index) => {
 };
 
 const editItem = (val) => {
-    console.log(val);
     loadingEdit.value = true;
-
     return new Promise((resolve, reject) => {
         axios
             .post("api/admin/roles/update", val)
             .then((response) => {
-                isEditOpen.value = false;
-                console.log(response.data);
                 updateItem(response.data.role);
                 filterRolesWithPermissionsId();
+                isEditOpen.value = false;
 
                 emitter.emit("toast", {
                     summary: $t("update.success"),

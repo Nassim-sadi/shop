@@ -119,10 +119,7 @@ const v$ = useVuelidate(rules, role);
 
 const createItem = () => {
     v$.value.$touch();
-    console.log("touching");
-
     if (v$.value.$invalid) return;
-    console.log(role.value);
     $emit("createItem", role.value);
     v$.value.$reset();
 };
