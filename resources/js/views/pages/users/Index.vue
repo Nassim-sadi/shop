@@ -8,6 +8,7 @@ import { watchDebounced } from "@vueuse/core";
 import { format } from "date-fns";
 import { useConfirm } from "primevue/useconfirm";
 import { computed, onMounted, ref } from "vue";
+import ChangeRole from "./sidebars/ChangeRole.vue";
 import Details from "./sidebars/Details.vue";
 import Edit from "./sidebars/Edit.vue";
 const Confirm = useConfirm();
@@ -26,6 +27,8 @@ const status = ref(null);
 const uploadPercentage = ref(0);
 const currentIndex = ref(null);
 const actionsPopover = ref();
+const isChangeRoleOpen = ref(false);
+
 const togglePopover = ({ event: event, current: data, index: index }) => {
     current.value = data;
     currentIndex.value = index;
@@ -69,21 +72,14 @@ const auth = authStore();
 
 const role = ref(null);
 const roleOptions = ref([{ label: "All", value: null }]);
-
+const roles = ref([]);
 const getRoles = async () => {
     return new Promise((resolve, reject) => {
         axios
             .get("api/admin/roles")
             .then((res) => {
-                roleOptions.value = [
-                    ...roleOptions.value,
-                    ...res.data.map((role) => {
-                        return {
-                            label: role.name,
-                            value: role.id,
-                        };
-                    }),
-                ];
+                roles.value = res.data;
+                setRoleOptions(res.data);
                 resolve(res.data);
             })
             .catch((err) => {
@@ -92,6 +88,18 @@ const getRoles = async () => {
             })
             .finally(() => {});
     });
+};
+
+const setRoleOptions = (data) => {
+    roleOptions.value = [
+        ...roleOptions.value,
+        ...data.map((role) => {
+            return {
+                label: role.name,
+                value: role.id,
+            };
+        }),
+    ];
 };
 
 const isSuper = computed(() => {
@@ -318,7 +326,6 @@ const editItem = (val) => {
             .then((response) => {
                 uploadPercentage.value = 0;
                 isEditOpen.value = false;
-                console.log(response.data);
                 updateItem(response.data.user);
                 emitter.emit("toast", {
                     summary: $t("update.success"),
@@ -349,6 +356,44 @@ const setLoadingState = (userId, isLoading) => {
     loadingStates.value[userId] = isLoading;
 };
 
+const openChangeRole = () => {
+    isChangeRoleOpen.value = true;
+};
+
+const changeRole = (val) => {
+    setLoadingState(current.id, true);
+    console.log(val);
+
+    return new Promise((resolve, reject) => {
+        axios
+            .post("api/admin/users/change-role", val)
+            .then((res) => {
+                console.log(res.data);
+
+                updateItem(res.data.user);
+                emitter.emit("toast", {
+                    summary: $t("status.success.title"),
+                    message: $t("status.success.user.change_role"),
+                    severity: "success",
+                });
+                resolve(res.data);
+            })
+            .catch((err) => {
+                console.log(err);
+                emitter.emit("toast", {
+                    summary: $t("status.error.title"),
+                    message: $t("status.error.user.change_role"),
+                    severity: "error",
+                });
+                reject(err);
+            })
+            .finally(() => {
+                setLoadingState(current.id, false);
+                isChangeRoleOpen.value = false;
+            });
+    });
+};
+
 onMounted(async () => {
     await getRoles();
     start_date.value.setDate(start_date.value.getDate() - 17);
@@ -365,6 +410,14 @@ onMounted(async () => {
             v-model:isOpen="isEditOpen"
             @editItem="editItem"
         ></Edit>
+
+        <ChangeRole
+            :current="current"
+            v-model:isOpen="isChangeRoleOpen"
+            @submit="changeRole"
+            :roles="roles"
+            :loading="loadingStates[current.id]"
+        ></ChangeRole>
 
         <DataTable
             :value="users"
@@ -499,7 +552,8 @@ onMounted(async () => {
             <Column :header="$t('activities.role')">
                 <template #body="slotProps">
                     <div
-                        :class="`${roleColor(slotProps.data.role.name)} highlight`"
+                        class="highlight"
+                        :style="`background-color: #${slotProps.data.role.color} ; color : #${slotProps.data.role.text_color}`"
                     >
                         {{ slotProps.data.role.name }}
                     </div>
@@ -615,6 +669,19 @@ onMounted(async () => {
                         :label="$t('common.change_status')"
                         @click="confirm(changeStatus)"
                         v-tooltip.bottom="$t('common.change_status')"
+                        class="action-btn"
+                        :loading="loadingStates[current.id]"
+                    />
+
+                    <Button
+                        icon="ti ti-user-edit"
+                        rounded
+                        size="normal"
+                        text
+                        severity="warning"
+                        :label="$t('users.change_role')"
+                        @click="openChangeRole"
+                        v-tooltip.bottom="$t('users.change_role')"
                         class="action-btn"
                         :loading="loadingStates[current.id]"
                     />

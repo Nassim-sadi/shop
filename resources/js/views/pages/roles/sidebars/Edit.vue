@@ -209,16 +209,15 @@ watch(
         class="!w-full md:!w-[30rem] lg:!w-[25rem]"
     >
         <div class="flex flex-col min-h-full">
-            {{ test }}
-            <label for="name" class="mb-5">{{ $t("roles.name") }}</label>
+            <label for="name" class="mb-5 font-bold">{{
+                $t("roles.name")
+            }}</label>
             <InputText
                 id="name"
                 v-model="editedItem.name"
                 aria-labelledby="name"
                 class="w-full mb-5"
             />
-            {{ editedItem.name }}
-
             <div
                 class="text-red-500 mb-5"
                 v-for="error of v$.name.$errors"
@@ -227,7 +226,7 @@ watch(
                 <Message severity="error">{{ error.$message }}</Message>
             </div>
 
-            <label for="description" class="mb-5">{{
+            <label for="description" class="mb-5 font-bold">{{
                 $t("roles.description")
             }}</label>
             <Textarea
@@ -238,7 +237,9 @@ watch(
                 rows="3"
             />
 
-            <label for="color" class="mb-5">{{ $t("roles.color") }}</label>
+            <label for="color" class="mb-5 font-bold">{{
+                $t("roles.color")
+            }}</label>
             <ColorPicker v-model="editedItem.color" class="mb-5" />
             <div
                 class="text-red-500 mb-5"
@@ -248,7 +249,7 @@ watch(
                 <Message severity="error">{{ error.$message }}</Message>
             </div>
 
-            <label for="text_color" class="mb-5">
+            <label for="text_color" class="mb-5 font-bold">
                 {{ $t("common.preview") }}
             </label>
             <span
@@ -271,7 +272,7 @@ watch(
                 <Message severity="error">{{ error.$message }}</Message>
             </div>
 
-            <label for="permissions" class="mb-5">{{
+            <label for="permissions" class="mb-5 font-bold">{{
                 $t("roles.permissions")
             }}</label>
 

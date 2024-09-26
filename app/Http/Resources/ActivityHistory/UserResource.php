@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources\ActivityHistory;
 
+use App\Http\Resources\Users\RoleResource;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -22,13 +23,7 @@ class UserResource extends JsonResource
             'email' => $this->email,
             'status' => $this->status,
             'image' => $this->image,
-            'role' => [
-                'id' => $this->roles[0]->id,
-                'name' => $this->roles[0]->name,
-                'description' => $this->roles[0]->description,
-                'color' => $this->roles[0]->color,
-                'text_color' => $this->roles[0]->text_color
-            ],
+            'role' => RoleResource::make($this->roles[0]),
         ];
     }
 }

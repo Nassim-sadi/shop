@@ -67,8 +67,13 @@ const { isOpen, current } = toRefs(props);
             </div>
 
             <div class="mb-4">
-                <p class="font-bold">{{ $t("activities.role") }} :</p>
-                {{ current.user.role.name }}
+                <p class="font-bold mb-2">{{ $t("activities.role") }} :</p>
+                <span
+                    :style="`background-color: #${current.user.role.color} ; color : #${current.user.role.text_color}`"
+                    class="highlight"
+                >
+                    {{ current.user.role.name }}
+                </span>
             </div>
 
             <div class="mb-4">

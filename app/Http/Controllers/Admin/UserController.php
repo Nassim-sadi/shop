@@ -211,4 +211,34 @@ class UserController extends Controller
 
         return response()->json(['success' => 'User updated successfully', 'user' => new UserResource($user)], 200);
     }
+
+    public function changeRole(Request $request)
+    {
+
+        // $this->authorize('changeRole', User::class);
+        $request->validate([
+            'user_id' => 'required|exists:users,id|not_in:' . $request->user()->id,
+            'role_id' => 'required|exists:roles,id',
+        ]);
+
+        $user = User::findOrFail($request->user_id);
+        $user->syncRoles($request->role_id);
+
+        // log activity
+        $agent = UA::parse($request->server('HTTP_USER_AGENT'));
+        ActivityHistoryJob::dispatch(
+            data: [
+                'model' => 'users',
+                'action' => 'changeRole',
+                'data' => ['user' => $user],
+                'user_id' => $request->user()->id,
+            ],
+            platform: $agent->os->family,
+            browser: $agent->ua->family,
+        );
+
+        $user->refresh();
+        $user->load('roles');
+        return response()->json(['success' => 'User role changed successfully', 'user' => new UserResource($user)], 200);
+    }
 }

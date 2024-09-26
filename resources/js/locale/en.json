@@ -99,7 +99,8 @@
         "deletedQuery": "Select deleted"
     },
     "users": {
-        "details": "User details"
+        "details": "User details",
+        "change_role": "Change role"
     },
     "activities": {
         "by": "Activity By",
@@ -128,6 +129,7 @@
     "common": {
         "yes": "Yes",
         "no": "No",
+        "for": "for",
         "cancel": "Cancel",
         "save": "Save",
         "create": "Create",
@@ -190,6 +192,7 @@
                 "delete": "User deleted successfully",
                 "perma_delete": "User permanently deleted successfully",
                 "change_status": "User status changed successfully",
+                "change_role": "User role changed successfully",
                 "restore": "User restored successfully"
             },
             "role": {
@@ -205,7 +208,9 @@
                 "create": "User creation failed",
                 "update": "User update failed",
                 "delete": "User deletion failed",
-                "change_status": "User status change failed"
+                "change_status": "User status change failed",
+                "change_role": "User role changed failed",
+                "restore": "User restored failed"
             },
             "role": {
                 "create": "Role creation failed",

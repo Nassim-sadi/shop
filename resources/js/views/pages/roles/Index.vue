@@ -196,7 +196,6 @@ const filterRolesWithPermissionsId = () => {
     filteredRoles.value = roles.value
         .filter((role) => role.name !== "Super Admin")
         .map((role) => {
-            // return  role name and permissions
             return {
                 name: role.name,
                 color: role.color,
@@ -205,8 +204,6 @@ const filterRolesWithPermissionsId = () => {
                 }),
             };
         });
-
-    console.log(filteredRoles.value);
 };
 
 const updateItem = (data) => {
