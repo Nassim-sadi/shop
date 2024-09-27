@@ -1,8 +1,8 @@
 import AppLayout from "@/layout/AppLayout.vue";
+import { canNavigate } from "@/plugins/canNavigate";
 import { authStore } from "@/store/AuthStore";
 import { createRouter, createWebHistory } from "vue-router";
 import { isUserLoggedIn } from "./utils";
-
 const router = createRouter({
     history: createWebHistory(),
     routes: [
@@ -79,22 +79,18 @@ const router = createRouter({
 
 router.beforeEach((to, from, next) => {
     const auth = authStore();
+
     if (
         to.name !== "login" &&
         to.name !== "forgot-password" &&
         to.name !== "reset-password"
     ) {
         if (isUserLoggedIn(auth)) {
-            // if (
-            //     to.name === "root" ||
-            //     to.name === "profile" ||
-            //     canNavigate(to.name)
-            // ) {
-            //     next();
-            // } else {
-            //     next("/");
-            // }
-            next();
+            if (canNavigate(to.name)) {
+                next();
+            } else {
+                next({ name: "accessDenied" });
+            }
         } else {
             next({ name: "login" });
         }
@@ -106,5 +102,4 @@ router.beforeEach((to, from, next) => {
         }
     }
 });
-
 export default router;

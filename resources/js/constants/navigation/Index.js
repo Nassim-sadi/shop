@@ -13,54 +13,35 @@ export default [
 
     {
         label: "Pages",
-        icon: "pi pi-fw pi-briefcase",
+        icon: "ti ti-briefcase",
         to: "/pages",
         items: [
-            // {
-            //     label: "Auth",
-            //     icon: "pi pi-fw pi-user",
-            //     items: [
-            //         {
-            //             label: "Login",
-            //             icon: "pi pi-fw pi-sign-in",
-            //             to: "/auth/login",
-            //         },
-            //         {
-            //             label: "Error",
-            //             icon: "pi pi-fw pi-times-circle",
-            //             to: "/auth/error",
-            //         },
-            //         {
-            //             label: "Access Denied",
-            //             icon: "pi pi-fw pi-lock",
-            //             to: "/auth/access",
-            //         },
-            //     ],
-            // },
             {
-                label: "Settings",
-                icon: "pi pi-fw pi-cog",
-                to: "/settings",
-                color: "#9C27B0",
+                label: "Users",
+                icon: "ti ti-users",
+                to: "/users",
+                color: "#3366bb",
+                access: "user_access",
             },
             {
                 label: "Activity History",
-                icon: "pi pi-fw pi-list",
+                icon: "ti ti-history",
                 to: "/activity-history",
                 color: "#830123",
-            },
-
-            {
-                label: "Users",
-                icon: "pi pi-fw pi-users",
-                to: "/users",
-                color: "#3366bb",
+                access: "activity_access",
             },
             {
                 label: "Roles",
-                icon: "pi pi-fw pi-lock",
+                icon: "ti ti-lock",
                 to: "/roles",
                 color: "#238E3A",
+                access: "role_access",
+            },
+            {
+                label: "Settings",
+                icon: "ti ti-settings",
+                to: "/settings",
+                color: "#9C27B0",
             },
 
             // {
@@ -73,11 +54,6 @@ export default [
             //     icon: 'pi pi-fw pi-exclamation-circle',
             //     to: '/pages/notfound'
             // },
-            // {
-            //     label: 'Empty',
-            //     icon: 'pi pi-fw pi-circle-off',
-            //     to: '/pages/empty'
-            // }
         ],
     },
 ];

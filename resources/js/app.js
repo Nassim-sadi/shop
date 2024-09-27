@@ -15,6 +15,8 @@ import router from "./router/Index";
 import "@/assets/myStyles.scss";
 import "@/assets/styles.scss";
 import "@/assets/tailwind.css";
+import { ability } from "@/plugins/ability";
+import { abilitiesPlugin } from "@casl/vue";
 import "vue3-perfect-scrollbar/style.css";
 
 const app = createApp(App);
@@ -34,6 +36,8 @@ app.use(PrimeVue, {
         },
     },
 });
+
+app.use(abilitiesPlugin, ability);
 app.use(ToastService);
 app.use(PerfectScrollbarPlugin);
 app.use(ConfirmationService);

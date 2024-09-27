@@ -45,7 +45,7 @@ class AuthController extends Controller
 
     public function getUser(Request $request)
     {
-        $user = $request->user();
+        $user = $request->user()->load('roles')->load('permissions');
         return new UserResource($user);
     }
 
@@ -71,9 +71,12 @@ class AuthController extends Controller
             $token = $user->createToken($user->name . '-AuthToken', ['*'], now()->addHours(2))->plainTextToken;
             $expiration = now()->addHours(2)->toDateTimeString();
         }
+
+        $user = $user->load('roles')->load('permissions');
+
         return response()->json([
             'status' => 'success',
-            'user' => $user,
+            'user' => new UserResource($user),
             'authorization' => [
                 'token' => $token,
                 'type' => 'bearer',

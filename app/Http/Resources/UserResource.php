@@ -27,7 +27,8 @@ class UserResource extends JsonResource
                 'name' => $this->roles[0]->name,
                 'description' => $this->roles[0]->description,
                 'color' => $this->roles[0]->color,
-                'text_color' => $this->roles[0]->text_color
+                'text_color' => $this->roles[0]->text_color,
+                'permissions' => $this->roles[0]->permissions
             ],
             'image' => $this->image,
             'status' => $this->status,

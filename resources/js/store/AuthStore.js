@@ -1,9 +1,9 @@
+import { ability, defineAbilitiesFor } from "@/plugins/ability";
 import axios from "@/plugins/axios";
 import emitter from "@/plugins/emitter";
 import { $t } from "@/plugins/i18n";
 import router from "@/router/Index";
 import { defineStore } from "pinia";
-
 export const authStore = defineStore("authStore", {
     state: () => ({
         user: null,
@@ -28,6 +28,8 @@ export const authStore = defineStore("authStore", {
                         this.token = response.data.authorization.token;
                         this.tokenExpiration =
                             response.data.authorization.expires_at;
+                        const newAbilities = defineAbilitiesFor(this.user);
+                        ability.update(newAbilities.rules);
                         resolve(response);
                     })
                     .catch((error) => {
@@ -60,7 +62,9 @@ export const authStore = defineStore("authStore", {
                     .get("api/admin/user")
                     .then((response) => {
                         this.user = response.data;
-                        resolve();
+                        const newAbilities = defineAbilitiesFor(this.user);
+                        ability.update(newAbilities.rules);
+                        resolve(response);
                     })
                     .catch((error) => {
                         this.user = null;

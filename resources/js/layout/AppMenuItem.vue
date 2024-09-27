@@ -1,10 +1,10 @@
 <script setup>
 import { useLayout } from "@/layout/composables/layout";
+import { canNavigate } from "@/plugins/canNavigate";
 import { onBeforeMount, ref, watch } from "vue";
 import { useRoute } from "vue-router";
 
 const route = useRoute();
-
 const { layoutState, setActiveMenuItem, onMenuToggle } = useLayout();
 
 const props = defineProps({
@@ -93,8 +93,13 @@ const checkActiveRoute = (item) => {
         >
             {{ item.label }}
         </div>
+
         <a
-            v-if="(!item.to || item.items) && item.visible !== false"
+            v-if="
+                (!item.to || item.items) &&
+                item.visible !== false &&
+                canNavigate(item.to)
+            "
             :href="item.url"
             @click="itemClick($event, item, index)"
             :class="item.class"
@@ -112,7 +117,12 @@ const checkActiveRoute = (item) => {
             ></i>
         </a>
         <router-link
-            v-if="item.to && !item.items && item.visible !== false"
+            v-if="
+                item.to &&
+                !item.items &&
+                item.visible !== false &&
+                canNavigate(item.to)
+            "
             @click="itemClick($event, item, index)"
             :class="[item.class, { 'active-route': checkActiveRoute(item) }]"
             tabindex="0"
