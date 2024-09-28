@@ -1,9 +1,9 @@
 <script setup>
+import placeholder from "@/assets/images/avatar/profile-placeholder.png";
 import browsers from "@/constants/images/browsers";
 import os from "@/constants/images/os";
 import { $t } from "@/plugins/i18n";
 import { computed, toRefs } from "vue";
-// import { PerfectScrollbar } from "vue3-perfect-scrollbar";
 
 const props = defineProps({
     current: {
@@ -55,7 +55,7 @@ const { isOpen, current } = toRefs(props);
                 <p class="font-bold">{{ $t("activities.by") }} :</p>
                 <div class="flex items-center gap-2 mt-2">
                     <Avatar
-                        :image="current.user.image"
+                        :image="current.user.image || placeholder"
                         shape="circle"
                         size="large"
                     ></Avatar>
