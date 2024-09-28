@@ -11,7 +11,7 @@ class ActivityHistoryController extends Controller
 {
     public function get(Request $request)
     {
-        // $this->authorize('view', ActivityHistory::class);
+        $this->authorize('activities_view');
 
         $activities = ActivityHistory::whereDate('created_at', '>=', $request->start_date)
             ->whereDate('created_at', '<=', $request->end_date)

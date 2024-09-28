@@ -1,4 +1,6 @@
 <script setup>
+import placeholder from "@/assets/images/avatar/profile-placeholder.png";
+import { ability } from "@/plugins/ability";
 import axios from "@/plugins/axios";
 import { $t } from "@/plugins/i18n";
 import { watchDebounced } from "@vueuse/core";
@@ -182,7 +184,7 @@ onMounted(() => {
                         <Avatar
                             shape="circle"
                             size="large"
-                            :image="slotProps.data.user.image"
+                            :image="slotProps.data.user.image || placeholder"
                         />
                         {{
                             slotProps.data.user.firstname +
@@ -257,6 +259,7 @@ onMounted(() => {
                         @click="openDetails(slotProps.data)"
                         v-tooltip.bottom="$t('common.view_details')"
                         class="action-btn"
+                        v-if="ability.can('activities', 'view')"
                     />
                 </template>
             </Column>

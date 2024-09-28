@@ -28,7 +28,7 @@ export default [
                 icon: "ti ti-history",
                 to: "/activity-history",
                 color: "#830123",
-                access: "activity_access",
+                access: "activities_access",
             },
             {
                 label: "Roles",

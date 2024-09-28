@@ -9,6 +9,7 @@ export const authStore = defineStore("authStore", {
         user: null,
         token: null,
         tokenExpiration: null,
+        permissions: [],
     }),
     persist: {
         enabled: true,
@@ -30,6 +31,7 @@ export const authStore = defineStore("authStore", {
                             response.data.authorization.expires_at;
                         const newAbilities = defineAbilitiesFor(this.user);
                         ability.update(newAbilities.rules);
+                        this.permissions = newAbilities.rules;
                         resolve(response);
                     })
                     .catch((error) => {
@@ -47,7 +49,7 @@ export const authStore = defineStore("authStore", {
                         this.user = null;
                         this.token = null;
                         this.tokenExpiration = null;
-                        router.push({ name: "login" });
+                        router.replace({ name: "login" });
                         resolve(response);
                     })
                     .catch((error) => {
@@ -64,6 +66,8 @@ export const authStore = defineStore("authStore", {
                         this.user = response.data;
                         const newAbilities = defineAbilitiesFor(this.user);
                         ability.update(newAbilities.rules);
+                        this.permissions = newAbilities.rules;
+
                         resolve(response);
                     })
                     .catch((error) => {

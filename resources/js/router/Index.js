@@ -1,8 +1,10 @@
 import AppLayout from "@/layout/AppLayout.vue";
+import { ability, defineAbilitiesFor } from "@/plugins/ability";
 import { canNavigate } from "@/plugins/canNavigate";
 import { authStore } from "@/store/AuthStore";
 import { createRouter, createWebHistory } from "vue-router";
 import { isUserLoggedIn } from "./utils";
+
 const router = createRouter({
     history: createWebHistory(),
     routes: [
@@ -79,7 +81,7 @@ const router = createRouter({
 
 router.beforeEach((to, from, next) => {
     const auth = authStore();
-
+    ability.update(auth.permissions);
     if (
         to.name !== "login" &&
         to.name !== "forgot-password" &&

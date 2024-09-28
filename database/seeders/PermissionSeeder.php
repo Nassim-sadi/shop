@@ -24,16 +24,17 @@ class PermissionSeeder extends Seeder
             'user_create',
             'user_edit',
             'user_delete',
+            "user_permaDelete",
+            "user_restore",
+            "user_changeRole",
+            "user_changeStatus",
             'role_access',
             'role_view',
             'role_create',
             'role_edit',
             'role_delete',
-            'permission_access',
-            'permission_view',
-            'permission_create',
-            'permission_edit',
-            'permission_delete',
+            "activities_access",
+            "activities_view",
         ];
 
         foreach ($permissions as $permission) {
@@ -50,11 +51,11 @@ class PermissionSeeder extends Seeder
             'user_view',
             'user_create',
             'user_edit',
+            "user_changeStatus",
             'user_delete',
         ]);
 
         // create user role and assign some permissions
         $role = Role::create(['name' => 'User', 'color' => '606C5D', 'text_color' => 'ffffff']);
-        $role->givePermissionTo(['user_access']);
     }
 }

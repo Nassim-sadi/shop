@@ -14,8 +14,8 @@ export function defineAbilitiesFor(user) {
             return;
         }
         user.roles.permissions.forEach((permission) => {
-            const [action, subject] = permission.name.split("_");
-            can(action, subject);
+            const [subject, action] = permission.name.split("_");
+            can(subject, action);
         });
     });
 }

@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\Roles\PermissionResource;
 use App\Http\Resources\Roles\RolesResource;
 use App\Jobs\ActivityHistoryJob;
-use App\Models\User;
 use Illuminate\Http\Request;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
@@ -17,14 +16,13 @@ class RoleController extends Controller
 
     public function getRoles(Request $request)
     {
-        // $this->authorize('view', ActivityHistory::class);
-        $roles = Role::with('permissions')->withCount('users')->get(); // Eager load 'permissions'
+        $this->authorize('role_view');
+        $roles = Role::with('permissions')->withCount('users')->get();
         return RolesResource::collection($roles);
     }
 
     public function getPermissions(Request $request)
     {
-        // $this->authorize('view', ActivityHistory::class);
         return response()->json(['permissions' => PermissionResource::collection(Permission::all())], 200);
     }
 
@@ -32,7 +30,7 @@ class RoleController extends Controller
     public function create(Request $request)
     {
 
-        // $this->authorize('view', ActivityHistory::class);
+        $this->authorize('role_create');
         $request->validate([
             'name' => 'required|unique:roles,name,except,id',
             'description' => 'nullable|string|max:255',
@@ -91,7 +89,7 @@ class RoleController extends Controller
 
     public function update(Request $request)
     {
-        // $this->authorize('view', ActivityHistory::class);
+        $this->authorize('role_edit');
         $request->validate([
             'id' => 'required|exists:roles',
             'name' => 'required|unique:roles,name,' . $request->id . ',id',
@@ -147,7 +145,7 @@ class RoleController extends Controller
 
     public function delete(Request $request)
     {
-        // $this->authorize('view', ActivityHistory::class);
+        $this->authorize('role_delete');
         $request->validate([
             'id' => 'required|exists:roles',
         ]);

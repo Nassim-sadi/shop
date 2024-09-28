@@ -1,5 +1,6 @@
 <script setup>
 import placeholder from "@/assets/images/avatar/profile-placeholder.png";
+import { ability } from "@/plugins/ability";
 import axios from "@/plugins/axios";
 import emitter from "@/plugins/emitter";
 import { $t } from "@/plugins/i18n";
@@ -642,6 +643,7 @@ onMounted(async () => {
                     v-tooltip.bottom="$t('common.view_details')"
                     class="action-btn"
                     :loading="loadingStates[current.id]"
+                    v-if="ability.can('user', 'view')"
                 />
 
                 <Button
@@ -655,6 +657,7 @@ onMounted(async () => {
                     v-tooltip.bottom="$t('common.edit')"
                     class="action-btn"
                     :loading="loadingStates[current.id]"
+                    v-if="ability.can('user', 'edit')"
                 />
 
                 <template
@@ -671,8 +674,8 @@ onMounted(async () => {
                         v-tooltip.bottom="$t('common.change_status')"
                         class="action-btn"
                         :loading="loadingStates[current.id]"
+                        v-if="ability.can('user', 'changeStatus')"
                     />
-
                     <Button
                         icon="ti ti-user-edit"
                         rounded
@@ -684,6 +687,7 @@ onMounted(async () => {
                         v-tooltip.bottom="$t('users.change_role')"
                         class="action-btn"
                         :loading="loadingStates[current.id]"
+                        v-if="ability.can('user', 'changeRole')"
                     />
 
                     <Button
@@ -697,6 +701,7 @@ onMounted(async () => {
                         v-tooltip.bottom="$t('common.delete')"
                         class="action-btn"
                         :loading="loadingStates[current.id]"
+                        v-if="ability.can('user', 'delete')"
                     />
                 </template>
                 <template
@@ -717,6 +722,7 @@ onMounted(async () => {
                         v-tooltip.bottom="$t('common.perma_delete')"
                         class="action-btn"
                         :loading="loadingStates[current.id]"
+                        v-if="ability.can('user', 'permaDelete')"
                     />
 
                     <Button
@@ -730,6 +736,7 @@ onMounted(async () => {
                         v-tooltip.bottom="$t('common.restore')"
                         class="action-btn"
                         :loading="loadingStates[current.id]"
+                        v-if="ability.can('user', 'restore')"
                     />
                 </template>
             </div>

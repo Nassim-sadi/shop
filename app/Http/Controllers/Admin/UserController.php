@@ -8,21 +8,17 @@ use App\Http\Resources\Users\UserCollection;
 use App\Http\Resources\Users\UserResource;
 use App\Jobs\ActivityHistoryJob;
 use App\Models\User;
-use Debugbar;
 use Str;
 use UA;
 
 class UserController extends Controller
 
 {
-
-
-
     public function getUsers(Request $request)
     {
-        // $this->authorize('view', ActivityHistory::class);
-        $user = $request->user();
 
+        $this->authorize('user_view');
+        $user = $request->user();
         $users = User::whereDate('created_at', '>=', $request->start_date)
             ->whereDate('created_at', '<=', $request->end_date)
             ->where(function ($q) use ($request) {
@@ -54,8 +50,7 @@ class UserController extends Controller
 
     public function changeStatus(Request $request)
     {
-        // $this->authorize('changeStatus', User::class);
-        // add validation to id not same as current user
+        $this->authorize('user_changeStatus');
         $request->validate([
             'status' => 'required|in:0,1',
             'id' => 'required|exists:users,id|not_in:' . $request->user()->id,
@@ -81,7 +76,7 @@ class UserController extends Controller
 
     public function delete(Request $request)
     {
-
+        $this->authorize('user_delete');
         $request->validate([
             'id' => 'required|exists:users,id|not_in:' . $request->user()->id,
         ]);
@@ -105,6 +100,8 @@ class UserController extends Controller
 
     public function forceDelete(Request $request)
     {
+        $this->authorize('user_permaDelete');
+
         $request->validate([
             'id' => 'required|exists:users,id|not_in:' . $request->user()->id,
         ]);
@@ -129,6 +126,7 @@ class UserController extends Controller
 
     public function restore(Request $request)
     {
+        $this->authorize('user_restore');
 
         $request->validate([
             'id' => 'required|exists:users,id|not_in:' . $request->user()->id,
@@ -154,6 +152,8 @@ class UserController extends Controller
 
     public function update(Request $request)
     {
+        $this->authorize('user_edit');
+
         $request->validate([
             'id' => 'required|exists:users',
             'image' => 'sometimes|required|image|mimes:jpeg,png,jpg,gif,svg,webp|max:2048',
@@ -215,7 +215,7 @@ class UserController extends Controller
     public function changeRole(Request $request)
     {
 
-        // $this->authorize('changeRole', User::class);
+        $this->authorize('user_changeRole');
         $request->validate([
             'user_id' => 'required|exists:users,id|not_in:' . $request->user()->id,
             'role_id' => 'required|exists:roles,id',

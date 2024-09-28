@@ -1,4 +1,5 @@
 <script setup>
+import { ability } from "@/plugins/ability";
 import axios from "@/plugins/axios";
 import emitter from "@/plugins/emitter";
 import { $t } from "@/plugins/i18n";
@@ -181,7 +182,6 @@ const editItem = (val) => {
                 resolve(response);
             })
             .catch((error) => {
-                uploadPercentage.value = 0;
                 console.log(error);
                 reject(error);
             })
@@ -262,7 +262,7 @@ onMounted(async () => {
                     </h1>
 
                     <Button
-                        v-if="isSuper"
+                        v-if="ability.can('role', 'create')"
                         icon="ti ti-plus"
                         @click="openCreate"
                         :label="$t('common.create')"
@@ -345,6 +345,7 @@ onMounted(async () => {
                         @click="openDetails(slotProps.data)"
                         v-tooltip.bottom="$t('common.view_details')"
                         class="action-btn"
+                        v-if="ability.can('role', 'view')"
                     />
                     <template
                         v-if="!nonChangingRoles.includes(slotProps.data.name)"
@@ -359,12 +360,14 @@ onMounted(async () => {
                             v-tooltip.bottom="$t('common.edit')"
                             class="action-btn"
                             :loading="loadingStates[slotProps.data.id]"
+                            v-if="ability.can('role', 'view')"
                         />
 
                         <Button
                             v-if="
                                 !slotProps.data.users_count ||
-                                slotProps.data.users_count === 0
+                                (slotProps.data.users_count === 0 &&
+                                    ability.can('role', 'delete'))
                             "
                             icon="ti ti-trash"
                             rounded

@@ -20,14 +20,14 @@ const items = ref([
         items: [
             {
                 label: $t("settings.account"),
-                icon: "pi pi-user",
+                icon: "ti ti-user",
                 command: () => {
                     router.push({ name: "settings" });
                 },
             },
             {
                 label: $t("logout"),
-                icon: "pi pi-sign-out",
+                icon: "ti ti-logout-2",
                 command: () => {
                     confirmLogout();
                 },
@@ -55,7 +55,7 @@ const confirmLogout = () => {
             outlined: true,
         },
         acceptProps: {
-            label: $t("confirm"),
+            label: $t("confirm.title"),
         },
         accept: () => {
             auth.logout();
@@ -180,7 +180,7 @@ const confirmLogout = () => {
             </template>
             <template #item="{ item, props }">
                 <a v-ripple class="flex items-center" v-bind="props.action">
-                    <span :class="item.icon" />
+                    <span :class="item.icon" class="text-xl" />
                     <span>{{ item.label }}</span>
                     <Badge
                         v-if="item.badge"
@@ -211,7 +211,7 @@ const confirmLogout = () => {
                         />
 
                         <div class="inline-flex flex-col items-start gap-1">
-                            <span class="font-bold text-lg">{{
+                            <span class="font-bold text-lg capitalize">{{
                                 user.firstname + " " + user.lastname
                             }}</span>
                             <span class="text-muted-color text-base">{{
