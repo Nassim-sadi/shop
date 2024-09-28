@@ -1,5 +1,5 @@
 import AppLayout from "@/layout/AppLayout.vue";
-import { ability, defineAbilitiesFor } from "@/plugins/ability";
+import { ability } from "@/plugins/ability";
 import { canNavigate } from "@/plugins/canNavigate";
 import { authStore } from "@/store/AuthStore";
 import { createRouter, createWebHistory } from "vue-router";
@@ -9,36 +9,40 @@ const router = createRouter({
     history: createWebHistory(),
     routes: [
         {
-            path: "/",
+            path: "/admin",
             component: AppLayout,
             children: [
                 {
-                    path: "/",
+                    path: "",
                     name: "dashboard",
                     component: () => import("@/views/Dashboard.vue"),
                 },
                 {
-                    path: "/settings",
+                    path: "settings",
                     name: "settings",
                     component: () => import("@/views/pages/settings/Index.vue"),
                 },
                 {
-                    path: "/activity-history",
+                    path: "activity-history",
                     name: "activity-history",
                     component: () =>
                         import("@/views/pages/activityHistories/Index.vue"),
                 },
                 {
-                    path: "/users",
+                    path: "users",
                     name: "users",
                     component: () => import("@/views/pages/users/Index.vue"),
                 },
                 {
-                    path: "/roles",
+                    path: "roles",
                     name: "roles",
                     component: () => import("@/views/pages/roles/Index.vue"),
                 },
             ],
+        },
+        {
+            path: "/",
+            redirect: "/admin",
         },
         {
             path: "/pages/notfound",
