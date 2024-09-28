@@ -15,28 +15,28 @@ const router = createRouter({
                 {
                     path: "",
                     name: "dashboard",
-                    component: () => import("@/views/Dashboard.vue"),
+                    component: () => import("@/views/admin/Dashboard.vue"),
                 },
                 {
                     path: "settings",
                     name: "settings",
-                    component: () => import("@/views/pages/settings/Index.vue"),
+                    component: () => import("@/views/admin/settings/Index.vue"),
                 },
                 {
                     path: "activity-history",
                     name: "activity-history",
                     component: () =>
-                        import("@/views/pages/activityHistories/Index.vue"),
+                        import("@/views/admin/activityHistories/Index.vue"),
                 },
                 {
                     path: "users",
                     name: "users",
-                    component: () => import("@/views/pages/users/Index.vue"),
+                    component: () => import("@/views/admin/users/Index.vue"),
                 },
                 {
                     path: "roles",
                     name: "roles",
-                    component: () => import("@/views/pages/roles/Index.vue"),
+                    component: () => import("@/views/admin/roles/Index.vue"),
                 },
             ],
         },
@@ -47,38 +47,38 @@ const router = createRouter({
         {
             path: "/pages/notfound",
             name: "notfound",
-            component: () => import("@/views/pages/NotFound.vue"),
+            component: () => import("@/views/admin/NotFound.vue"),
         },
 
         {
             path: "/auth/login",
             name: "login",
-            component: () => import("@/views/pages/auth/Login.vue"),
+            component: () => import("@/views/admin/auth/Login.vue"),
         },
         {
             path: "/auth/forgot-password",
             name: "forgot-password",
-            component: () => import("@/views/pages/auth/ForgotPassword.vue"),
+            component: () => import("@/views/admin/auth/ForgotPassword.vue"),
         },
         {
             path: "/auth/reset-password",
             name: "reset-password",
-            component: () => import("@/views/pages/auth/ResetPassword.vue"),
+            component: () => import("@/views/admin/auth/ResetPassword.vue"),
         },
         {
             path: "/NotFound",
             name: "notFound",
-            component: () => import("@/views/pages/NotFound.vue"),
+            component: () => import("@/views/admin/NotFound.vue"),
         },
         {
             path: "/auth/access",
             name: "accessDenied",
-            component: () => import("@/views/pages/auth/Access.vue"),
+            component: () => import("@/views/admin/auth/Access.vue"),
         },
         {
             path: "/auth/error",
             name: "error",
-            component: () => import("@/views/pages/auth/Error.vue"),
+            component: () => import("@/views/admin/auth/Error.vue"),
         },
     ],
 });

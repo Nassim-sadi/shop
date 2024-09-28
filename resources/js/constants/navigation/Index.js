@@ -18,36 +18,28 @@ export default [
             {
                 label: "Users",
                 icon: "ti ti-users",
-                to: {
-                    name: "users",
-                },
+                to: "/admin/users",
                 color: "#3366bb",
                 access: "user_access",
             },
             {
                 label: "Activity History",
                 icon: "ti ti-history",
-                to: {
-                    name: "activity-history",
-                },
+                to: "/admin/activity-history",
                 color: "#830123",
                 access: "activities_access",
             },
             {
                 label: "Roles",
                 icon: "ti ti-lock",
-                to: {
-                    name: "roles",
-                },
+                to: "/admin/roles",
                 color: "#238E3A",
                 access: "role_access",
             },
             {
                 label: "Settings",
                 icon: "ti ti-settings",
-                to: {
-                    name: "settings",
-                },
+                to: "/admin/settings",
                 color: "#9C27B0",
             },
 
