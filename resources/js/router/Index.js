@@ -9,15 +9,9 @@ const router = createRouter({
     history: createWebHistory(),
     routes: [
         {
-            path: "/",
-            component: AppLayout,
-            children: [
-                {
-                    path: "",
-                    name: "home",
-                    component: () => import("@/views/Home.vue"),
-                },
-            ],
+            path: "",
+            name: "home",
+            component: () => import("@/views/Home.vue"),
         },
         {
             path: "/admin",
