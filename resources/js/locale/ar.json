@@ -1,0 +1,14 @@
+{
+    "title": "Breeze App",
+    "scale": "حجم الخط",
+    "darkMode": "الوضع المظلم",
+    "menuType": "نوع القائمة",
+    "rippleEffect": "تأثير تموج",
+    "themes": "المظهر",
+    "primaryFocusRing": "حلقة التركيز الأساسية",
+    "overlay": "تراكب",
+    "static": "ثابت",
+    "settings": "الإعدادات",
+    "profile": "الملف الشخصي",
+    "logout": "تسجيل الخروج"
+}

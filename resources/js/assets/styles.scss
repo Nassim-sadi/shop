@@ -1,0 +1,22 @@
+/* You can add global styles to this file, and also import other style files */
+@import "@/assets/layout/layout.scss";
+@import "primeicons/primeicons.css";
+@import "@tabler/icons-webfont/dist/tabler-icons.min.css";
+
+//fonts
+// Noto
+@font-face {
+    font-family: "Noto";
+    src: url("@/assets/fonts/Noto_Sans/NotoSans-VariableFont_wdth,wght.ttf")
+        format("truetype");
+    font-style: normal;
+    font-weight: 100 1000;
+}
+
+@font-face {
+    font-family: "Noto";
+    src: url("@/assets/fonts/Noto_Sans/NotoSans-Italic-VariableFont_wdth,wght.ttf")
+        format("truetype");
+    font-style: italic;
+    font-weight: 100 1000;
+}
