@@ -1,5 +1,5 @@
 <script setup>
-import { useLayout } from "@/layout/composables/layout";
+import { useLayout } from "@/layout/admin/composables/layout";
 import { canNavigate } from "@/plugins/canNavigate";
 import { onBeforeMount, ref, watch } from "vue";
 import { useRoute } from "vue-router";

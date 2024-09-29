@@ -1,17 +1,23 @@
-import AppLayout from "@/layout/AppLayout.vue";
+import AppLayout from "@/layout/admin/AppLayout.vue";
+import Layout from "@/layout/Layout.vue";
 import { ability } from "@/plugins/ability";
 import { canNavigate } from "@/plugins/canNavigate";
 import { authStore } from "@/store/AuthStore";
 import { createRouter, createWebHistory } from "vue-router";
 import { isUserLoggedIn } from "./utils";
-
 const router = createRouter({
     history: createWebHistory(),
     routes: [
         {
-            path: "",
-            name: "home",
-            component: () => import("@/views/Home.vue"),
+            path: "/",
+            component: Layout,
+            children: [
+                {
+                    path: "",
+                    name: "home",
+                    component: () => import("@/views/Home.vue"),
+                },
+            ],
         },
         {
             path: "/admin",

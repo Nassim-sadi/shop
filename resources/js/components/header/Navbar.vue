@@ -1,81 +1,14 @@
 <script setup>
-import logo from "@/assets/images/logo.svg";
-import { useLayout } from "@/layout/composables/layout";
-import router from "@/router/Index";
-import { useConfirm } from "primevue/useconfirm";
-import { computed, ref } from "vue";
-import AppConfigurator from "./AppConfigurator.vue";
-const { onMenuToggle, toggleDarkMode, isDarkTheme } = useLayout();
-const confirm = useConfirm();
-
-import placeholder from "@/assets/images/avatar/profile-placeholder.png";
-import { $t } from "@/plugins/i18n";
-import { authStore } from "@/store/AuthStore";
-const auth = authStore();
 const appName = ref(import.meta.env.VITE_APP_NAME);
-const menu = ref();
-const items = ref([
-    {
-        label: "Options",
-        items: [
-            {
-                label: $t("settings.account"),
-                icon: "ti ti-user",
-                command: () => {
-                    router.push({ name: "settings" });
-                },
-            },
-            {
-                label: $t("logout"),
-                icon: "ti ti-logout-2",
-                command: () => {
-                    confirmLogout();
-                },
-            },
-        ],
-    },
-]);
-
-const user = computed(() => {
-    return auth.user;
-});
-
-const toggleProfileMenu = (event) => {
-    menu.value.toggle(event);
-};
-
-const confirmLogout = () => {
-    confirm.require({
-        header: $t("logout.confirm.header"),
-        message: $t("logout.confirm.message"),
-        icon: "pi pi-exclamation-triangle",
-        rejectProps: {
-            label: $t("cancel"),
-            severity: "secondary",
-            outlined: true,
-        },
-        acceptProps: {
-            label: $t("confirm.title"),
-        },
-        accept: () => {
-            auth.logout();
-        },
-        reject: () => {},
-    });
-};
+import placeholder from "@/assets/images/avatar/profile-placeholder.png";
+import logo from "@/assets/images/logo.svg";
+import router from "@/router/Index";
+import { ref } from "vue";
 </script>
-
 <template>
-    <div class="layout-topbar rounded-bl-2xl rounded-br-2xl">
-        <div class="layout-topbar-logo-container">
-            <button
-                class="layout-menu-button layout-topbar-action"
-                @click="onMenuToggle"
-            >
-                <i class="pi pi-bars"></i>
-            </button>
-
-            <router-link to="/" class="layout-topbar-logo">
+    <div class="navbar rounded-bl-2xl rounded-br-2xl">
+        <div class="navbar-logo-container">
+            <router-link to="/" class="navbar-logo">
                 <Image :src="logo" alt="logo" class="logo" />
                 <span>{{ appName }}</span>
             </router-link>
@@ -83,35 +16,7 @@ const confirmLogout = () => {
 
         <div class="layout-topbar-actions items-center">
             <div class="layout-config-menu">
-                <button
-                    type="button"
-                    class="layout-topbar-action"
-                    @click="toggleDarkMode"
-                >
-                    <i
-                        :class="[
-                            'pi',
-                            { 'pi-moon': isDarkTheme, 'pi-sun': !isDarkTheme },
-                        ]"
-                    ></i>
-                </button>
-                <div class="relative">
-                    <button
-                        v-styleclass="{
-                            selector: '@next',
-                            enterFromClass: 'hidden',
-                            enterActiveClass: 'animate-scalein',
-                            leaveToClass: 'hidden',
-                            leaveActiveClass: 'animate-fadeout',
-                            hideOnOutsideClick: true,
-                        }"
-                        type="button"
-                        class="layout-topbar-action layout-topbar-action-highlight"
-                    >
-                        <i class="pi pi-palette"></i>
-                    </button>
-                    <AppConfigurator />
-                </div>
+                <div class="relative"></div>
             </div>
 
             <!-- <button
@@ -154,21 +59,8 @@ const confirmLogout = () => {
                     </button>
                 </div>
             </div> -->
-            <button
-                type="button"
-                @click="toggleProfileMenu"
-                aria-haspopup="true"
-                aria-controls="overlay_menu"
-                style="display: flex"
-            >
-                <Avatar
-                    :image="user && user.image ? user.image : placeholder"
-                    shape="circle"
-                    size="large"
-                />
-            </button>
         </div>
-        <Menu
+        <!-- <Menu
             :model="items"
             ref="menu"
             id="overlay_menu"
@@ -228,17 +120,48 @@ const confirmLogout = () => {
                     </div>
                 </div>
             </template>
-        </Menu>
-        <ConfirmDialog></ConfirmDialog>
+        </Menu> -->
     </div>
 </template>
 
 <style lang="scss" scoped>
-.logo {
-    &.p-image {
-        width: 2rem;
-        height: auto;
-        margin-right: 0.5rem;
+.navbar {
+    position: fixed;
+    height: 4rem;
+    z-index: 997;
+    left: 0;
+    top: 0;
+    width: 100%;
+    padding: 0 2rem;
+    background-color: var(--surface-card);
+    transition: left var(--layout-section-transition-duration);
+    display: flex;
+    align-items: center;
+
+    .navbar-logo-container {
+        width: 20rem;
+        display: flex;
+        align-items: center;
+    }
+
+    .navbar-logo {
+        display: inline-flex;
+        align-items: center;
+        font-size: 1.5rem;
+        border-radius: var(--content-border-radius);
+        color: var(--text-color);
+        font-weight: 500;
+        gap: 0.5rem;
+
+        svg {
+            width: 3rem;
+        }
+    }
+}
+
+@media (max-width: 991px) {
+    .navbar {
+        padding: 0 2rem;
     }
 }
 </style>

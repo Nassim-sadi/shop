@@ -1,5 +1,5 @@
 <script setup>
-import { useLayout } from "@/layout/composables/layout";
+import { useLayout } from "@/layout/admin/composables/layout";
 import { $t as t } from "@/plugins/i18n";
 import { $t, updatePreset, updateSurfacePalette } from "@primevue/themes";
 

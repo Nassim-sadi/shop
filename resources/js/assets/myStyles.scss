@@ -1,3 +1,8 @@
+html,
+body {
+    height: 100%;
+    margin: 0;
+}
 // custom action buttons
 .action-btn {
     @apply m-2;
@@ -66,4 +71,12 @@
 
 .highlight {
     @apply font-bold py-1 px-2 text-center rounded-lg;
+}
+
+.logo {
+    &.p-image {
+        width: 2rem;
+        height: auto;
+        margin-right: 0.5rem;
+    }
 }

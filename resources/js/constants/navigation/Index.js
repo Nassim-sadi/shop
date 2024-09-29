@@ -5,7 +5,7 @@ export default [
             {
                 label: "Dashboard",
                 icon: "pi pi-fw pi-home",
-                to: "/",
+                to: "/admin",
                 color: "#238E3A",
             },
         ],
