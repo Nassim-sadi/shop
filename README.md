@@ -1,6 +1,6 @@
-# Laravel Vue template with admin ready for production
+# Laravel Vue Shop with admin Panel
 
-This is a Laravel Vue template with admin ready for production.
+This is a Laravel Vue Shop with admin panel.
 
 ## Installation
 
