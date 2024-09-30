@@ -143,13 +143,12 @@ class RoleController extends Controller
 
 
 
-    public function delete(Request $request)
+    public function delete($id, Request $request)
     {
         $this->authorize('role_delete');
-        $request->validate([
-            'id' => 'required|exists:roles',
-        ]);
-        $role = Role::find($request->id);
+
+        $role = Role::findOrFail($id);
+
 
         if ($role->name === 'Super Admin' || $role->name === 'user') {
             return response()->json(['error' => 'Super Admin role cannot be deleted'], 400);

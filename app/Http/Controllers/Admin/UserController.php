@@ -74,14 +74,19 @@ class UserController extends Controller
         return response()->json(['success' => 'Status changed successfully', 'status' => $user->status], 200);
     }
 
-    public function delete(Request $request)
+    public function delete($id, Request $request)
     {
         $this->authorize('user_delete');
-        $request->validate([
-            'id' => 'required|exists:users,id|not_in:' . $request->user()->id,
-        ]);
 
-        $user = User::find($request->id);
+        $user = User::findOrFail($id);
+        if ($user->id == $request->user()->id) {
+            return response()->json(['error' => 'You cannot delete yourself'], 400);
+        }
+
+        if ($user->hasRole('Super Admin')) {
+            return response()->json(['error' => 'Super Admin cannot be deleted'], 400);
+        }
+
         $user->delete();
         // log activity
         $agent = UA::parse($request->server('HTTP_USER_AGENT'));
@@ -98,14 +103,20 @@ class UserController extends Controller
         return response()->json(['success' => 'User deleted successfully', 'deleted_at' => $user->deleted_at], 200);
     }
 
-    public function forceDelete(Request $request)
+    public function forceDelete($id,  Request $request)
     {
         $this->authorize('user_permaDelete');
 
-        $request->validate([
-            'id' => 'required|exists:users,id|not_in:' . $request->user()->id,
-        ]);
-        $user = User::onlyTrashed()->find($request->id);
+
+        $user = User::onlyTrashed()->findOrFail($id);
+        if ($user->id == $request->user()->id) {
+            return response()->json(['error' => 'You cannot delete yourself'], 400);
+        }
+
+        if ($user->hasRole('Super Admin')) {
+            return response()->json(['error' => 'Super Admin cannot be deleted'], 400);
+        }
+
         $user->forceDelete();
         // log activity
         $agent = UA::parse($request->server('HTTP_USER_AGENT'));
@@ -124,14 +135,21 @@ class UserController extends Controller
 
 
 
-    public function restore(Request $request)
+    public function restore($id, Request $request)
     {
         $this->authorize('user_restore');
 
-        $request->validate([
-            'id' => 'required|exists:users,id|not_in:' . $request->user()->id,
-        ]);
-        $user = User::withTrashed()->find($request->id);
+
+        $user = User::withTrashed()->findOrFail($request->id);
+
+        if ($user->id == $request->user()->id) {
+            return response()->json(['error' => 'You cannot restore yourself'], 400);
+        }
+
+        if ($user->hasRole('Super Admin')) {
+            return response()->json(['error' => 'Super Admin cannot be restored'], 400);
+        }
+
         $user->restore();
 
         // log activity

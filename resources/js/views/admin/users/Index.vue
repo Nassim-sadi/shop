@@ -190,7 +190,7 @@ const changeStatus = async () => {
 
     return new Promise((resolve, reject) => {
         axios
-            .post("api/admin/users/change-status", {
+            .patch("api/admin/users/change-status", {
                 id: current.value.id,
                 status: !current.value.status ? 1 : 0,
             })
@@ -223,9 +223,7 @@ const deleteItem = () => {
 
     return new Promise((resolve, reject) => {
         axios
-            .post("api/admin/users/delete", {
-                id: current.value.id,
-            })
+            .delete("api/admin/users/delete/" + current.value.id)
             .then((res) => {
                 if (deleted.value !== null) {
                     users.value[currentIndex.value].deleted_at =
@@ -258,9 +256,7 @@ const deleteItemPermanently = () => {
 
     return new Promise((resolve, reject) => {
         axios
-            .post("api/admin/users/delete-permanently", {
-                id: current.value.id,
-            })
+            .delete("api/admin/users/delete-permanently/" + current.value.id)
             .then((res) => {
                 users.value.splice(currentIndex.value, 1);
                 total.value--;
@@ -287,9 +283,7 @@ const restoreItem = () => {
 
     return new Promise((resolve, reject) => {
         axios
-            .post("api/admin/users/restore", {
-                id: current.value.id,
-            })
+            .post("api/admin/users/restore/" + current.value.id)
             .then((res) => {
                 if (deleted.value === "only") {
                     users.value.splice(currentIndex.value, 1);
@@ -367,7 +361,7 @@ const changeRole = (val) => {
 
     return new Promise((resolve, reject) => {
         axios
-            .post("api/admin/users/change-role", val)
+            .patch("api/admin/users/change-role", val)
             .then((res) => {
                 console.log(res.data);
 

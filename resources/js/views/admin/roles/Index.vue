@@ -47,8 +47,6 @@ const confirm = (myFunction, params) => {
     });
 };
 
-const auth = authStore();
-
 const getRoles = async () => {
     return new Promise((resolve, reject) => {
         axios
@@ -64,10 +62,6 @@ const getRoles = async () => {
             .finally(() => {});
     });
 };
-
-const isSuper = computed(() => {
-    return auth.user.roles.name === "Super Admin";
-});
 
 const getPermissions = async () => {
     if (loading.value) return;
@@ -141,9 +135,7 @@ const deleteItem = (item, index) => {
     setLoadingState(item.id, true);
     return new Promise((resolve, reject) => {
         axios
-            .post("api/admin/roles/delete", {
-                id: item.id,
-            })
+            .delete("api/admin/roles/delete/" + item.id)
             .then((res) => {
                 roles.value.splice(index, 1);
                 filterRolesWithPermissionsId();
@@ -168,7 +160,7 @@ const editItem = (val) => {
     loadingEdit.value = true;
     return new Promise((resolve, reject) => {
         axios
-            .post("api/admin/roles/update", val)
+            .put("api/admin/roles/update", val)
             .then((response) => {
                 updateItem(response.data.role);
                 filterRolesWithPermissionsId();
