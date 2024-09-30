@@ -3,7 +3,6 @@ import { $t } from "@/plugins/i18n";
 import { Color } from "@/validators/CustomValidators";
 import useVuelidate from "@vuelidate/core";
 import { helpers, required } from "@vuelidate/validators";
-import { useDebounce } from "@vueuse/core";
 import isEqual from "lodash.isequal";
 import { useConfirm } from "primevue/useconfirm";
 import { computed, ref, toRefs, watch } from "vue";
@@ -97,6 +96,7 @@ const rules = computed(() => ({
         ),
     },
     color: {
+        required: helpers.withMessage($t("validation.required"), required),
         Color: helpers.withMessage($t("validation.invalid_color"), Color),
         validateColor: helpers.withMessage(
             $t("validation.existing_role_color"),
@@ -104,6 +104,7 @@ const rules = computed(() => ({
         ),
     },
     text_color: {
+        required: helpers.withMessage($t("validation.required"), required),
         Color: helpers.withMessage($t("validation.invalid_color"), Color),
     },
     permissions: {
