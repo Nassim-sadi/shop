@@ -618,7 +618,11 @@ onMounted(() => {
                             },
                         ]"
                         :style="{
-                            backgroundColor: `${primaryColor.name === 'noir' ? 'var(--text-color)' : primaryColor.palette['500']}`,
+                            backgroundColor: `${
+                                primaryColor.name === 'noir'
+                                    ? 'var(--text-color)'
+                                    : primaryColor.palette['500']
+                            }`,
                         }"
                     ></button>
                 </div>
