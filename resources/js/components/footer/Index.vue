@@ -6,6 +6,6 @@
 <style lang="scss" scoped>
 .shop-footer {
     height: 30rem;
-    background-color: grey;
+    background-color: #e8e8e8;
 }
 </style>

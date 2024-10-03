@@ -32,13 +32,8 @@ const showToast = () => {
     });
 };
 
-const excludedRoutes = ["login", "forgot-password", "reset-password"];
-
 const checkAuth = async () => {
-    if (excludedRoutes.includes(route.name)) {
-        return;
-    }
-    // auth.refresh();
+    if (!route.meta.requireAuth) return;
     await auth.getUser();
 };
 

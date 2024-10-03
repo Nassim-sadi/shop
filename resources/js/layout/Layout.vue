@@ -27,4 +27,10 @@ import Navbar from "@/components/header/Navbar.vue";
     min-height: auto;
     flex-grow: 1;
 }
+
+@media (max-width: 960px) {
+    .layout-main-container {
+        padding: 6rem 1rem 0 1rem !important;
+    }
+}
 </style>

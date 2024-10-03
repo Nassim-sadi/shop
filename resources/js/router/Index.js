@@ -11,17 +11,34 @@ const router = createRouter({
         {
             path: "/",
             component: Layout,
+            meta: { requiresAuth: false },
             children: [
                 {
                     path: "",
                     name: "home",
                     component: () => import("@/views/Home.vue"),
                 },
+                {
+                    path: "Categories",
+                    name: "categories",
+                    component: () => import("@/views/Categories.vue"),
+                },
+                {
+                    path: "about",
+                    name: "about",
+                    component: () => import("@/views/About.vue"),
+                },
+                {
+                    path: "contact",
+                    name: "contact",
+                    component: () => import("@/views/Contact.vue"),
+                },
             ],
         },
         {
             path: "/admin",
             component: AppLayout,
+            meta: { requiresAuth: true, isAdmin: true },
             children: [
                 {
                     path: "",
@@ -52,10 +69,16 @@ const router = createRouter({
             ],
         },
         {
-            path: "/pages/notfound",
+            path: "/admin/:catchAll(.*)",
             name: "notfound",
             component: () => import("@/views/admin/NotFound.vue"),
         },
+
+        // {
+        //     path: "/:catchAll(.*)",
+        //     name: "notfound",
+        //     component: () => import("@/views/admin/NotFound.vue"),
+        // },
 
         {
             path: "/auth/login",
@@ -93,26 +116,20 @@ const router = createRouter({
 router.beforeEach((to, from, next) => {
     const auth = authStore();
     ability.update(auth.permissions);
-    if (
-        to.name !== "login" &&
-        to.name !== "forgot-password" &&
-        to.name !== "reset-password"
-    ) {
-        if (isUserLoggedIn(auth)) {
-            if (canNavigate(to.name)) {
-                next();
-            } else {
-                next({ name: "accessDenied" });
-            }
-        } else {
-            next({ name: "login" });
-        }
-    } else {
-        if (isUserLoggedIn(auth)) {
-            next("/");
-        } else {
-            next();
-        }
+    if (to.meta.requiresAuth && !isUserLoggedIn(auth)) {
+        return next({ name: "login" });
     }
+    if (to.meta.isAdmin && !canNavigate(to.name)) {
+        return next({ name: "accessDenied" });
+    }
+    const publicPages = ["login", "forgot-password", "reset-password"];
+    if (publicPages.includes(to.name)) {
+        if (isUserLoggedIn(auth)) {
+            return next({ name: "dashboard" });
+        }
+        return next();
+    }
+    next();
 });
+
 export default router;

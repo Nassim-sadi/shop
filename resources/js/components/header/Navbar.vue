@@ -1,142 +1,70 @@
 <script setup>
 const appName = ref(import.meta.env.VITE_APP_NAME);
-import placeholder from "@/assets/images/avatar/profile-placeholder.png";
-import logo from "@/assets/images/logo.svg";
-import router from "@/router/Index";
+import logo from "@/assets/shop/logo.avif";
 import { ref } from "vue";
+
+const navItems = ref([
+    {
+        label: "Store",
+        icon: "ti ti-home",
+        to: "/",
+    },
+    {
+        label: "Categories",
+        icon: "ti ti-list",
+        to: "/categories",
+    },
+    {
+        label: "About",
+        icon: "ti ti-info-circle",
+        to: "/about",
+    },
+    {
+        label: "Contact",
+        icon: "ti ti-phone",
+        to: "/contact",
+    },
+]);
 </script>
 <template>
-    <div class="navbar rounded-bl-2xl rounded-br-2xl">
+    <div class="navbar">
         <div class="navbar-logo-container">
             <router-link to="/" class="navbar-logo">
-                <Image :src="logo" alt="logo" class="logo" />
-                <span>{{ appName }}</span>
+                <!-- <Image :src="logo" alt="logo" /> -->
+                <span style="color: var(--light-clr)">{{ appName }}</span>
             </router-link>
         </div>
 
-        <div class="layout-topbar-actions items-center">
-            <div class="layout-config-menu">
-                <div class="relative"></div>
-            </div>
+        <IconField>
+            <InputIcon class="pi pi-search" />
+            <InputText v-model="value1" placeholder="Search" />
+        </IconField>
 
-            <!-- <button
-                class="layout-topbar-menu-button layout-topbar-action"
-                v-styleclass="{
-                    selector: '@next',
-                    enterFromClass: 'hidden',
-                    enterActiveClass: 'animate-scalein',
-                    leaveToClass: 'hidden',
-                    leaveActiveClass: 'animate-fadeout',
-                    hideOnOutsideClick: true,
-                }"
-            >
-                <i class="pi pi-ellipsis-v"></i>
-            </button>
-
-            <div class="layout-topbar-menu hidden lg:block">
-                <div class="layout-topbar-menu-content items-center">
-                    <button type="button" class="layout-topbar-action">
-                        <i class="pi pi-calendar"></i>
-                        <span>Calendar</span>
-                    </button>
-                    <button type="button" class="layout-topbar-action">
-                        <i class="pi pi-inbox"></i>
-                        <span>Messages</span>
-                    </button>
-                    <button
-                        type="button"
-                        @click="toggleProfileMenu"
-                        aria-haspopup="true"
-                        aria-controls="overlay_menu"
-                    >
-                        <Avatar
-                            :image="
-                                user && user.image ? user.image : placeholder
-                            "
-                            shape="circle"
-                            size="large"
-                        />
-                    </button>
-                </div>
-            </div> -->
+        <div class="navbar-items">
+            <template v-for="item in navItems">
+                <router-link :to="item.to" class="navbar-item" v-ripple>
+                    <i :class="item.icon"></i>
+                    {{ item.label }}
+                </router-link>
+            </template>
         </div>
-        <!-- <Menu
-            :model="items"
-            ref="menu"
-            id="overlay_menu"
-            class="w-full md:w-80 p-2"
-            :popup="true"
-        >
-            <template #submenulabel="{ item }">
-                <span class="text-primary font-bold">{{ item.label }}</span>
-            </template>
-            <template #item="{ item, props }">
-                <a v-ripple class="flex items-center" v-bind="props.action">
-                    <span :class="item.icon" class="text-xl" />
-                    <span>{{ item.label }}</span>
-                    <Badge
-                        v-if="item.badge"
-                        class="ml-auto"
-                        :value="item.badge"
-                    />
-                    <span
-                        v-if="item.shortcut"
-                        class="ml-auto border border-surface rounded bg-emphasis text-muted-color text-xs p-1"
-                        >{{ item.shortcut }}</span
-                    >
-                </a>
-            </template>
-            <template #start>
-                <div
-                    class="relative overflow-hidden w-full p-2 rounded-none transition-colors duration-200"
-                >
-                    <h2 class="font-bold text-xl mb-4">
-                        {{ $t("user.profile") }}
-                    </h2>
-                    <div class="flex items-center gap-4">
-                        <Avatar
-                            :image="
-                                user && user.image ? user.image : placeholder
-                            "
-                            shape="circle"
-                            size="xlarge"
-                        />
-
-                        <div class="inline-flex flex-col items-start gap-1">
-                            <span class="font-bold text-lg capitalize">{{
-                                user.firstname + " " + user.lastname
-                            }}</span>
-                            <span class="text-muted-color text-base">{{
-                                user.roles.name
-                            }}</span>
-                            <div
-                                class="flex items-center gap-2 text-muted-color"
-                            >
-                                <span class="pi pi-envelope"></span>
-
-                                <span class="text-sm"> {{ user.email }}</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </template>
-        </Menu> -->
     </div>
 </template>
 
 <style lang="scss" scoped>
 .navbar {
     position: fixed;
-    height: 4rem;
+    height: 6rem;
     z-index: 997;
     left: 0;
     top: 0;
     width: 100%;
     padding: 0 2rem;
-    background-color: var(--surface-card);
+    background-color: var(--black-clr);
     transition: left var(--layout-section-transition-duration);
     display: flex;
     align-items: center;
+    justify-content: space-between;
 
     .navbar-logo-container {
         width: 20rem;
@@ -157,11 +85,24 @@ import { ref } from "vue";
             width: 3rem;
         }
     }
+
+    .navbar-items {
+        display: flex;
+        align-items: center;
+        gap: 2rem;
+
+        .navbar-item {
+            color: var(--light-clr);
+            font-size: 1.2rem;
+            font-weight: 500;
+            cursor: pointer;
+        }
+    }
 }
 
 @media (max-width: 991px) {
     .navbar {
-        padding: 0 2rem;
+        padding: 0 1rem;
     }
 }
 </style>
