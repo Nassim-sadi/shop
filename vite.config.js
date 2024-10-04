@@ -22,4 +22,7 @@ export default defineConfig({
             "@": fileURLToPath(new URL("./resources/js", import.meta.url)),
         },
     },
+    server: {
+        port: import.meta.env.VITE_APP_PORT || 8080,
+    },
 });
