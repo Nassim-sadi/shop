@@ -24,5 +24,8 @@ export default defineConfig({
     },
     server: {
         port: parseInt(process.env.VITE_PORT) || 8080,
+        hmr: {
+            host: "localhost",
+        },
     },
 });
