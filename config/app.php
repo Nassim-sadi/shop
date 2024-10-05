@@ -44,7 +44,7 @@ return [
     */
 
     'debug' => (bool) env('APP_DEBUG', false),
-    'frontend_url' => env('FRONTEND_URL', 'http://127.0.0.1:8000'),
+    'frontend_url' => env('FRONTEND_URL', 'http://127.0.0.1'),
 
     /*
     |--------------------------------------------------------------------------

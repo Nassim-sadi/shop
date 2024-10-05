@@ -124,6 +124,7 @@ const forgotPassword = () => {
                             class="block text-surface-900 dark:text-surface-0 text-xl font-medium mb-2"
                             >{{ $t("auth.email") }}</label
                         >
+
                         <InputText
                             id="email1"
                             type="text"
@@ -196,6 +197,19 @@ const forgotPassword = () => {
                             >
                             </Button>
                         </div>
+                        <Button
+                            :label="$t('auth.sign_in')"
+                            class="w-full"
+                            @click="login"
+                            :loading="loading"
+                        ></Button>
+
+                        <Button
+                            :label="$t('auth.sign_in')"
+                            class="w-full"
+                            @click="login"
+                            :loading="loading"
+                        ></Button>
                         <Button
                             :label="$t('auth.sign_in')"
                             class="w-full"
