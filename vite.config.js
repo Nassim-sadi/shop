@@ -22,7 +22,4 @@ export default defineConfig({
             "@": fileURLToPath(new URL("./resources/js", import.meta.url)),
         },
     },
-    server: {
-        port: 5173, // Or your desired port
-    },
 });
