@@ -3,16 +3,47 @@ echo "Running composer"
 cp /etc/secrets/.env .env
 composer global require hirak/prestissimo
 composer install --no-dev --working-dir=/var/www/html
-# Install Node.js and npm if not detected automatically
-if ! command -v npm &> /dev/null
-then
-    echo "npm not found, installing Node.js"
-    curl -sL https://deb.nodesource.com/setup_lts.x | bash -
-    apt-get install -y nodejs
-fi
+
 echo "npm build"
-npm install
-npm run build
+
+# Function to install npm for Debian-based systems
+install_npm_debian() {
+  echo "Detected Debian-based system."
+  curl -fsSL https://deb.nodesource.com/setup_16.x | bash -
+  apt-get install -y nodejs
+}
+
+# Function to install npm for Arch-based systems
+install_npm_arch() {
+  echo "Detected Arch-based system."
+  pacman -Syu --noconfirm nodejs npm
+}
+
+# Function to detect Linux distribution
+detect_distro_and_install_npm() {
+  if [ -f /etc/os-release ]; then
+    . /etc/os-release
+    case $ID in
+      debian|ubuntu|linuxmint)
+        install_npm_debian
+        ;;
+      arch|manjaro)
+        install_npm_arch
+        ;;
+      *)
+        echo "Unsupported Linux distribution: $ID"
+        exit 1
+        ;;
+    esac
+  else
+    echo "Cannot detect the Linux distribution. Exiting."
+    exit 1
+  fi
+}
+
+# Run the distro detection and npm installation
+detect_distro_and_install_npm
+
 
 echo "Clearing caches..."
 php artisan optimize:clear
