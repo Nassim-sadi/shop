@@ -42,6 +42,8 @@ else
   exit 1
 fi
 
+npm install
+npm run build
 
 
 echo "Clearing caches..."
