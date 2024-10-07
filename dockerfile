@@ -48,4 +48,4 @@ EXPOSE 80
 
 
 # Start PHP-FPM and Nginx server
-CMD ["php-fpm"]
+CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=80"]
