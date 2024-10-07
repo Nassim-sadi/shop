@@ -130,7 +130,6 @@ return [
 
 
     'providers' => ServiceProvider::defaultProviders()->merge([
-        Barryvdh\LaravelIdeHelper\IdeHelperServiceProvider::class,
         Ichtrojan\Otp\OtpServiceProvider::class,
         Nebed\UserAgent\UserAgentServiceProvider::class,
 

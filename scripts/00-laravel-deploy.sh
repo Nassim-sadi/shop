@@ -20,29 +20,25 @@ install_npm_arch() {
 }
 
 # Function to detect Linux distribution
-detect_distro_and_install_npm() {
-  if [ -f /etc/os-release ]; then
-    . /etc/os-release
-    case $ID in
-      debian|ubuntu|linuxmint)
-        install_npm_debian
-        ;;
-      arch|manjaro)
-        install_npm_arch
-        ;;
-      *)
-        echo "Unsupported Linux distribution: $ID"
-        exit 1
-        ;;
-    esac
-  else
-    echo "Cannot detect the Linux distribution. Exiting."
-    exit 1
-  fi
-}
+if [ -f /etc/os-release ]; then
+  . /etc/os-release
+  case $ID in
+    debian|ubuntu|linuxmint)
+      install_npm_debian
+      ;;
+    arch|manjaro)
+      install_npm_arch
+      ;;
+    *)
+      echo "Unsupported Linux distribution: $ID"
+      exit 1
+      ;;
+  esac
+else
+  echo "Cannot detect the Linux distribution. Exiting."
+  exit 1
+fi
 
-# Run the distro detection and npm installation
-detect_distro_and_install_npm
 
 
 echo "Clearing caches..."
