@@ -29,6 +29,9 @@ if [ -f /etc/os-release ]; then
     arch|manjaro)
       install_npm_arch
       ;;
+    alpine)
+    apk add --update nodejs npm
+      ;;
     *)
       echo "Unsupported Linux distribution: $ID"
       exit 1
