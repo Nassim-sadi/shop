@@ -46,12 +46,6 @@ EXPOSE 80
 # Expose port for Vite (Frontend)
 # EXPOSE 5173
 
-# Run Laravel artisan commands during build
-RUN php artisan storage:link \
-  && php artisan config:cache \
-  && php artisan route:cache \
-  && php artisan view:cache \
-  && php artisan migrate:fresh --seed
 
 # Start PHP-FPM and Nginx server
 CMD ["php-fpm"]
