@@ -1,14 +1,14 @@
-# Use the official PHP image as the base image
+# Use the official PHP image as a base image
 FROM php:8.3-fpm
 
-# Set the working directory
+# Set working directory
 WORKDIR /var/www/html
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
   build-essential \
   libpng-dev \
-  libjpeg62-turbo-dev \
+  libjpeg-dev \
   libfreetype6-dev \
   locales \
   zip \
@@ -18,28 +18,40 @@ RUN apt-get update && apt-get install -y \
   git \
   curl \
   libonig-dev \
-  libxml2-dev
+  libxml2-dev \
+  libzip-dev
 
 # Clear cache
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Install PHP extensions
-RUN docker-php-ext-install pdo pdo_mysql mbstring exif pcntl bcmath gd
+RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd zip
 
 # Install Composer
-COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Copy the application code
+# Copy existing application directory contents
 COPY . /var/www/html
 
-# Set file permissions
+# Copy existing application directory permissions
+COPY --chown=www-data:www-data . /var/www/html
+
+# Set correct permissions
 RUN chown -R www-data:www-data /var/www/html \
   && chmod -R 755 /var/www/html
 
-# Expose the port Laravel will run on
+# Expose port 80
 EXPOSE 80
 
-# Start PHP-FPM
-CMD ["php-fpm"]
+# Expose port for Vite (Frontend)
+# EXPOSE 5173
 
-EXPOSE 8000
+# Run Laravel artisan commands during build
+RUN php artisan storage:link \
+  && php artisan config:cache \
+  && php artisan route:cache \
+  && php artisan view:cache \
+  && php artisan migrate:fresh --seed
+
+# Start PHP-FPM and Nginx server
+CMD ["php-fpm"]
