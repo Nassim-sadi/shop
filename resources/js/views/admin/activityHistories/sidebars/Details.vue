@@ -44,21 +44,11 @@ const { isOpen, current } = toRefs(props);
 
 <template>
     <PerfectScrollbar :options="{ wheelPropagation: false }">
-        <Drawer
-            :visible="isOpen"
-            :header="$t('activities.details')"
-            position="right"
-            @update:visible="$emit('update:isOpen', $event)"
-            class="!w-full md:!w-[30rem] lg:!w-[25rem]"
-        >
+        <Drawer :visible="isOpen" :header="$t('activities.details')" position="right" @update:visible="$emit('update:isOpen', $event)" class="!w-full md:!w-[30rem] lg:!w-[25rem]">
             <div class="mb-4">
                 <p class="font-bold">{{ $t("activities.by") }} :</p>
                 <div class="flex items-center gap-2 mt-2">
-                    <Avatar
-                        :image="current.user.image || placeholder"
-                        shape="circle"
-                        size="large"
-                    ></Avatar>
+                    <Avatar :image="current.user.image || placeholder" shape="circle" size="large"></Avatar>
                     {{ current.user.firstname + " " + current.user.lastname }}
                 </div>
 
@@ -68,10 +58,7 @@ const { isOpen, current } = toRefs(props);
 
             <div class="mb-4">
                 <p class="font-bold mb-2">{{ $t("activities.role") }} :</p>
-                <span
-                    :style="`background-color: #${current.user.role.color} ; color : #${current.user.role.text_color}`"
-                    class="highlight"
-                >
+                <span :style="`background-color: #${current.user.role.color} ; color : #${current.user.role.text_color}`" class="highlight">
                     {{ current.user.role.name }}
                 </span>
             </div>
@@ -79,10 +66,7 @@ const { isOpen, current } = toRefs(props);
             <div class="mb-4">
                 <p class="font-bold">{{ $t("activities.browser") }} :</p>
                 <div class="flex gap-2 items-center mt-2">
-                    <Image
-                        :src="browsers[current.browser]"
-                        class="w-8 object-contain block"
-                    />
+                    <Image :src="browsers[current.browser]" class="w-8 object-contain block" />
 
                     {{ current.browser }}
                 </div>
@@ -91,16 +75,12 @@ const { isOpen, current } = toRefs(props);
             <div class="mb-4">
                 <p class="font-bold">{{ $t("activities.os") }} :</p>
                 <div class="flex items-center gap-2 mt-2">
-                    <Image
-                        :src="
-                            os[
-                                current.platform === 'Other'
-                                    ? 'Other'
-                                    : current.platform
-                            ]
-                        "
-                        class="w-8 object-contain block"
-                    />
+                    <Image :src="os[
+                        current.platform === 'Other'
+                            ? 'Other'
+                            : current.platform
+                        ]
+                        " class="w-8 object-contain block" />
                     {{ current.platform }}
                 </div>
             </div>

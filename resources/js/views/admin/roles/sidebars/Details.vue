@@ -16,20 +16,10 @@ const { isOpen, current } = toRefs(props);
 </script>
 
 <template>
-    <Drawer
-        :visible="isOpen"
-        :header="$t('roles.details')"
-        position="right"
-        @update:visible="$emit('update:isOpen', $event)"
-        class="!w-full md:!w-[30rem] lg:!w-[25rem] sidebar"
-        blockScroll
-    >
+    <Drawer :visible="isOpen" :header="$t('roles.details')" position="right" @update:visible="$emit('update:isOpen', $event)" class="!w-full md:!w-[30rem] lg:!w-[25rem] sidebar" blockScroll>
         <div class="mb-4">
             <p class="font-bold mb-2">{{ $t("roles.name") }} :</p>
-            <span
-                :style="`background-color: #${current.color} ; color : #${current.text_color}`"
-                class="highlight"
-            >
+            <span :style="`background-color: #${current.color} ; color : #${current.text_color}`" class="highlight">
                 {{ current.name }}
             </span>
         </div>
@@ -42,13 +32,8 @@ const { isOpen, current } = toRefs(props);
         <div class="mb-4">
             <p class="font-bold mb-2">{{ $t("roles.permissions") }} :</p>
             <div class="flex flex-wrap gap-2 font-semibold">
-                <template
-                    v-if="current.permissions && current.permissions.length > 0"
-                    v-for="permission in current.permissions"
-                >
-                    <span
-                        class="highlight text-lime-600 bg-lime-300 border-lime-600 border-2"
-                    >
+                <template v-if="current.permissions && current.permissions.length > 0" v-for="permission in current.permissions">
+                    <span class="highlight text-lime-600 bg-lime-300 border-lime-600 border-2">
                         {{ permission.name }}
                     </span>
                 </template>
@@ -76,7 +61,7 @@ const { isOpen, current } = toRefs(props);
 
         <div class="mb-4">
             <p class="font-bold">{{ $t("roles.users_count") }} :</p>
-            {{ current.users_count }}
+            {{ current.users_count || $t("roles.no_users") }}
         </div>
     </Drawer>
 </template>

@@ -1,0 +1,24 @@
+# Ignore node modules (frontend dependencies)
+node_modules
+npm-debug.log
+
+# Ignore local environment files
+.env
+.env.*
+
+# Ignore Laravel specific files
+/storage/*
+/vendor/*
+
+# Ignore IDE files
+.idea
+.vscode
+
+# Ignore Git files
+.git
+.gitignore
+
+# Ignore logs and cache
+*.log
+storage/logs/*
+storage/framework/cache/*
