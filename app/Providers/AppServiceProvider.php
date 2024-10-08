@@ -27,9 +27,9 @@ class AppServiceProvider extends ServiceProvider
         Gate::before(function ($user, $ability) {
             return $user->hasRole('Super Admin') ? true : null;
         });
-        if (env('APP_ENV') == 'production') {
-            $url->forceScheme('https');
-        }
+        // if (env('APP_ENV') == 'production') {
+        //     $url->forceScheme('https');
+        // }
         // TODO : Implement rate limiter method.
         // RateLimiter::for('api', function (Request $request) {
         //     return Limit::perMinute(60)->by($request->user()?->id ?: $request->ip());
