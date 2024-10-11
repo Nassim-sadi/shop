@@ -181,7 +181,8 @@
         "update_success": "Role updated successfully",
         "delete_success": "Role deleted successfully",
         "select_permission": "Select permission",
-        "users_count": "Users count"
+        "users_count": "Users count",
+        "no_users": "No users for this role"
     },
     "status": {
         "success": {

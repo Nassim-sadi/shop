@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\Roles\PermissionResource;
 use App\Http\Resources\Roles\RolesResource;
 use App\Jobs\ActivityHistoryJob;
+use App\Models\ActivityHistory;
 use Illuminate\Http\Request;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
@@ -71,6 +72,18 @@ class RoleController extends Controller
 
         // log activity
         $agent = UA::parse($request->server('HTTP_USER_AGENT'));
+        // defer(
+        //     function () use ($agent, $role, $request) {
+        //         ActivityHistory::create([
+        //             'user_id' => $request->user()->id,
+        //             'model' => 'roles',
+        //             'action' => 'create',
+        //             'data' => ['role' => $role],
+        //             'platform' => $agent->os->family,
+        //             'browser' => $agent->ua->family,
+        //         ]);
+        //     }
+        // );
         ActivityHistoryJob::dispatch(
             data: [
                 'model' => 'roles',

@@ -6,6 +6,7 @@ import { fileURLToPath, URL } from "url";
 import { defineConfig } from "vite";
 
 export default defineConfig({
+    base: "./",
     plugins: [
         vue(),
         Components({
