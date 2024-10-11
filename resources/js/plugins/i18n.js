@@ -1,5 +1,5 @@
-import AR from "@/locale/ar.json";
-import EN from "@/locale/en.json";
+import AR from "@/locales/ar.json";
+import EN from "@/locales/en.json";
 import { createI18n } from "vue-i18n";
 
 const i18n = createI18n({
