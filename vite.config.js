@@ -12,7 +12,7 @@ export default defineConfig({
             resolvers: [PrimeVueResolver()],
         }),
         laravel({
-            input: ["resources/styles/app.css", "resources/js/app.js"],
+            input: ["resources/js/app.js"],
             refresh: true,
         }),
     ],

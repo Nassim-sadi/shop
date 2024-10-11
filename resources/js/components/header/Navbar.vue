@@ -37,7 +37,7 @@ const navItems = ref([
 
         <IconField>
             <InputIcon class="pi pi-search" />
-            <InputText v-model="value1" placeholder="Search" />
+            <InputText v-model="search" placeholder="Search" />
         </IconField>
 
         <div class="navbar-items">
