@@ -1,6 +1,7 @@
 <script setup>
 const appName = ref(import.meta.env.VITE_APP_NAME);
 import logo from "@/assets/shop/logo.avif";
+import ecommerceLogo from "@/assets/shop/logo.png";
 import { ref } from "vue";
 
 const navItems = ref([
@@ -28,7 +29,8 @@ const navItems = ref([
         <div class="navbar-logo-container">
             <router-link to="/" class="navbar-logo">
                 <!-- <Image :src="logo" alt="logo" /> -->
-                <span style="color: var(--light-clr)">{{ appName }}</span>
+                <Image :src="logo" alt="logo" class="logo" />
+                <!-- <span style="color: var(--light-clr)">{{ appName }}</span> -->
             </router-link>
         </div>
 
@@ -77,10 +79,12 @@ const navItems = ref([
         font-weight: 500;
         gap: 0.5rem;
 
-        svg {
-            width: 3rem;
+        .logo {
+            width: 6rem;
         }
     }
+
+
 
     .navbar-items {
         display: flex;
