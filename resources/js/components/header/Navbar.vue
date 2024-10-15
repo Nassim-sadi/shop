@@ -6,22 +6,19 @@ import { ref } from "vue";
 const navItems = ref([
     {
         label: "Store",
-        icon: "ti ti-home",
         to: "/",
     },
     {
         label: "Categories",
-        icon: "ti ti-list",
         to: "/categories",
     },
     {
         label: "About",
-        icon: "ti ti-info-circle",
         to: "/about",
     },
     {
         label: "Contact",
-        icon: "ti ti-phone",
+
         to: "/contact",
     },
 ]);
@@ -43,7 +40,6 @@ const navItems = ref([
         <div class="navbar-items">
             <template v-for="item in navItems">
                 <router-link :to="item.to" class="navbar-item" v-ripple>
-                    <i :class="item.icon"></i>
                     {{ item.label }}
                 </router-link>
             </template>

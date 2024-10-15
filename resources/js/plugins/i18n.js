@@ -11,7 +11,5 @@ const i18n = createI18n({
         AR: AR,
     },
 });
-console.log(import.meta.env.VITE_APP_LOCALE);
 const $t = i18n.global.t;
-
 export { $t, i18n };
