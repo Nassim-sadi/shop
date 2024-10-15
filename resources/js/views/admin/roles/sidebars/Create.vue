@@ -62,10 +62,6 @@ function isValidPermission() {
 
 const validateColor = (value) => {
     for (let i = 0; i < filteredRoles.value.length; i++) {
-        console.log(filteredRoles.value[i].color);
-        console.log("color");
-
-        console.log(value);
         if (filteredRoles.value[i].color === value) {
             return false;
         }
@@ -74,11 +70,6 @@ const validateColor = (value) => {
 };
 
 const validateName = (value) => {
-    console.log("name");
-
-    console.log(value);
-
-    // check name if same as in filtered roles
     for (let i = 0; i < filteredRoles.value.length; i++) {
         if (filteredRoles.value[i].name === value) {
             return false;
@@ -153,7 +144,7 @@ const cancelConfirm = () => {
             accept: () => {
                 $emit("update:isOpen", false);
             },
-            reject: () => {},
+            reject: () => { },
         });
     } else {
         $emit("update:isOpen", false);
@@ -186,72 +177,37 @@ watch(
 </script>
 
 <template>
-    <Drawer
-        :visible="isOpen"
-        :header="$t('roles.create')"
-        position="right"
-        @update:visible="$emit('update:isOpen', $event)"
-        :dismissable="false"
-        :showCloseIcon="false"
-        block-scroll
-        class="!w-full md:!w-[30rem] lg:!w-[25rem]"
-    >
+    <Drawer :visible="isOpen" :header="$t('roles.create')" position="right" @update:visible="$emit('update:isOpen', $event)" :dismissable="false" :showCloseIcon="false" block-scroll class="!w-full md:!w-[30rem] lg:!w-[25rem]">
         <div class="flex flex-col min-h-full">
             <label for="name" class="mb-5">{{ $t("roles.name") }}</label>
-            <InputText
-                id="name"
-                v-model="role.name"
-                aria-labelledby="name"
-                class="w-full mb-5"
-            />
+            <InputText id="name" v-model="role.name" aria-labelledby="name" class="w-full mb-5" />
 
-            <div
-                class="text-red-500 mb-5"
-                v-for="error of v$.name.$errors"
-                :key="error.$uid"
-            >
+            <div class="text-red-500 mb-5" v-for="error of v$.name.$errors" :key="error.$uid">
                 <Message severity="error">{{ error.$message }}</Message>
             </div>
 
             <label for="description" class="mb-5">{{
                 $t("roles.description")
             }}</label>
-            <Textarea
-                id="description"
-                v-model="role.description"
-                aria-labelledby="description"
-                class="w-full mb-5"
-                rows="3"
-            />
+            <Textarea id="description" v-model="role.description" aria-labelledby="description" class="w-full mb-5" rows="3" />
 
             <label for="color" class="mb-5">{{ $t("roles.color") }}</label>
             <ColorPicker v-model="role.color" class="mb-5" />
-            <div
-                class="text-red-500 mb-5"
-                v-for="error of v$.color.$errors"
-                :key="error.$uid"
-            >
+            <div class="text-red-500 mb-5" v-for="error of v$.color.$errors" :key="error.$uid">
                 <Message severity="error">{{ error.$message }}</Message>
             </div>
 
             <label for="text_color" class="mb-5">
                 {{ $t("common.preview") }}
             </label>
-            <span
-                class="highlight mb-5"
-                :style="{
-                    color: '#' + getContrastTextColor(role.color),
-                    backgroundColor: role.color ? '#' + role.color : '',
-                }"
-            >
+            <span class="highlight mb-5" :style="{
+                color: '#' + getContrastTextColor(role.color),
+                backgroundColor: role.color ? '#' + role.color : '',
+            }">
                 {{ role.name ? role.name : $t("roles.name") }}
             </span>
 
-            <div
-                class="text-red-500 mb-5"
-                v-for="error of v$.text_color.$errors"
-                :key="error.$uid"
-            >
+            <div class="text-red-500 mb-5" v-for="error of v$.text_color.$errors" :key="error.$uid">
                 <Message severity="error">{{ error.$message }}</Message>
             </div>
 
@@ -259,42 +215,16 @@ watch(
                 $t("roles.permissions")
             }}</label>
 
-            <MultiSelect
-                id="permissions"
-                v-model="role.permissions"
-                option-value="id"
-                :options="permissions"
-                display="chip"
-                optionLabel="name"
-                class="w-full mb-5"
-                :placeholder="$t('roles.select_permission')"
-            />
+            <MultiSelect id="permissions" v-model="role.permissions" option-value="id" :options="permissions" display="chip" optionLabel="name" class="w-full mb-5" :placeholder="$t('roles.select_permission')" />
 
-            <div
-                class="text-red-500 mb-5"
-                v-for="error of v$.permissions.$errors"
-                :key="error.$uid"
-            >
+            <div class="text-red-500 mb-5" v-for="error of v$.permissions.$errors" :key="error.$uid">
                 <Message severity="error">{{ error.$message }}</Message>
             </div>
 
             <div slot="footer" class="mt-auto flex justify-evenly">
-                <Button
-                    label="Cancel"
-                    icon="pi pi-times"
-                    severity="danger"
-                    @click="cancelConfirm"
-                    :disabled="loading"
-                />
+                <Button label="Cancel" icon="pi pi-times" severity="danger" @click="cancelConfirm" :disabled="loading" />
 
-                <Button
-                    label="Save"
-                    icon="pi pi-check"
-                    severity="success"
-                    @click="createItem"
-                    :loading="loading"
-                    :disabled="!isEdited || loading"
-                />
+                <Button label="Save" icon="pi pi-check" severity="success" @click="createItem" :loading="loading" :disabled="!isEdited || loading" />
             </div>
         </div>
     </Drawer>

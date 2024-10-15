@@ -45,7 +45,6 @@ export const authStore = defineStore("authStore", {
                 axios
                     .post("api/admin/logout")
                     .then((response) => {
-                        console.log(response);
                         this.user = null;
                         this.token = null;
                         this.tokenExpiration = null;
