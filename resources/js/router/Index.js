@@ -33,8 +33,14 @@ const router = createRouter({
                     name: "contact",
                     component: () => import("@/views/Contact.vue"),
                 },
+                {
+                    path: "/:catchAll(.*)",
+                    name: "404",
+                    component: () => import("@/views/404.vue"),
+                },
             ],
         },
+        // admin routes
         {
             path: "/admin",
             component: AppLayout,
@@ -73,13 +79,6 @@ const router = createRouter({
             name: "notfound",
             component: () => import("@/views/admin/NotFound.vue"),
         },
-
-        // {
-        //     path: "/:catchAll(.*)",
-        //     name: "notfound",
-        //     component: () => import("@/views/admin/NotFound.vue"),
-        // },
-
         {
             path: "/auth/login",
             name: "login",

@@ -19,7 +19,6 @@ const navItems = ref([
     },
     {
         label: "Contact",
-
         to: "/contact",
     },
 ]);
@@ -27,10 +26,8 @@ const navItems = ref([
 <template>
     <div class="navbar">
         <div class="navbar-logo-container">
-            <router-link to="/" class="navbar-logo">
-                <!-- <Image :src="logo" alt="logo" /> -->
+            <router-link :to="{ name: 'home' }" class="navbar-logo">
                 <Image :src="logo" alt="logo" class="logo" />
-                <!-- <span style="color: var(--light-clr)">{{ appName }}</span> -->
             </router-link>
         </div>
 
@@ -80,7 +77,7 @@ const navItems = ref([
         gap: 0.5rem;
 
         .logo {
-            width: 6rem;
+            width: 16rem;
         }
     }
 
