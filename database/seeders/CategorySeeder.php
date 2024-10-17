@@ -2,9 +2,9 @@
 
 namespace Database\Seeders;
 
+use App\Models\Category;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
-use Database\Factories\CategoryFactory;
 
 class CategorySeeder extends Seeder
 {
@@ -13,6 +13,15 @@ class CategorySeeder extends Seeder
      */
     public function run(): void
     {
-        CategoryFactory::new()->count(10)->create();
+        $parentCategory = Category::create(['name' => 'Electronics', 'slug' => 'electronics', 'description' => 'All electronics']);
+
+        // Create subcategories
+        $parentCategory->children()->createMany([
+            ['name' => 'Smartphones', 'slug' => 'smartphones', 'description' => 'All smartphones'],
+            ['name' => 'Laptops', 'slug' => 'laptops', 'description' => 'All laptops'],
+            ['name' => 'Tablets', 'slug' => 'tablets', 'description' => 'All tablets'],
+            ['name' => 'Headphones', 'slug' => 'headphones', 'description' => 'All headphones'],
+            ['name' => 'Cameras', 'slug' => 'cameras', 'description' => 'All cameras'],
+        ]);
     }
 }

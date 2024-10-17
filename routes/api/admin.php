@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\ActivityHistoryController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\AuthController;
+use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\ResetPasswordController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\UserController;
@@ -56,6 +57,13 @@ Route::middleware(["auth:sanctum"])->group(function () {
         Route::post('/create', 'create');
         Route::put('/update', 'update');
         Route::delete('/delete/{id}', 'delete');
+    });
+
+    Route::prefix('categories')->controller(CategoryController::class)->group(function () {
+        Route::get('/', 'getCategories');
+        // Route::post('/create', 'create');
+        // Route::put('/update', 'update');
+        // Route::delete('/delete/{id}', 'delete');
     });
 
 

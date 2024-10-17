@@ -235,5 +235,21 @@
         "role_permission_exists": "An existing role already has these permissions",
         "existing_role_name": "An existing role already has this name",
         "existing_role_color": "An existing role already has this color"
+    },
+    "categories": {
+        "title": "category | categories",
+        "subtitle": "List of categories",
+        "page": "Categories",
+        "name": "name",
+        "no_category": "No category found",
+        "create": "Create category",
+        "edit": "Edit category",
+        "update": "Update category",
+        "delete": "Delete category",
+        "details": "Category details",
+        "create_success": "Category created successfully",
+        "update_success": "Category updated successfully",
+        "delete_success": "Category deleted successfully",
+        "select_parent": "Select parent category"
     }
 }

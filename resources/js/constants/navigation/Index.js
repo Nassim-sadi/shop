@@ -16,6 +16,13 @@ export default [
         icon: "ti ti-briefcase",
         items: [
             {
+                label: "Categories",
+                icon: "ti ti-list",
+                to: "/admin/categories",
+                color: "#9C27B0",
+                access: "category_access",
+            },
+            {
                 label: "Users",
                 icon: "ti ti-users",
                 to: "/admin/users",

@@ -10,10 +10,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Spatie\Permission\Traits\HasRoles;
+use App\Traits\FormateDate;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
-    use HasFactory, Notifiable, HasApiTokens, HasRoles, SoftDeletes;
+    use HasFactory, Notifiable, HasApiTokens, HasRoles, SoftDeletes, FormateDate;
 
     /**
      * The attributes that are mass assignable.
@@ -59,31 +60,32 @@ class User extends Authenticatable implements MustVerifyEmail
         ];
     }
 
-    public function getCreatedAtAttribute($value)
-    {
-        return $this->formatDate($value);
-    }
-
-    public function getUpdatedAtAttribute($value)
-    {
-        return $this->formatDate($value);
-    }
-
     public function getEmailVerifiedAtAttribute($value)
     {
         return $value ? $this->formatDate($value) : null;
     }
 
-    public function getDeletedAtAttribute($value)
-    {
-        return $value ? $this->formatDate($value) : null;
-    }
+    // public function getCreatedAtAttribute($value)
+    // {
+    //     return $this->formatDate($value);
+    // }
 
-    protected function formatDate($value)
-    {
-        $format = env('DATE_FORMAT', 'Y-m-d H:i:s'); // default format
-        return \Carbon\Carbon::parse($value)->format($format);
-    }
+    // public function getUpdatedAtAttribute($value)
+    // {
+    //     return $this->formatDate($value);
+    // }
+
+
+    // public function getDeletedAtAttribute($value)
+    // {
+    //     return $value ? $this->formatDate($value) : null;
+    // }
+
+    // protected function formatDate($value)
+    // {
+    //     $format = env('DATE_FORMAT', 'Y-m-d H:i:s'); // default format
+    //     return \Carbon\Carbon::parse($value)->format($format);
+    // }
 
 
 
