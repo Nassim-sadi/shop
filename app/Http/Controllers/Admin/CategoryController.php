@@ -21,7 +21,7 @@ class CategoryController extends Controller
             ->when(isset($request->status) && $request->status !== '', function ($q) use ($request) {
                 $q->where('status', $request->status);
             })
-            ->orderBy('created_at', 'DESC')
+            ->orderBy('order', 'ASC')
             ->paginate($request->per_page);
         return new CategoryCollection($categories);
     }

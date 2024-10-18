@@ -3,10 +3,9 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Http\Resources\Roles\PermissionResource;
-use App\Http\Resources\Roles\RolesResource;
+use App\Http\Resources\Admin\Roles\PermissionResource;
+use App\Http\Resources\Admin\Roles\RolesResource;
 use App\Jobs\ActivityHistoryJob;
-use App\Models\ActivityHistory;
 use Illuminate\Http\Request;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
@@ -17,7 +16,6 @@ class RoleController extends Controller
 
     public function getRoles(Request $request)
     {
-        $this->authorize('role_view');
         $roles = Role::with('permissions')->withCount('users')->get();
         return RolesResource::collection($roles);
     }

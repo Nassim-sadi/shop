@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Resources\ActivityHistory;
+namespace App\Http\Resources\Admin\ActivityHistory;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\ResourceCollection;

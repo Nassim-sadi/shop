@@ -35,6 +35,13 @@ class PermissionSeeder extends Seeder
             'role_delete',
             "activities_access",
             "activities_view",
+            "category_access",
+            "category_view",
+            "category_create",
+            "category_edit",
+            "category_changeStatus",
+            "category_delete",
+
         ];
 
         foreach ($permissions as $permission) {

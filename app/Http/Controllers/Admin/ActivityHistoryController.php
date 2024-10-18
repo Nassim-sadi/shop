@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Http\Resources\ActivityHistory\ActivityHistoryCollection;
+use App\Http\Resources\Admin\ActivityHistory\ActivityHistoryCollection;
 use App\Models\ActivityHistory;
 use Illuminate\Http\Request;
 

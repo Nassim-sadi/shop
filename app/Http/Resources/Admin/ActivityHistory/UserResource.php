@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Http\Resources\ActivityHistory;
+namespace App\Http\Resources\Admin\ActivityHistory;
 
-use App\Http\Resources\Users\RoleResource;
+use App\Http\Resources\Admin\Users\RoleResource;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 

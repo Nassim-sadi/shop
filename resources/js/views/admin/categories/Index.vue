@@ -348,7 +348,11 @@ onMounted(async () => {
                     />
                 </div>
             </template>
-
+            <Column :header="$t('categories.order')">
+                <template #body="slotProps">
+                    {{ slotProps.data.order }}
+                </template>
+            </Column>
             <Column :header="$t('categories.name')">
                 <template #body="slotProps">
                     <div class="flex items-center gap-2 font-semibold">
@@ -359,6 +363,25 @@ onMounted(async () => {
                         />
                         {{ slotProps.data.name }}
                     </div>
+                </template>
+            </Column>
+
+            <Column :header="$t('common.status')">
+                <template #body="slotProps">
+                    <span
+                        :class="
+                            slotProps.data.status
+                                ? 'text-green-500'
+                                : 'text-red-500'
+                        "
+                        class="font-bold"
+                    >
+                        {{
+                            slotProps.data.status
+                                ? $t("common.active")
+                                : $t("common.inactive")
+                        }}
+                    </span>
                 </template>
             </Column>
 
@@ -387,31 +410,12 @@ onMounted(async () => {
                     ></span>
                 </template>
             </Column>
-
-            <Column :header="$t('user.status')">
-                <template #body="slotProps">
-                    <span
-                        :class="
-                            slotProps.data.status
-                                ? 'text-green-500'
-                                : 'text-red-500'
-                        "
-                        class="font-bold"
-                    >
-                        {{
-                            slotProps.data.status
-                                ? $t("common.active")
-                                : $t("common.inactive")
-                        }}
-                    </span>
-                </template>
-            </Column>
-
+           -->
             <Column :header="$t('common.created_at')" field="created_at">
             </Column>
 
             <Column :header="$t('common.updated_at')" field="created_at">
-            </Column> -->
+            </Column>
 
             <Column :header="$t('activities.action')">
                 <template #body="slotProps">
@@ -454,7 +458,7 @@ onMounted(async () => {
                     v-tooltip.bottom="$t('common.view_details')"
                     class="action-btn"
                     :loading="loadingStates[current.id]"
-                    v-if="ability.can('user', 'view')"
+                    v-if="ability.can('category', 'view')"
                 />
 
                 <Button
@@ -468,7 +472,7 @@ onMounted(async () => {
                     v-tooltip.bottom="$t('common.edit')"
                     class="action-btn"
                     :loading="loadingStates[current.id]"
-                    v-if="ability.can('user', 'edit')"
+                    v-if="ability.can('category', 'edit')"
                 />
 
                 <template
@@ -485,22 +489,8 @@ onMounted(async () => {
                         v-tooltip.bottom="$t('common.change_status')"
                         class="action-btn"
                         :loading="loadingStates[current.id]"
-                        v-if="ability.can('user', 'changeStatus')"
+                        v-if="ability.can('category', 'changeStatus')"
                     />
-                    <Button
-                        icon="ti ti-user-edit"
-                        rounded
-                        size="normal"
-                        text
-                        severity="warning"
-                        :label="$t('users.change_role')"
-                        @click="openChangeRole"
-                        v-tooltip.bottom="$t('users.change_role')"
-                        class="action-btn"
-                        :loading="loadingStates[current.id]"
-                        v-if="ability.can('user', 'changeRole')"
-                    />
-
                     <Button
                         icon="ti ti-trash"
                         rounded
@@ -512,7 +502,7 @@ onMounted(async () => {
                         v-tooltip.bottom="$t('common.delete')"
                         class="action-btn"
                         :loading="loadingStates[current.id]"
-                        v-if="ability.can('user', 'delete')"
+                        v-if="ability.can('category', 'delete')"
                     />
                 </template>
             </div>

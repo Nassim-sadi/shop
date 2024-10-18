@@ -4,8 +4,8 @@ namespace App\Http\Controllers\Admin;
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-use App\Http\Resources\Users\UserCollection;
-use App\Http\Resources\Users\UserResource;
+use App\Http\Resources\Admin\Users\UserCollection;
+use App\Http\Resources\Admin\Users\UserResource;
 use App\Jobs\ActivityHistoryJob;
 use App\Models\User;
 use Str;
