@@ -254,7 +254,7 @@ onMounted(async () => {
             @editItem="editItem"
         ></Edit>
 
-        <DataTable
+        <TreeTable
             :value="categories"
             tableStyle="min-width: 50rem"
             :loading="loading"
@@ -348,9 +348,10 @@ onMounted(async () => {
                     />
                 </div>
             </template>
-            <Column :header="$t('categories.order')">
+
+            <Column :header="$t('categories.order')" expander>
                 <template #body="slotProps">
-                    {{ slotProps.data.order }}
+                    {{ slotProps.node.order }}
                 </template>
             </Column>
             <Column :header="$t('categories.name')">
@@ -359,9 +360,9 @@ onMounted(async () => {
                         <Avatar
                             shape="circle"
                             size="large"
-                            :image="slotProps.data.image"
+                            :image="slotProps.node.image"
                         />
-                        {{ slotProps.data.name }}
+                        {{ slotProps.node.name }}
                     </div>
                 </template>
             </Column>
@@ -370,14 +371,14 @@ onMounted(async () => {
                 <template #body="slotProps">
                     <span
                         :class="
-                            slotProps.data.status
+                            slotProps.node.status
                                 ? 'text-green-500'
                                 : 'text-red-500'
                         "
                         class="font-bold"
                     >
                         {{
-                            slotProps.data.status
+                            slotProps.node.status
                                 ? $t("common.active")
                                 : $t("common.inactive")
                         }}
@@ -385,36 +386,16 @@ onMounted(async () => {
                 </template>
             </Column>
 
-            <!--   <Column :header="$t('activities.role')">
-                <template #body="slotProps">
-                    <div
-                        class="highlight"
-                        :style="`background-color: #${slotProps.data.role.color} ; color : #${slotProps.data.role.text_color}`"
-                    >
-                        {{ slotProps.data.role.name }}
-                    </div>
-                </template>
-            </Column>
-
-            <Column :header="$t('user.email')">
-                <template #body="slotProps">
-                    {{ slotProps.data.email }}
-                    <span
-                        class="ti ti-rosette-discount-check-filled text-green-500 font-bold"
-                        v-if="slotProps.data.email_verified_at"
-                        v-tooltip.bottom="
-                            $t('user.verified_at') +
-                            ' ' +
-                            slotProps.data.email_verified_at
-                        "
-                    ></span>
-                </template>
-            </Column>
-           -->
             <Column :header="$t('common.created_at')" field="created_at">
+                <template #body="slotProps">
+                    {{ slotProps.node.created_at }}
+                </template>
             </Column>
 
-            <Column :header="$t('common.updated_at')" field="created_at">
+            <Column :header="$t('common.updated_at')">
+                <template #body="slotProps">
+                    {{ slotProps.node.updated_at }}
+                </template>
             </Column>
 
             <Column :header="$t('activities.action')">
@@ -427,7 +408,7 @@ onMounted(async () => {
                         @click="
                             togglePopover({
                                 event: $event,
-                                current: slotProps.data,
+                                current: slotProps.node,
                                 index: slotProps.index,
                             })
                         "
@@ -443,7 +424,7 @@ onMounted(async () => {
                 </span>
                 {{ $t("categories.title", total) }}.
             </template>
-        </DataTable>
+        </TreeTable>
 
         <Popover ref="actionsPopover" class="popover" position="right">
             <div class="content">
