@@ -35,7 +35,9 @@ declare module 'vue' {
     SelectButton: typeof import('primevue/selectbutton')['default']
     Skeleton: typeof import('primevue/skeleton')['default']
     Textarea: typeof import('primevue/textarea')['default']
+    TieredMenu: typeof import('primevue/tieredmenu')['default']
     Toast: typeof import('primevue/toast')['default']
+    Tree: typeof import('primevue/tree')['default']
     TreeTable: typeof import('primevue/treetable')['default']
   }
   export interface ComponentCustomProperties {

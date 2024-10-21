@@ -349,7 +349,9 @@ onMounted(async () => {
                 </div>
             </template>
 
-            <Column :header="$t('categories.order')" expander>
+            <Column expander> </Column>
+
+            <Column :header="$t('categories.order')">
                 <template #body="slotProps">
                     {{ slotProps.node.order }}
                 </template>

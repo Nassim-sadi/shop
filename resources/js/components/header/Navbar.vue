@@ -2,8 +2,47 @@
 const appName = ref(import.meta.env.VITE_APP_NAME);
 import logo from "@/assets/shop/logo.avif";
 import ecommerceLogo from "@/assets/shop/logo.png";
-import { ref } from "vue";
+import { onMounted, ref } from "vue";
+import axios from "@/plugins/axios";
+const categories = ref([]);
+const formattedCategories = ref([]);
+const loading = ref(false);
+const categoriesMenu = ref(false);
+const getCategories = async () => {
+    loading.value = true;
+    return new Promise((resolve, reject) => {
+        axios
+            .get("/api/categories")
+            .then((response) => {
+                console.log(response.data);
+                categories.value = response.data;
+                resolve(response.data);
+            })
+            .catch((error) => {
+                reject(error);
+            })
+            .finally(() => {
+                loading.value = false;
+            });
+    });
+};
 
+function formatCategories(categories) {
+    function recursiveFormat(category) {
+        const formattedCategory = {
+            id: category.id,
+            label: category.name,
+            to: `/categories/${category.slug}`,
+            badge: category.children ? category.children.length : null,
+            items:
+                category.children.length > 0
+                    ? category.children.map(recursiveFormat)
+                    : null,
+        };
+        return formattedCategory;
+    }
+    return categories.map(recursiveFormat);
+}
 const navItems = ref([
     {
         label: "Store",
@@ -22,6 +61,15 @@ const navItems = ref([
         to: "/contact",
     },
 ]);
+
+const toggleMenu = (event) => {
+    categoriesMenu.value.toggle(event);
+};
+
+onMounted(async () => {
+    await getCategories();
+    formattedCategories.value = formatCategories(categories.value);
+});
 </script>
 <template>
     <div class="navbar">
@@ -31,19 +79,55 @@ const navItems = ref([
             </router-link>
         </div>
 
-        <IconField>
-            <InputIcon class="pi pi-search" />
-            <InputText v-model="search" placeholder="Search" />
-        </IconField>
-
         <div class="navbar-items">
             <template v-for="item in navItems">
-                <router-link :to="item.to" class="navbar-item" v-ripple>
+                <button
+                    class="navbar-item"
+                    v-ripple
+                    v-if="item.label === 'Categories'"
+                    @click="toggleMenu"
+                    aria-haspopup="true"
+                    aria-controls="overlay_tmenu"
+                >
+                    {{ item.label }}
+                </button>
+
+                <router-link v-else :to="item.to" class="navbar-item" v-ripple>
                     {{ item.label }}
                 </router-link>
             </template>
         </div>
+
+        <IconField>
+            <InputIcon class="pi pi-search" />
+            <InputText v-model="search" placeholder="Search" />
+        </IconField>
     </div>
+
+    <TieredMenu
+        :model="formattedCategories"
+        key="id"
+        class="w-full md:w-80 p-2"
+        :popup="true"
+        :loading="loading"
+        ref="categoriesMenu"
+        id="overlay_tmenu"
+    >
+        <template #item="{ item, props, hasSubmenu }">
+            <a v-ripple class="flex" v-bind="props.action">
+                <span class="ml-2">{{ item.label }}</span>
+                <!-- <Badge v-if="item.badge" class="ml-auto" :value="item.badge" /> -->
+                <span v-if="hasSubmenu" class="ml-auto">
+                    <i class="pi pi-fw pi-angle-right"></i>
+                </span>
+                <span
+                    v-if="item.shortcut"
+                    class="ml-auto border border-surface rounded bg-emphasis text-muted-color text-xs p-1"
+                    >{{ item.shortcut }}</span
+                >
+            </a>
+        </template>
+    </TieredMenu>
 </template>
 
 <style lang="scss" scoped>
@@ -80,8 +164,6 @@ const navItems = ref([
             width: 16rem;
         }
     }
-
-
 
     .navbar-items {
         display: flex;
