@@ -244,12 +244,16 @@ onMounted(async () => {
             :rowHover="true"
         >
             <template #empty>
-                <div class="text-center">{{ $t("common.no_data") }}</div>
+                <div class="text-center text-surface-900 dark:text-surface-0">
+                    {{ $t("common.no_data") }}
+                </div>
             </template>
 
             <template #header>
                 <div class="flex justify-between align-center">
-                    <h1 class="text-xl font-bold mb-4">
+                    <h1
+                        class="text-xl font-bold mb-4 text-surface-900 dark:text-surface-0"
+                    >
                         {{ $t("roles.page") }}
                     </h1>
 

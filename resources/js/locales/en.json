@@ -123,7 +123,10 @@
         "changes": "Changes",
         "models": {
             "users": "Users",
-            "roles": "Roles"
+            "roles": "Roles",
+            "categories": "Categories",
+            "products": "Products",
+            "orders": "Orders"
         }
     },
     "common": {
@@ -203,6 +206,18 @@
                 "update": "Role updated successfully",
                 "delete": "Role deleted successfully",
                 "change_status": "Role status changed successfully"
+            },
+            "category": {
+                "create": "Category created successfully",
+                "update": "Category updated successfully",
+                "delete": "Category deleted successfully",
+                "change_status": "Category status changed successfully"
+            },
+            "product": {
+                "create": "Product created successfully",
+                "update": "Product updated successfully",
+                "delete": "Product deleted successfully",
+                "change_status": "Product status changed successfully"
             }
         },
         "error": {

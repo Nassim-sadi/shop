@@ -51,7 +51,7 @@ const confirm = (myFunction, params) => {
         accept: () => {
             myFunction(params ? [...params] : null);
         },
-        reject: () => { },
+        reject: () => {},
     });
 };
 
@@ -87,7 +87,7 @@ const getRoles = async () => {
                 console.log(err);
                 reject(err);
             })
-            .finally(() => { });
+            .finally(() => {});
     });
 };
 
@@ -323,7 +323,7 @@ const editItem = (val) => {
                 isEditOpen.value = false;
                 updateItem(response.data.user);
                 emitter.emit("toast", {
-                    summary: $t("update.success"),
+                    summary: $t("status.success.user.update"),
                     message: $t("update.success_message"),
                     severity: "success",
                 });
@@ -396,57 +396,145 @@ onMounted(async () => {
     <div class="card">
         <Details :current="current ? current : {}" v-model:isOpen="isOpen" />
 
-        <Edit :current="current" v-model:isOpen="isEditOpen" @editItem="editItem"></Edit>
+        <Edit
+            :current="current"
+            v-model:isOpen="isEditOpen"
+            @editItem="editItem"
+        ></Edit>
 
-        <ChangeRole :current="current" v-model:isOpen="isChangeRoleOpen" @submit="changeRole" :roles="roles" :loading="loadingStates[current.id]"></ChangeRole>
+        <ChangeRole
+            :current="current"
+            v-model:isOpen="isChangeRoleOpen"
+            @submit="changeRole"
+            :roles="roles"
+            :loading="loadingStates[current.id]"
+        ></ChangeRole>
 
-        <DataTable :value="users" tableStyle="min-width: 50rem" :loading="loading" :rows="per_page" :paginator="true" :totalRecords="total" @page="onPageChange" dataKey="id" :lazy="true" :rowHover="true" :rowsPerPageOptions="[5, 10, 20, 30]" :row-class="rowClass">
+        <DataTable
+            :value="users"
+            tableStyle="min-width: 50rem"
+            :loading="loading"
+            :rows="per_page"
+            :paginator="true"
+            :totalRecords="total"
+            @page="onPageChange"
+            dataKey="id"
+            :lazy="true"
+            :rowHover="true"
+            :rowsPerPageOptions="[5, 10, 20, 30]"
+            :row-class="rowClass"
+        >
             <template #empty>
-                <div class="text-center">{{ $t("common.no_data") }}</div>
+                <div class="text-center text-surface-900 dark:text-surface-0">
+                    {{ $t("common.no_data") }}
+                </div>
             </template>
 
             <template #header>
-                <h1 class="text-xl font-bold mb-4">
+                <h1
+                    class="text-xl font-bold mb-4 text-surface-900 dark:text-surface-0"
+                >
                     {{ $t("user.page") }}
                 </h1>
                 <div class="flex flex-wrap gap-2 mb-4 w-full">
                     <div class="flex gap-2 items-baseline">
                         <span>{{ $t("common.from") }}</span>
-                        <DatePicker showIcon v-model="start_date" date-format="yy-mm-dd" :max-date="end_date
-                            ? new Date(end_date)
-                            : new Date(2025, 0, 1)
-                            " :min-date="new Date(2024, 0, 1)" showButtonBar @clear-click="() => (start_date = new Date())" />
+                        <DatePicker
+                            showIcon
+                            v-model="start_date"
+                            date-format="yy-mm-dd"
+                            :max-date="
+                                end_date
+                                    ? new Date(end_date)
+                                    : new Date(2025, 0, 1)
+                            "
+                            :min-date="new Date(2024, 0, 1)"
+                            showButtonBar
+                            @clear-click="() => (start_date = new Date())"
+                        />
                     </div>
 
                     <div class="flex gap-2 items-baseline">
                         <span>{{ $t("common.to") }}</span>
-                        <DatePicker showIcon v-model="end_date" date-format="yy-mm-dd" :max-date="new Date()" :min-date="start_date
-                            ? new Date(start_date)
-                            : new Date(2024, 0, 1)
-                            " showButtonBar @clear-click="() => (end_date = new Date())" />
+                        <DatePicker
+                            showIcon
+                            v-model="end_date"
+                            date-format="yy-mm-dd"
+                            :max-date="new Date()"
+                            :min-date="
+                                start_date
+                                    ? new Date(start_date)
+                                    : new Date(2024, 0, 1)
+                            "
+                            showButtonBar
+                            @clear-click="() => (end_date = new Date())"
+                        />
                     </div>
 
                     <IconField>
                         <InputIcon class="pi pi-search" />
-                        <InputText v-model="keyword" :placeholder="$t('common.search')" @keyup.enter="getUsers" />
+                        <InputText
+                            v-model="keyword"
+                            :placeholder="$t('common.search')"
+                            @keyup.enter="getUsers"
+                        />
                     </IconField>
 
-                    <Select v-model="status" :options="statusOptions" optionLabel="label" optionValue="value" :placeholder="$t('user.statusQuery')" />
+                    <Select
+                        v-model="status"
+                        :options="statusOptions"
+                        optionLabel="label"
+                        optionValue="value"
+                        :placeholder="$t('user.statusQuery')"
+                    />
 
-                    <Select v-model="role" :options="roleOptions" optionLabel="label" optionValue="value" :placeholder="$t('user.roleQuery')" />
+                    <Select
+                        v-model="role"
+                        :options="roleOptions"
+                        optionLabel="label"
+                        optionValue="value"
+                        :placeholder="$t('user.roleQuery')"
+                    />
 
-                    <Select v-if="isSuper" v-model="deleted" :options="deletedOptions" optionLabel="label" optionValue="value" :placeholder="$t('user.deletedQuery')" />
+                    <Select
+                        v-if="isSuper"
+                        v-model="deleted"
+                        :options="deletedOptions"
+                        optionLabel="label"
+                        optionValue="value"
+                        :placeholder="$t('user.deletedQuery')"
+                    />
 
-                    <Button :label="$t('common.search')" icon="ti ti-search" @click="getUsers" :disabled="!start_date || !end_date" :loading="loading" class="bold-label" />
+                    <Button
+                        :label="$t('common.search')"
+                        icon="ti ti-search"
+                        @click="getUsers"
+                        :disabled="!start_date || !end_date"
+                        :loading="loading"
+                        class="bold-label"
+                    />
 
-                    <Button :label="$t('common.reset')" icon="ti ti-restore" @click="reset" :loading="loading" class="bold-label" v-tooltip.bottom="$t('common.reset')" :disabled="!start_date || !end_date" severity="secondary" />
+                    <Button
+                        :label="$t('common.reset')"
+                        icon="ti ti-restore"
+                        @click="reset"
+                        :loading="loading"
+                        class="bold-label"
+                        v-tooltip.bottom="$t('common.reset')"
+                        :disabled="!start_date || !end_date"
+                        severity="secondary"
+                    />
                 </div>
             </template>
 
             <Column :header="$t('user.name')">
                 <template #body="slotProps">
                     <div class="flex items-center gap-2 font-semibold">
-                        <Avatar shape="circle" size="large" :image="slotProps.data.image || placeholder" />
+                        <Avatar
+                            shape="circle"
+                            size="large"
+                            :image="slotProps.data.image || placeholder"
+                        />
                         {{
                             slotProps.data.firstname +
                             " " +
@@ -458,7 +546,10 @@ onMounted(async () => {
 
             <Column :header="$t('activities.role')">
                 <template #body="slotProps">
-                    <div class="highlight" :style="`background-color: #${slotProps.data.role.color} ; color : #${slotProps.data.role.text_color}`">
+                    <div
+                        class="highlight"
+                        :style="`background-color: #${slotProps.data.role.color} ; color : #${slotProps.data.role.text_color}`"
+                    >
                         {{ slotProps.data.role.name }}
                     </div>
                 </template>
@@ -467,19 +558,28 @@ onMounted(async () => {
             <Column :header="$t('user.email')">
                 <template #body="slotProps">
                     {{ slotProps.data.email }}
-                    <span class="ti ti-rosette-discount-check-filled text-green-500 font-bold" v-if="slotProps.data.email_verified_at" v-tooltip.bottom="$t('user.verified_at') +
-                        ' ' +
-                        slotProps.data.email_verified_at
-                        "></span>
+                    <span
+                        class="ti ti-rosette-discount-check-filled text-green-500 font-bold"
+                        v-if="slotProps.data.email_verified_at"
+                        v-tooltip.bottom="
+                            $t('user.verified_at') +
+                            ' ' +
+                            slotProps.data.email_verified_at
+                        "
+                    ></span>
                 </template>
             </Column>
 
             <Column :header="$t('user.status')">
                 <template #body="slotProps">
-                    <span :class="slotProps.data.status
-                        ? 'text-green-500'
-                        : 'text-red-500'
-                        " class="font-bold">
+                    <span
+                        :class="
+                            slotProps.data.status
+                                ? 'text-green-500'
+                                : 'text-red-500'
+                        "
+                        class="font-bold"
+                    >
                         {{
                             slotProps.data.status
                                 ? $t("common.active")
@@ -497,13 +597,19 @@ onMounted(async () => {
 
             <Column :header="$t('activities.action')">
                 <template #body="slotProps">
-                    <Button icon="ti ti-dots-vertical" rounded text size="large" @click="
-                        togglePopover({
-                            event: $event,
-                            current: slotProps.data,
-                            index: slotProps.index,
-                        })
-                        ">
+                    <Button
+                        icon="ti ti-dots-vertical"
+                        rounded
+                        text
+                        size="large"
+                        @click="
+                            togglePopover({
+                                event: $event,
+                                current: slotProps.data,
+                                index: slotProps.index,
+                            })
+                        "
+                    >
                     </Button>
                 </template>
             </Column>
@@ -519,24 +625,112 @@ onMounted(async () => {
 
         <Popover ref="actionsPopover" class="popover" position="right">
             <div class="content">
-                <Button icon="ti ti-eye" rounded size="normal" text :label="$t('common.view_details')" severity="info" @click="openDetails" v-tooltip.bottom="$t('common.view_details')" class="action-btn" :loading="loadingStates[current.id]" v-if="ability.can('user', 'view')" />
+                <Button
+                    icon="ti ti-eye"
+                    rounded
+                    size="normal"
+                    text
+                    :label="$t('common.view_details')"
+                    severity="info"
+                    @click="openDetails"
+                    v-tooltip.bottom="$t('common.view_details')"
+                    class="action-btn"
+                    :loading="loadingStates[current.id]"
+                    v-if="ability.can('user', 'view')"
+                />
 
-                <Button icon="ti ti-edit" rounded size="normal" text :label="$t('common.edit')" severity="success" @click="openEdit" v-tooltip.bottom="$t('common.edit')" class="action-btn" :loading="loadingStates[current.id]" v-if="ability.can('user', 'edit')" />
+                <Button
+                    icon="ti ti-edit"
+                    rounded
+                    size="normal"
+                    text
+                    :label="$t('common.edit')"
+                    severity="success"
+                    @click="openEdit"
+                    v-tooltip.bottom="$t('common.edit')"
+                    class="action-btn"
+                    :loading="loadingStates[current.id]"
+                    v-if="ability.can('user', 'edit')"
+                />
 
-                <template v-if="current.id !== auth.user.id && !current.deleted_at">
-                    <Button icon="ti ti-status-change" rounded size="normal" text severity="help" :label="$t('common.change_status')" @click="confirm(changeStatus)" v-tooltip.bottom="$t('common.change_status')" class="action-btn" :loading="loadingStates[current.id]" v-if="ability.can('user', 'changeStatus')" />
-                    <Button icon="ti ti-user-edit" rounded size="normal" text severity="warning" :label="$t('users.change_role')" @click="openChangeRole" v-tooltip.bottom="$t('users.change_role')" class="action-btn" :loading="loadingStates[current.id]" v-if="ability.can('user', 'changeRole')" />
+                <template
+                    v-if="current.id !== auth.user.id && !current.deleted_at"
+                >
+                    <Button
+                        icon="ti ti-status-change"
+                        rounded
+                        size="normal"
+                        text
+                        severity="help"
+                        :label="$t('common.change_status')"
+                        @click="confirm(changeStatus)"
+                        v-tooltip.bottom="$t('common.change_status')"
+                        class="action-btn"
+                        :loading="loadingStates[current.id]"
+                        v-if="ability.can('user', 'changeStatus')"
+                    />
+                    <Button
+                        icon="ti ti-user-edit"
+                        rounded
+                        size="normal"
+                        text
+                        severity="warning"
+                        :label="$t('users.change_role')"
+                        @click="openChangeRole"
+                        v-tooltip.bottom="$t('users.change_role')"
+                        class="action-btn"
+                        :loading="loadingStates[current.id]"
+                        v-if="ability.can('user', 'changeRole')"
+                    />
 
-                    <Button icon="ti ti-trash" rounded size="normal" text severity="danger" :label="$t('common.delete')" @click="confirm(deleteItem)" v-tooltip.bottom="$t('common.delete')" class="action-btn" :loading="loadingStates[current.id]" v-if="ability.can('user', 'delete')" />
+                    <Button
+                        icon="ti ti-trash"
+                        rounded
+                        size="normal"
+                        text
+                        severity="danger"
+                        :label="$t('common.delete')"
+                        @click="confirm(deleteItem)"
+                        v-tooltip.bottom="$t('common.delete')"
+                        class="action-btn"
+                        :loading="loadingStates[current.id]"
+                        v-if="ability.can('user', 'delete')"
+                    />
                 </template>
-                <template v-if="
-                    current.deleted_at &&
-                    isSuper &&
-                    current.id !== auth.user.id
-                ">
-                    <Button icon="ti ti-trash" rounded size="normal" :label="$t('common.perma_delete')" text severity="danger" @click="confirm(deleteItemPermanently)" v-tooltip.bottom="$t('common.perma_delete')" class="action-btn" :loading="loadingStates[current.id]" v-if="ability.can('user', 'permaDelete')" />
+                <template
+                    v-if="
+                        current.deleted_at &&
+                        isSuper &&
+                        current.id !== auth.user.id
+                    "
+                >
+                    <Button
+                        icon="ti ti-trash"
+                        rounded
+                        size="normal"
+                        :label="$t('common.perma_delete')"
+                        text
+                        severity="danger"
+                        @click="confirm(deleteItemPermanently)"
+                        v-tooltip.bottom="$t('common.perma_delete')"
+                        class="action-btn"
+                        :loading="loadingStates[current.id]"
+                        v-if="ability.can('user', 'permaDelete')"
+                    />
 
-                    <Button icon="ti ti-restore" rounded size="normal" text :label="$t('common.restore')" severity="success" @click="confirm(restoreItem)" v-tooltip.bottom="$t('common.restore')" class="action-btn" :loading="loadingStates[current.id]" v-if="ability.can('user', 'restore')" />
+                    <Button
+                        icon="ti ti-restore"
+                        rounded
+                        size="normal"
+                        text
+                        :label="$t('common.restore')"
+                        severity="success"
+                        @click="confirm(restoreItem)"
+                        v-tooltip.bottom="$t('common.restore')"
+                        class="action-btn"
+                        :loading="loadingStates[current.id]"
+                        v-if="ability.can('user', 'restore')"
+                    />
                 </template>
             </div>
         </Popover>

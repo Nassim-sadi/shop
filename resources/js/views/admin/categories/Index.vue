@@ -3,13 +3,13 @@ import { ability } from "@/plugins/ability";
 import axios from "@/plugins/axios";
 import emitter from "@/plugins/emitter";
 import { $t } from "@/plugins/i18n";
-import { authStore } from "@/store/AuthStore";
 import { watchDebounced } from "@vueuse/core";
 import { format } from "date-fns";
 import { useConfirm } from "primevue/useconfirm";
-import { computed, onMounted, ref } from "vue";
+import { onMounted, ref } from "vue";
 import Details from "./sidebars/Details.vue";
 import Edit from "./sidebars/Edit.vue";
+import Create from "./sidebars/Create.vue";
 const Confirm = useConfirm();
 const categories = ref([]);
 const loading = ref(false);
@@ -19,18 +19,21 @@ const per_page = ref(10);
 const start_date = ref(new Date());
 const end_date = ref(new Date());
 const current = ref({});
-const isOpen = ref(false);
+const isDetailsOpen = ref(false);
 const isEditOpen = ref(false);
+const isCreateOpen = ref(false);
 const keyword = ref("");
 const status = ref(null);
 const uploadPercentage = ref(0);
-const currentIndex = ref(null);
 const actionsPopover = ref();
 
-const togglePopover = ({ event: event, current: data, index: index }) => {
+const togglePopover = ({ event: event, current: data }) => {
     current.value = data;
-    currentIndex.value = index;
     actionsPopover.value.toggle(event);
+};
+
+const openAdd = () => {
+    isCreateOpen.value = true;
 };
 const confirm = (myFunction, params) => {
     Confirm.require({
@@ -58,12 +61,6 @@ const statusOptions = [
     { label: "Inactive", value: 0 },
 ];
 
-const auth = authStore();
-
-const isSuper = computed(() => {
-    return auth.user.roles.name === "Super Admin";
-});
-
 const getCategories = async () => {
     if (loading.value) return;
     loadingStates.value = [];
@@ -81,10 +78,6 @@ const getCategories = async () => {
                 },
             })
             .then((res) => {
-                console.log("get categories");
-
-                console.log(res.data);
-
                 categories.value = res.data.data;
                 total.value = res.data.total;
                 currentPage.value = res.data.current_page;
@@ -115,12 +108,11 @@ const onPageChange = (event) => {
     currentPage.value = event.page + 1;
     per_page.value = event.rows;
     current.value = {};
-    currentIndex.value = null;
     getCategories();
 };
 
 const openDetails = () => {
-    isOpen.value = true;
+    isDetailsOpen.value = true;
 };
 
 const openEdit = () => {
@@ -133,21 +125,46 @@ const reset = () => {
     getCategories();
 };
 
+const createItem = (data) => {
+    if (loading.value) return;
+    loading.value = true;
+    return new Promise((resolve, reject) => {
+        axios
+            .post("api/admin/categories/create", data)
+            .then((res) => {
+                categories.value.push(res.data.category);
+                emitter.emit("toast", {
+                    summary: $t("status.success.title"),
+                    message: $t("status.success.category.create"),
+                    severity: "success",
+                });
+                resolve(res.data);
+            })
+            .catch((err) => {
+                console.log(err);
+                reject(err);
+            })
+            .finally(() => {
+                setLoadingState(current.value.id, false);
+            });
+    });
+};
+
 const changeStatus = async () => {
     if (loadingStates.value[current.value.id]) return;
     setLoadingState(current.value.id, true);
-
     return new Promise((resolve, reject) => {
         axios
-            .patch("api/admin/users/change-status", {
+            .patch("api/admin/categories/change-status", {
                 id: current.value.id,
-                status: !current.value.status ? 1 : 0,
+                status: current.value.status ? 0 : 1,
             })
             .then((res) => {
+                console.log(res.data.status);
                 updateItemStatus(res.data.status);
                 emitter.emit("toast", {
                     summary: $t("status.success.title"),
-                    message: $t("status.success.user.change_status"),
+                    message: $t("status.success.category.change_status"),
                     severity: "success",
                 });
                 resolve(res.data);
@@ -163,7 +180,7 @@ const changeStatus = async () => {
 };
 
 const updateItemStatus = (status) => {
-    users.value[currentIndex.value].status = status;
+    current.value.status = status;
 };
 
 const deleteItem = () => {
@@ -172,19 +189,18 @@ const deleteItem = () => {
 
     return new Promise((resolve, reject) => {
         axios
-            .delete("api/admin/users/delete/" + current.value.id)
+            .delete("api/admin/categories/delete/" + current.value.id)
             .then((res) => {
-                if (deleted.value !== null) {
-                    users.value[currentIndex.value].deleted_at =
-                        res.data.deleted_at;
-                } else {
-                    users.value.splice(currentIndex.value, 1);
+                if (current.value && current.value.id) {
+                    removeCategoryById(categories.value, current.value.id);
+                }
+                if (!current.value.parent_id) {
+                    console.log(current);
                     total.value--;
                 }
-
                 emitter.emit("toast", {
                     summary: $t("status.success.title"),
-                    message: $t("status.success.user.delete"),
+                    message: $t("status.success.category.delete"),
                     severity: "success",
                 });
                 resolve(res.data);
@@ -199,10 +215,20 @@ const deleteItem = () => {
     });
 };
 
+const removeCategoryById = (categories, idToRemove) => {
+    categories.forEach((category, index) => {
+        if (category.id === idToRemove) {
+            categories.splice(index, 1);
+        } else if (category.children && category.children.length > 0) {
+            removeCategoryById(category.children, idToRemove);
+        }
+    });
+};
+
 const editItem = (val) => {
     return new Promise((resolve, reject) => {
         axios
-            .post("api/admin/users/update", val, {
+            .post("api/admin/categories/update", val, {
                 onUploadProgress: (progressEvent) => {
                     uploadPercentage.value = Math.round(
                         (progressEvent.loaded * 100) / progressEvent.total,
@@ -214,8 +240,8 @@ const editItem = (val) => {
                 isEditOpen.value = false;
                 updateItem(response.data.user);
                 emitter.emit("toast", {
-                    summary: $t("update.success"),
-                    message: $t("update.success_message"),
+                    summary: $t("status.success.title"),
+                    message: $t("status.success.category.update"),
                     severity: "success",
                 });
                 resolve(response);
@@ -229,7 +255,7 @@ const editItem = (val) => {
 };
 
 const updateItem = (data) => {
-    users.value[currentIndex.value] = data;
+    current.value = data;
 };
 
 const loadingStates = ref({});
@@ -246,13 +272,18 @@ onMounted(async () => {
 
 <template>
     <div class="card">
-        <Details :current="current ? current : {}" v-model:isOpen="isOpen" />
+        <Details
+            :current="current ? current : {}"
+            v-model:isOpen="isDetailsOpen"
+        />
 
         <Edit
             :current="current"
             v-model:isOpen="isEditOpen"
             @editItem="editItem"
         ></Edit>
+
+        <Create v-model:isOpen="isCreateOpen" @createItem="createItem"></Create>
 
         <TreeTable
             :value="categories"
@@ -266,15 +297,29 @@ onMounted(async () => {
             :lazy="true"
             :rowHover="true"
             :rowsPerPageOptions="[5, 10, 20, 30]"
+            size="small"
         >
             <template #empty>
                 <div class="text-center">{{ $t("common.no_data") }}</div>
             </template>
 
             <template #header>
-                <h1 class="text-xl font-bold mb-4">
-                    {{ $t("categories.page") }}
-                </h1>
+                <div class="flex justify-between items-center mb-4">
+                    <h1
+                        class="text-xl font-bold mb-0 text-surface-900 dark:text-surface-0"
+                    >
+                        {{ $t("categories.page") }}
+                    </h1>
+                    <Button
+                        :label="$t('categories.create')"
+                        icon="ti ti-plus"
+                        @click="openAdd"
+                        class="bold-label"
+                        v-tooltip.bottom="$t('categories.create')"
+                        v-if="ability.can('category', 'create')"
+                        severity="success"
+                    />
+                </div>
                 <div class="flex flex-wrap gap-2 mb-4 w-full">
                     <div class="flex gap-2 items-baseline">
                         <span>{{ $t("common.from") }}</span>
@@ -411,7 +456,6 @@ onMounted(async () => {
                             togglePopover({
                                 event: $event,
                                 current: slotProps.node,
-                                index: slotProps.index,
                             })
                         "
                     >
@@ -458,36 +502,35 @@ onMounted(async () => {
                     v-if="ability.can('category', 'edit')"
                 />
 
-                <template
-                    v-if="current.id !== auth.user.id && !current.deleted_at"
-                >
-                    <Button
-                        icon="ti ti-status-change"
-                        rounded
-                        size="normal"
-                        text
-                        severity="help"
-                        :label="$t('common.change_status')"
-                        @click="confirm(changeStatus)"
-                        v-tooltip.bottom="$t('common.change_status')"
-                        class="action-btn"
-                        :loading="loadingStates[current.id]"
-                        v-if="ability.can('category', 'changeStatus')"
-                    />
-                    <Button
-                        icon="ti ti-trash"
-                        rounded
-                        size="normal"
-                        text
-                        severity="danger"
-                        :label="$t('common.delete')"
-                        @click="confirm(deleteItem)"
-                        v-tooltip.bottom="$t('common.delete')"
-                        class="action-btn"
-                        :loading="loadingStates[current.id]"
-                        v-if="ability.can('category', 'delete')"
-                    />
-                </template>
+                <Button
+                    icon="ti ti-status-change"
+                    rounded
+                    size="normal"
+                    text
+                    severity="help"
+                    :label="$t('common.change_status')"
+                    @click="confirm(changeStatus)"
+                    v-tooltip.bottom="$t('common.change_status')"
+                    class="action-btn"
+                    :loading="loadingStates[current.id]"
+                    v-if="ability.can('category', 'changeStatus')"
+                />
+                <Button
+                    icon="ti ti-trash"
+                    rounded
+                    size="normal"
+                    text
+                    severity="danger"
+                    :label="$t('common.delete')"
+                    @click="confirm(deleteItem)"
+                    v-tooltip.bottom="$t('common.delete')"
+                    class="action-btn"
+                    :loading="loadingStates[current.id]"
+                    v-if="
+                        ability.can('category', 'delete') &&
+                        !current.children.length
+                    "
+                />
             </div>
         </Popover>
     </div>

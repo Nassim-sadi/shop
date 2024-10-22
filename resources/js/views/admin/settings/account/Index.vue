@@ -22,7 +22,12 @@ onMounted(async () => {
 </script>
 <template>
     <div class="grid grid-cols-12 gap-8">
-        <Profile :user="auth.user" :loading="loading" @update:user="updateUser" v-if="auth.user" />
+        <Profile
+            :user="auth.user"
+            :loading="loading"
+            @update:user="updateUser"
+            v-if="auth.user"
+        />
         <Security :user="auth.user" v-if="auth.user" />
     </div>
 </template>

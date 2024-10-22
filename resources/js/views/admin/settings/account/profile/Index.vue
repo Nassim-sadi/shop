@@ -74,7 +74,7 @@ const editItem = (val) => {
         <div
             class="font-semibold text-surface-900 dark:text-surface-0 text-xl col-span-12 flex justify-between items-baseline mb-8"
         >
-            <h3>
+            <h3 class="text-surface-900 dark:text-surface-0">
                 {{ $t("settings.personnel") }}
             </h3>
 
