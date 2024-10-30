@@ -39,6 +39,11 @@ const { isOpen, current } = toRefs(props);
         </div>
 
         <div class="mb-4">
+            <p class="font-bold">{{ $t("categories.description") }} :</p>
+            {{ current.description }}
+        </div>
+
+        <div class="mb-4">
             <p class="font-bold">{{ $t("user.status") }} :</p>
             {{ current.status ? $t("common.active") : $t("common.inactive") }}
         </div>

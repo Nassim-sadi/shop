@@ -235,7 +235,18 @@
                 "update": "Role update failed",
                 "delete": "Role deletion failed",
                 "change_status": "Role status change failed"
-            }
+            },
+            "category": {
+                "create": "Category creation failed",
+                "update": "Category update failed",
+                "slug": "Category name already exists",
+                "delete": "Category deletion failed",
+                "change_status": "Category status change failed"
+            },
+            "not_found": "Resource not found.",
+            "server_error": "An unexpected server error occurred.",
+            "unauthorized": "You are not authorized to perform this action.",
+            "default": "An error occurred. Please try again later."
         },
         "warning": "Warning",
         "info": "Info",
@@ -270,6 +281,7 @@
         "create_success": "Category created successfully",
         "update_success": "Category updated successfully",
         "delete_success": "Category deleted successfully",
-        "select_parent": "Select parent category"
+        "select_parent": "Select parent category",
+        "add_sub": "Add sub category"
     }
 }

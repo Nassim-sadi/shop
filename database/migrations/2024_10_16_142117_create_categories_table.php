@@ -15,10 +15,10 @@ return new class extends Migration
             $table->id();
             $table->foreignId('parent_id')->nullable()->constrained('categories')->onDelete('cascade'); // Self-referencing relationship
             $table->string('slug')->unique();
-            $table->string('name');
+            $table->string('name')->unique();
             $table->text('description');
-            $table->string('image')->nullable();
-            $table->boolean('status')->default(true);
+            $table->string('image');
+            $table->boolean('status')->default(false);
             $table->integer('order')->default(0);
             $table->timestamps();
         });

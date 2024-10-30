@@ -67,18 +67,22 @@ const getCategories = async () => {
     loading.value = true;
     return new Promise((resolve, reject) => {
         axios
-            .get("api/admin/categories", {
-                params: {
-                    keyword: keyword.value,
-                    page: currentPage.value,
-                    per_page: per_page.value,
-                    start_date: format(start_date.value, "yyyy-MM-dd"),
-                    end_date: format(end_date.value, "yyyy-MM-dd"),
-                    status: status.value,
-                },
-            })
+            .get(
+                "api/admin/categories",
+                // , {
+                //     params: {
+                //         keyword: keyword.value,
+                //         page: currentPage.value,
+                //         per_page: per_page.value,
+                //         start_date: format(start_date.value, "yyyy-MM-dd"),
+                //         end_date: format(end_date.value, "yyyy-MM-dd"),
+                //         status: status.value,
+                //     },
+                // }
+            )
             .then((res) => {
-                categories.value = res.data.data;
+                console.log(res.data);
+                categories.value = res.data;
                 total.value = res.data.total;
                 currentPage.value = res.data.current_page;
                 per_page.value = res.data.per_page;
@@ -132,7 +136,8 @@ const createItem = (data) => {
         axios
             .post("api/admin/categories/create", data)
             .then((res) => {
-                categories.value.push(res.data.category);
+                isCreateOpen.value = false;
+                addItem(res.data.category);
                 emitter.emit("toast", {
                     summary: $t("status.success.title"),
                     message: $t("status.success.category.create"),
@@ -141,13 +146,32 @@ const createItem = (data) => {
                 resolve(res.data);
             })
             .catch((err) => {
-                console.log(err);
+                if (err.response.status == 432) {
+                    emitter.emit("toast", {
+                        summary: $t("status.error.title"),
+                        message: $t("status.error.category.slug"),
+                        severity: "error",
+                    });
+                }
                 reject(err);
             })
             .finally(() => {
-                setLoadingState(current.value.id, false);
+                loading.value = false;
+                current.value = {};
             });
     });
+};
+
+const addItem = (data) => {
+    if (current.value.id) {
+        console.log("pushing to children");
+        current.value.children.push(data);
+    } else {
+        console.log("pushing to categories");
+
+        categories.value.push(data);
+        total.value++;
+    }
 };
 
 const changeStatus = async () => {
@@ -160,7 +184,6 @@ const changeStatus = async () => {
                 status: current.value.status ? 0 : 1,
             })
             .then((res) => {
-                console.log(res.data.status);
                 updateItemStatus(res.data.status);
                 emitter.emit("toast", {
                     summary: $t("status.success.title"),
@@ -175,6 +198,7 @@ const changeStatus = async () => {
             })
             .finally(() => {
                 setLoadingState(current.value.id, false);
+                current.value = {};
             });
     });
 };
@@ -198,6 +222,7 @@ const deleteItem = () => {
                     console.log(current);
                     total.value--;
                 }
+
                 emitter.emit("toast", {
                     summary: $t("status.success.title"),
                     message: $t("status.success.category.delete"),
@@ -211,6 +236,7 @@ const deleteItem = () => {
             })
             .finally(() => {
                 setLoadingState(current.value.id, false);
+                current.value = {};
             });
     });
 };
@@ -238,7 +264,8 @@ const editItem = (val) => {
             .then((response) => {
                 uploadPercentage.value = 0;
                 isEditOpen.value = false;
-                updateItem(response.data.user);
+                updateItem(response.data.category);
+                current.value = {};
                 emitter.emit("toast", {
                     summary: $t("status.success.title"),
                     message: $t("status.success.category.update"),
@@ -283,20 +310,36 @@ onMounted(async () => {
             @editItem="editItem"
         ></Edit>
 
-        <Create v-model:isOpen="isCreateOpen" @createItem="createItem"></Create>
+        <Create
+            v-model:isOpen="isCreateOpen"
+            @createItem="createItem"
+            :loading="loading"
+            :parent="current ? current.id : {}"
+        ></Create>
+        <TreeTable :value="categories" :loading="loading">
+            <template #header>
+                <div>sup</div>
+            </template>
+            <Column header="name">
+                <template #body="slotProps">
+                    <div class="flex items-center gap-2">
+                        <Avatar
+                            shape="circle"
+                            size="large"
+                            :image="slotProps.node.image"
+                        />
+                        {{ slotProps.node.name }}
+                    </div>
+                </template>
+            </Column>
+        </TreeTable>
 
-        <TreeTable
+        <!-- <TreeTable
             :value="categories"
             tableStyle="min-width: 50rem"
             :loading="loading"
-            :rows="per_page"
-            :paginator="true"
-            :totalRecords="total"
-            @page="onPageChange"
             dataKey="id"
-            :lazy="true"
             :rowHover="true"
-            :rowsPerPageOptions="[5, 10, 20, 30]"
             size="small"
         >
             <template #empty>
@@ -394,8 +437,6 @@ onMounted(async () => {
                 </div>
             </template>
 
-            <Column expander> </Column>
-
             <Column :header="$t('categories.order')">
                 <template #body="slotProps">
                     {{ slotProps.node.order }}
@@ -418,14 +459,14 @@ onMounted(async () => {
                 <template #body="slotProps">
                     <span
                         :class="
-                            slotProps.node.status
+                            slotProps.node.status == 1
                                 ? 'text-green-500'
                                 : 'text-red-500'
                         "
                         class="font-bold"
                     >
                         {{
-                            slotProps.node.status
+                            slotProps.node.status == 1
                                 ? $t("common.active")
                                 : $t("common.inactive")
                         }}
@@ -470,7 +511,7 @@ onMounted(async () => {
                 </span>
                 {{ $t("categories.title", total) }}.
             </template>
-        </TreeTable>
+        </TreeTable> -->
 
         <Popover ref="actionsPopover" class="popover" position="right">
             <div class="content">
@@ -486,6 +527,20 @@ onMounted(async () => {
                     class="action-btn"
                     :loading="loadingStates[current.id]"
                     v-if="ability.can('category', 'view')"
+                />
+
+                <Button
+                    icon="ti ti-plus"
+                    rounded
+                    size="normal"
+                    text
+                    :label="$t('categories.add_sub')"
+                    severity="success"
+                    @click="openAdd"
+                    v-tooltip.bottom="$t('categories.add_sub')"
+                    class="action-btn"
+                    :loading="loadingStates[current.id]"
+                    v-if="ability.can('category', 'add')"
                 />
 
                 <Button
@@ -528,6 +583,7 @@ onMounted(async () => {
                     :loading="loadingStates[current.id]"
                     v-if="
                         ability.can('category', 'delete') &&
+                        current.children &&
                         !current.children.length
                     "
                 />

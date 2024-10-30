@@ -117,7 +117,17 @@ class UserController extends Controller
             return response()->json(['error' => 'Super Admin cannot be deleted'], 400);
         }
 
+
+        // delete user profile image
+        if ($user->image) {
+            $oldImage = basename(parse_url($user->image, PHP_URL_PATH));
+            $oldImagePath = public_path('/storage/images/profile/' . $oldImage);
+            if (file_exists($oldImagePath)) {
+                unlink($oldImagePath);
+            }
+        }
         $user->forceDelete();
+
         // log activity
         $agent = UA::parse($request->server('HTTP_USER_AGENT'));
         ActivityHistoryJob::dispatch(

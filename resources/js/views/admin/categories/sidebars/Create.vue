@@ -1,13 +1,14 @@
 <script setup>
 import { $t } from "@/plugins/i18n";
-import { Color } from "@/validators/CustomValidators";
 import useVuelidate from "@vuelidate/core";
-import { helpers, required } from "@vuelidate/validators";
+import { required } from "@vuelidate/validators";
+import { alphaSpace } from "@/validators/CustomValidators";
+import categoryPlaceHolder from "@/assets/images/placeholder.webp";
 import isEqual from "lodash.isequal";
 import { useConfirm } from "primevue/useconfirm";
+import imageCompression from "browser-image-compression";
 import { computed, ref, toRefs, watch } from "vue";
 const confirm = useConfirm();
-
 const props = defineProps({
     isOpen: {
         type: Boolean,
@@ -17,105 +18,90 @@ const props = defineProps({
         type: Boolean,
         required: false,
     },
+    parent: {
+        required: false,
+        default: "not_set",
+    },
+    progress: {
+        type: Number,
+        required: false,
+    },
 });
 
 const $emit = defineEmits(["update:isOpen", "createItem"]);
 
-const { isOpen, permissions, filteredRoles } = toRefs(props);
+const { isOpen, loading, parent } = toRefs(props);
 
-const role = ref({
+const category = ref({
     name: "",
     description: "",
-    color: "",
-    text_color: "",
-    permissions: [],
+    parent: parent.value | null,
+    status: 0,
 });
-
-function arraysAreEqual(arr1, arr2) {
-    if (arr1.length !== arr2.length) return false;
-    const sortedArr1 = [...arr1].sort((a, b) => a - b);
-    const sortedArr2 = [...arr2].sort((a, b) => a - b);
-    return sortedArr1.every((value, index) => value === sortedArr2[index]);
-}
-
-function isValidPermission() {
-    for (let i = 0; i < filteredRoles.value.length; i++) {
-        if (
-            arraysAreEqual(
-                role.value.permissions,
-                filteredRoles.value[i].permissions,
-            )
-        ) {
-            return false;
-        }
-    }
-    return true;
-}
-
-const validateColor = (value) => {
-    for (let i = 0; i < filteredRoles.value.length; i++) {
-        if (filteredRoles.value[i].color === value) {
-            return false;
-        }
-    }
-    return true;
-};
-
-const validateName = (value) => {
-    for (let i = 0; i < filteredRoles.value.length; i++) {
-        if (filteredRoles.value[i].name === value) {
-            return false;
-        }
-    }
-    return true;
-};
 
 const rules = computed(() => ({
     name: {
         required,
-        isValidName: helpers.withMessage(
-            $t("validation.existing_role_name"),
-            validateName,
-        ),
+        alphaSpace,
     },
-    color: {
-        required: helpers.withMessage($t("validation.required"), required),
-        Color: helpers.withMessage($t("validation.invalid_color"), Color),
-        validateColor: helpers.withMessage(
-            $t("validation.existing_role_color"),
-            validateColor,
-        ),
-    },
-    text_color: {
-        required: helpers.withMessage($t("validation.required"), required),
-        Color: helpers.withMessage($t("validation.invalid_color"), Color),
-    },
-    permissions: {
-        required: helpers.withMessage($t("validation.required"), required),
-        isValidPermission: helpers.withMessage(
-            $t("validation.role_permission_exists"),
-            isValidPermission,
-        ),
+    description: {
+        alphaSpace,
+        required,
     },
 }));
 
-const v$ = useVuelidate(rules, role);
+const imageFile = ref(null);
+
+const imageRules = computed(() => ({
+    imageFile: {
+        required,
+    },
+}));
+
+const imageV$ = useVuelidate(imageRules, { imageFile });
+
+const v$ = useVuelidate(rules, category);
+let formData = new FormData();
+const previewImage = ref(categoryPlaceHolder);
+
+const updateCategoryPicture = async (e) => {
+    imageFile.value = await compressImage(e.target.files[0]);
+    previewImage.value = URL.createObjectURL(imageFile.value);
+    const compressedImage = new File(
+        [imageFile.value],
+        e.target.files[0].name.split(".")[0],
+        {
+            type: imageFile.value.type,
+        },
+    );
+
+    formData.append("image", compressedImage);
+};
+
+const compressImage = async (image) => {
+    const options = {
+        maxSizeMB: 2,
+        maxWidthOrHeight: 1000,
+        useWebWorker: true,
+    };
+    return await imageCompression(image, options);
+};
 
 const createItem = () => {
     v$.value.$touch();
-    if (v$.value.$invalid) return;
-    $emit("createItem", role.value);
-    v$.value.$reset();
-};
+    imageV$.value.$touch();
+    if (v$.value.$invalid || imageV$.value.$invalid) return;
 
-const getContrastTextColor = (hex) => {
-    const r = parseInt(hex.slice(0, 2), 16);
-    const g = parseInt(hex.slice(2, 4), 16);
-    const b = parseInt(hex.slice(4, 6), 16);
-    const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-    let textColor = luminance > 0.5 ? "000000" : "ffffff";
-    role.value.text_color = textColor;
-    return textColor;
+    if (parent.value != "not_set") {
+        formData.append("parent_id", parent.value);
+    }
+    formData.append("name", category.value.name);
+    formData.append("description", category.value.description);
+    formData.append("status", category.value.status);
+    console.log("status value: ", category.value.status);
+
+    $emit("createItem", formData);
+    v$.value.$reset();
 };
 
 const cancelConfirm = () => {
@@ -144,12 +130,13 @@ const cancelConfirm = () => {
 };
 
 const isEdited = computed(() => {
-    return !isEqual(role.value, {
-        name: "",
-        description: "",
-        color: "",
-        text_color: "",
-    });
+    return (
+        !isEqual(category.value, {
+            name: "",
+            description: "",
+            status: false,
+        }) && previewImage.value !== categoryPlaceHolder
+    );
 });
 
 watch(
@@ -157,12 +144,12 @@ watch(
     (val) => {
         if (!val) {
             v$.value.$reset();
-            role.value = {
+            category.value = {
                 name: "",
                 description: "",
-                color: "",
-                text_color: "",
+                status: 0,
             };
+            previewImage.value = categoryPlaceHolder;
         }
     },
 );
@@ -179,11 +166,46 @@ watch(
         block-scroll
         class="!w-full md:!w-[30rem] lg:!w-[25rem]"
     >
+        {{ category.status }}
         <div class="flex flex-col min-h-full">
+            <div
+                class="cursor-pointer mb-10 w-full aspect-[1/1] rounded-xl overflow-hidden relative"
+            >
+                <label
+                    for="image"
+                    class="w-full absolute top-0 right-0 left-0 bottom-0"
+                >
+                    <input
+                        type="file"
+                        id="image"
+                        @change="updateCategoryPicture"
+                        accept="image/*"
+                        class="hidden"
+                    />
+                    <img
+                        :src="previewImage || categoryPlaceHolder"
+                        class="w-full object-cover !h-full"
+                    />
+                </label>
+                <div
+                    class="mb-5 absolute z-10 right-2 left-2 bottom-0"
+                    v-if="progress > 0"
+                >
+                    <ProgressBar :value="progress"></ProgressBar>
+                </div>
+            </div>
+            <div
+                class="text-red-500 mb-5"
+                v-for="error of imageV$.imageFile.$errors"
+                :key="error.$uid"
+            >
+                <Message severity="error">{{ error.$message }}</Message>
+            </div>
+
             <label for="name" class="mb-5">{{ $t("roles.name") }}</label>
             <InputText
                 id="name"
-                v-model="role.name"
+                v-model="category.name"
                 aria-labelledby="name"
                 class="w-full mb-5"
             />
@@ -197,69 +219,15 @@ watch(
             </div>
 
             <label for="description" class="mb-5">{{
-                $t("roles.description")
+                $t("categories.description")
             }}</label>
             <Textarea
                 id="description"
-                v-model="role.description"
+                v-model="category.description"
                 aria-labelledby="description"
                 class="w-full mb-5"
                 rows="3"
             />
-
-            <label for="color" class="mb-5">{{ $t("roles.color") }}</label>
-            <ColorPicker v-model="role.color" class="mb-5" />
-            <div
-                class="text-red-500 mb-5"
-                v-for="error of v$.color.$errors"
-                :key="error.$uid"
-            >
-                <Message severity="error">{{ error.$message }}</Message>
-            </div>
-
-            <label for="text_color" class="mb-5">
-                {{ $t("common.preview") }}
-            </label>
-            <span
-                class="highlight mb-5"
-                :style="{
-                    color: '#' + getContrastTextColor(role.color),
-                    backgroundColor: role.color ? '#' + role.color : '',
-                }"
-            >
-                {{ role.name ? role.name : $t("roles.name") }}
-            </span>
-
-            <div
-                class="text-red-500 mb-5"
-                v-for="error of v$.text_color.$errors"
-                :key="error.$uid"
-            >
-                <Message severity="error">{{ error.$message }}</Message>
-            </div>
-
-            <label for="permissions" class="mb-5">{{
-                $t("roles.permissions")
-            }}</label>
-
-            <MultiSelect
-                id="permissions"
-                v-model="role.permissions"
-                option-value="id"
-                :options="permissions"
-                display="chip"
-                optionLabel="name"
-                class="w-full mb-5"
-                :placeholder="$t('roles.select_permission')"
-            />
-
-            <div
-                class="text-red-500 mb-5"
-                v-for="error of v$.permissions.$errors"
-                :key="error.$uid"
-            >
-                <Message severity="error">{{ error.$message }}</Message>
-            </div>
 
             <div slot="footer" class="mt-auto flex justify-evenly">
                 <Button
@@ -276,7 +244,7 @@ watch(
                     severity="success"
                     @click="createItem"
                     :loading="loading"
-                    :disabled="!isEdited || loading"
+                    :disabled="loading"
                 />
             </div>
         </div>
