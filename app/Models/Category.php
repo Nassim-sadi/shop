@@ -27,7 +27,7 @@ class Category extends Model
 
     public function children()
     {
-        return $this->hasMany(Category::class, 'parent_id')->with('children');
+        return $this->hasMany(Category::class, 'parent_id')->with('children')->orderBy('order', 'ASC');
     }
 
     // A category can have one parent category

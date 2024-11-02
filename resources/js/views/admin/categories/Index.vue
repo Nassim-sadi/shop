@@ -1,15 +1,20 @@
 <script setup>
+import { onMounted, ref, watch } from "vue";
+
+import { format } from "date-fns";
+import { useConfirm } from "primevue/useconfirm";
+
 import { ability } from "@/plugins/ability";
 import axios from "@/plugins/axios";
 import emitter from "@/plugins/emitter";
 import { $t } from "@/plugins/i18n";
 import { watchDebounced } from "@vueuse/core";
-import { format } from "date-fns";
-import { useConfirm } from "primevue/useconfirm";
-import { onMounted, ref } from "vue";
+
+import ChangeOrder from "./sidebars/ChangeOrder.vue";
+import Create from "./sidebars/Create.vue";
 import Details from "./sidebars/Details.vue";
 import Edit from "./sidebars/Edit.vue";
-import Create from "./sidebars/Create.vue";
+
 const Confirm = useConfirm();
 const categories = ref([]);
 const loading = ref(false);
@@ -25,16 +30,26 @@ const isCreateOpen = ref(false);
 const keyword = ref("");
 const status = ref(null);
 const uploadPercentage = ref(0);
-const actionsPopover = ref();
+const actionsPopover = ref({ visible: false });
 
 const togglePopover = ({ event: event, current: data }) => {
     current.value = data;
     actionsPopover.value.toggle(event);
 };
 
+watch(
+    () => actionsPopover.value.visible,
+    (val) => {
+        if (!val && !loading.value && !loadingStates.value[current.value.id]) {
+            current.value = {};
+        }
+    },
+);
+
 const openAdd = () => {
     isCreateOpen.value = true;
 };
+
 const confirm = (myFunction, params) => {
     Confirm.require({
         message: $t("confirm.message_default"),
@@ -67,22 +82,19 @@ const getCategories = async () => {
     loading.value = true;
     return new Promise((resolve, reject) => {
         axios
-            .get(
-                "api/admin/categories",
-                // , {
-                //     params: {
-                //         keyword: keyword.value,
-                //         page: currentPage.value,
-                //         per_page: per_page.value,
-                //         start_date: format(start_date.value, "yyyy-MM-dd"),
-                //         end_date: format(end_date.value, "yyyy-MM-dd"),
-                //         status: status.value,
-                //     },
-                // }
-            )
+            .get("api/admin/categories", {
+                params: {
+                    keyword: keyword.value,
+                    page: currentPage.value,
+                    per_page: per_page.value,
+                    start_date: format(start_date.value, "yyyy-MM-dd"),
+                    end_date: format(end_date.value, "yyyy-MM-dd"),
+                    status: status.value,
+                },
+            })
             .then((res) => {
                 console.log(res.data);
-                categories.value = res.data;
+                categories.value = res.data.data;
                 total.value = res.data.total;
                 currentPage.value = res.data.current_page;
                 per_page.value = res.data.per_page;
@@ -164,11 +176,8 @@ const createItem = (data) => {
 
 const addItem = (data) => {
     if (current.value.id) {
-        console.log("pushing to children");
         current.value.children.push(data);
     } else {
-        console.log("pushing to categories");
-
         categories.value.push(data);
         total.value++;
     }
@@ -184,6 +193,8 @@ const changeStatus = async () => {
                 status: current.value.status ? 0 : 1,
             })
             .then((res) => {
+                console.log(res.data);
+
                 updateItemStatus(res.data.status);
                 emitter.emit("toast", {
                     summary: $t("status.success.title"),
@@ -291,10 +302,65 @@ const setLoadingState = (userId, isLoading) => {
     loadingStates.value[userId] = isLoading;
 };
 
+const updateOrder = (data) => {
+    loading.value = true;
+    return new Promise((resolve, reject) => {
+        axios
+            .patch("api/admin/categories/update-order", { categories: data })
+            .then(async (res) => {
+                loading.value = false;
+                await getCategories();
+                emitter.emit("toast", {
+                    summary: $t("status.success.title"),
+                    message: $t("status.success.category.update_order"),
+                    severity: "success",
+                });
+                resolve(res.data);
+            })
+            .catch((err) => {
+                console.log(err);
+                reject(err);
+            })
+            .finally(() => {
+                isChangeOrderOpen.value = false;
+                loading.value = false;
+            });
+    });
+};
+
 onMounted(async () => {
     start_date.value.setDate(start_date.value.getDate() - 17);
     await getCategories();
 });
+
+const isChangeOrderOpen = ref(false);
+const selectedCategories = ref([]);
+const openChangeOrder = () => {
+    if (current.value && current.value.id) {
+        const category = findCategoryById(categories.value, current.value.id);
+        if (category && category.children && category.children.length > 1) {
+            selectedCategories.value = category.children;
+        } else {
+            selectedCategories.value = [];
+        }
+    } else {
+        selectedCategories.value = categories.value;
+    }
+    isChangeOrderOpen.value = true;
+};
+
+const findCategoryById = (categories, id) => {
+    for (const category of categories) {
+        if (category.id === id) {
+            return category;
+        }
+        if (category.children && category.children.length > 0) {
+            const found = findCategoryById(category.children, id);
+            if (found) return found;
+        }
+    }
+    return null;
+};
 </script>
 
 <template>
@@ -316,31 +382,28 @@ onMounted(async () => {
             :loading="loading"
             :parent="current ? current.id : {}"
         ></Create>
-        <TreeTable :value="categories" :loading="loading">
-            <template #header>
-                <div>sup</div>
-            </template>
-            <Column header="name">
-                <template #body="slotProps">
-                    <div class="flex items-center gap-2">
-                        <Avatar
-                            shape="circle"
-                            size="large"
-                            :image="slotProps.node.image"
-                        />
-                        {{ slotProps.node.name }}
-                    </div>
-                </template>
-            </Column>
-        </TreeTable>
 
-        <!-- <TreeTable
+        <ChangeOrder
+            v-model:isOpen="isChangeOrderOpen"
+            @submit="updateOrder"
+            :current="selectedCategories"
+            :loading="loading"
+            :parentName="current.name || ''"
+        ></ChangeOrder>
+
+        <TreeTable
             :value="categories"
             tableStyle="min-width: 50rem"
             :loading="loading"
             dataKey="id"
             :rowHover="true"
             size="small"
+            :rows="per_page"
+            :paginator="true"
+            :totalRecords="total"
+            lazy
+            @page="onPageChange"
+            :key="categories.length"
         >
             <template #empty>
                 <div class="text-center">{{ $t("common.no_data") }}</div>
@@ -353,15 +416,26 @@ onMounted(async () => {
                     >
                         {{ $t("categories.page") }}
                     </h1>
-                    <Button
-                        :label="$t('categories.create')"
-                        icon="ti ti-plus"
-                        @click="openAdd"
-                        class="bold-label"
-                        v-tooltip.bottom="$t('categories.create')"
-                        v-if="ability.can('category', 'create')"
-                        severity="success"
-                    />
+                    <div class="flex gap-2">
+                        <Button
+                            icon="ti ti-sort-descending-2"
+                            :label="$t('categories.change_order')"
+                            @click="openChangeOrder"
+                            class="bold-label"
+                            v-tooltip.bottom="$t('categories.change_order')"
+                            severity="warn"
+                            v-if="ability.can('category', 'update')"
+                        ></Button>
+                        <Button
+                            :label="$t('categories.create')"
+                            icon="ti ti-plus"
+                            @click="openAdd"
+                            class="bold-label"
+                            v-tooltip.bottom="$t('categories.create')"
+                            v-if="ability.can('category', 'create')"
+                            severity="success"
+                        />
+                    </div>
                 </div>
                 <div class="flex flex-wrap gap-2 mb-4 w-full">
                     <div class="flex gap-2 items-baseline">
@@ -437,11 +511,12 @@ onMounted(async () => {
                 </div>
             </template>
 
-            <Column :header="$t('categories.order')">
+            <Column :header="$t('categories.order')" expander>
                 <template #body="slotProps">
                     {{ slotProps.node.order }}
                 </template>
             </Column>
+
             <Column :header="$t('categories.name')">
                 <template #body="slotProps">
                     <div class="flex items-center gap-2 font-semibold">
@@ -504,15 +579,18 @@ onMounted(async () => {
                 </template>
             </Column>
 
-            <template #footer>
+            <!-- <template #footer>
                 {{ $t("activities.total") }}
                 <span class="font-bold text-primary">
                     {{ total }}
                 </span>
                 {{ $t("categories.title", total) }}.
-            </template>
-        </TreeTable> -->
+            </template> -->
+        </TreeTable>
 
+        <pre>
+            {{ current }}
+        </pre>
         <Popover ref="actionsPopover" class="popover" position="right">
             <div class="content">
                 <Button
@@ -587,6 +665,24 @@ onMounted(async () => {
                         !current.children.length
                     "
                 />
+
+                <Button
+                    icon="ti ti-sort-descending-2"
+                    rounded
+                    size="normal"
+                    text
+                    severity="warn"
+                    :label="$t('categories.change_order')"
+                    @click="openChangeOrder"
+                    v-tooltip.bottom="$t('categories.change_order')"
+                    class="action-btn"
+                    :loading="loadingStates[current.id]"
+                    v-if="
+                        ability.can('category', 'changeOrder') &&
+                        current.children &&
+                        current.children.length > 1
+                    "
+                />
             </div>
         </Popover>
     </div>
@@ -606,5 +702,10 @@ onMounted(async () => {
     margin: 0 !important;
     width: 100%;
     justify-content: flex-start;
+}
+
+.change-order-btns > Button {
+    margin: 0;
+    padding: 0;
 }
 </style>

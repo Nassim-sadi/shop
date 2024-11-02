@@ -16,21 +16,18 @@ class CategoryController extends Controller
     public function getCategories(Request $request)
     {
         $this->authorize('category_view');
-        // $categories = Category::with('children')->whereNull('parent_id')->whereDate('created_at', '>=', $request->start_date)
-        //     ->whereDate('created_at', '<=', $request->end_date)
-        //     ->where(function ($q) use ($request) {
-        //         $q->where('name', 'Like', '%' . $request->keyword . '%')
-        //             ->orWhere('slug', 'Like', '%' . $request->keyword . '%');
-        //     })
-        //     ->when(isset($request->status) && $request->status !== '', function ($q) use ($request) {
-        //         $q->where('status', $request->status);
-        //     })
-        //     ->orderBy('order', 'ASC')
-        //     ->paginate($request->per_page);
-        // return new CategoryCollection($categories);
-
-        $categories = Category::with('children')->whereNull('parent_id')->get();
-        return  CategoryResource::collection($categories);
+        $categories = Category::with('children')->whereNull('parent_id')->whereDate('created_at', '>=', $request->start_date)
+            ->whereDate('created_at', '<=', $request->end_date)
+            ->where(function ($q) use ($request) {
+                $q->where('name', 'Like', '%' . $request->keyword . '%')
+                    ->orWhere('slug', 'Like', '%' . $request->keyword . '%');
+            })
+            ->when(isset($request->status) && $request->status !== '', function ($q) use ($request) {
+                $q->where('status', $request->status);
+            })
+            ->orderBy('order', 'ASC')
+            ->paginate($request->per_page);
+        return new CategoryCollection($categories);
     }
 
     public function create(Request $request)
@@ -50,19 +47,10 @@ class CategoryController extends Controller
         if (Category::where('slug', $slug)->exists()) {
             return response()->json(['error' => 'The generated slug is already in use. Please choose a different name.'], 432);
         }
-
-
-        // $nextOrder = array_key_exists('parent_id', $validatedData) ? Category::where('parent_id', $validatedData['parent_id'])->max('order') + 1 : Category::whereNull('parent_id')->max('order') + 1;
-
         $nextOrder = 1;
         $validatedData['slug'] = $slug;
-
-        // Check if we're creating a child category
         if (array_key_exists('parent_id', $validatedData)) {
-            // Fetch parent category only once
             $parentCategory = Category::withMax('children', 'order')->findOrFail($validatedData['parent_id']);
-
-            // Determine the order based on the max order of the parent's children
             $nextOrder = ($parentCategory->children_max_order ?? 0) + 1;
 
             // Create the child category
@@ -75,10 +63,7 @@ class CategoryController extends Controller
                 'order' => $nextOrder,
             ]);
         } else {
-            // Determine order for a top-level category
             $nextOrder = Category::whereNull('parent_id')->max('order') + 1;
-
-            // Create a top-level category
             $category = Category::create([
                 'image' => $this->uploadImage($validatedData['image']),
                 'name' => $validatedData['name'],
@@ -88,19 +73,6 @@ class CategoryController extends Controller
                 'order' => $nextOrder,
             ]);
         }
-
-        // $validatedData['order'] = $nextOrder;
-
-        // $image = $request->file('image');
-        // $originalName = pathinfo($image->getClientOriginalName(), PATHINFO_FILENAME);
-        // $extension = $image->extension();
-        // $imageName = Str::slug($originalName) . '-' . time() . '.' . $extension;
-        // $destinationPath = public_path('/storage/images/categories');
-        // $image->move($destinationPath, $imageName);
-        // $validatedData['image'] = $imageName;
-
-        // $category = Category::create($validatedData);
-
         $agent = UA::parse($request->server('HTTP_USER_AGENT'));
         ActivityHistoryJob::dispatch(
             data: [
@@ -148,6 +120,35 @@ class CategoryController extends Controller
             browser: $agent->ua->family,
         );
         return response()->json($category);
+    }
+
+    public function updateOrder(Request $request)
+    {
+        $this->authorize('category_edit');
+        $request->validate([
+            'categories' => 'required|array',
+            'categories.*.id' => 'required|integer|exists:categories,id',
+            'categories.*.order' => 'required|integer',
+        ]);
+
+        // Loop through the array and update each category
+        foreach ($request->categories as $categoryData) {
+            $category = Category::findOrFail($categoryData['id']);
+            $category->order = $categoryData['order'];
+            $category->save();
+            $agent = UA::parse($request->server('HTTP_USER_AGENT'));
+            ActivityHistoryJob::dispatch(
+                data: [
+                    'model' => 'categories',
+                    'action' => 'update',
+                    'data' => ['category' =>  $category],
+                    'user_id' => $request->user()->id,
+                ],
+                platform: $agent->os->family,
+                browser: $agent->ua->family,
+            );
+        }
+        return response()->json(['message' => 'Categories updated successfully']);
     }
 
     public function changeStatus(Request $request)

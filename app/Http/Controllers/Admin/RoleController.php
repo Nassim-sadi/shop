@@ -31,7 +31,7 @@ class RoleController extends Controller
 
         $this->authorize('role_create');
         $request->validate([
-            'name' => 'required|unique:roles,name,except,id',
+            'name' => 'required|unique:roles,name',
             'description' => 'nullable|string|max:255',
             'color' => ['required', 'regex:/^(?:[0-9a-f]{3}){1,2}$/i'],
             'text_color'
@@ -42,10 +42,10 @@ class RoleController extends Controller
 
         // After validation, check if any other role has the same set of permissions
         $roleWithSamePermissions = Role::whereHas('permissions', function ($query) use ($request) {
-            $query->whereIn('id', $request->permissions);
+            $query->whereIn('id',  $request->permissions);
         }, '=', count($request->permissions)) // Ensure exact match by counting
             ->whereDoesntHave('permissions', function ($query) use ($request) {
-                $query->whereNotIn('id', $request->permissions);
+                $query->whereNotIn('id',  $request->permissions);
             })
             ->where('id', '!=', $role->id ?? null) // Exclude the current role (if updating)
             ->first();

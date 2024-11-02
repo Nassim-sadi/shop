@@ -64,6 +64,7 @@ Route::middleware(["auth:sanctum"])->group(function () {
         Route::post('/create', 'create');
         Route::put('/update', 'update');
         Route::patch('/change-status', 'changeStatus');
+        Route::patch('/update-order', 'updateOrder');
         Route::delete('/delete/{id}', 'delete');
     });
 

@@ -166,7 +166,6 @@ watch(
         block-scroll
         class="!w-full md:!w-[30rem] lg:!w-[25rem]"
     >
-        {{ category.status }}
         <div class="flex flex-col min-h-full">
             <div
                 class="cursor-pointer mb-10 w-full aspect-[1/1] rounded-xl overflow-hidden relative"

@@ -211,7 +211,8 @@
                 "create": "Category created successfully",
                 "update": "Category updated successfully",
                 "delete": "Category deleted successfully",
-                "change_status": "Category status changed successfully"
+                "change_status": "Category status changed successfully",
+                "update_order": "Category order updated successfully"
             },
             "product": {
                 "create": "Product created successfully",
@@ -282,6 +283,7 @@
         "update_success": "Category updated successfully",
         "delete_success": "Category deleted successfully",
         "select_parent": "Select parent category",
-        "add_sub": "Add sub category"
+        "add_sub": "Add sub category",
+        "change_order": "Change order"
     }
 }
