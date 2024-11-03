@@ -1,14 +1,12 @@
 <script setup>
 import { onMounted, ref, watch } from "vue";
 
-import { format } from "date-fns";
 import { useConfirm } from "primevue/useconfirm";
 
 import { ability } from "@/plugins/ability";
 import axios from "@/plugins/axios";
 import emitter from "@/plugins/emitter";
 import { $t } from "@/plugins/i18n";
-import { watchDebounced } from "@vueuse/core";
 
 import ChangeOrder from "./sidebars/ChangeOrder.vue";
 import Create from "./sidebars/Create.vue";
@@ -18,18 +16,10 @@ import Edit from "./sidebars/Edit.vue";
 const Confirm = useConfirm();
 const categories = ref([]);
 const loading = ref(false);
-const total = ref(0);
-const currentPage = ref(1);
-const per_page = ref(10);
-const start_date = ref(new Date());
-const end_date = ref(new Date());
 const current = ref({});
 const isDetailsOpen = ref(false);
 const isEditOpen = ref(false);
 const isCreateOpen = ref(false);
-const keyword = ref("");
-const status = ref(null);
-const uploadPercentage = ref(0);
 const actionsPopover = ref({ visible: false });
 
 const togglePopover = ({ event: event, current: data }) => {
@@ -70,34 +60,15 @@ const confirm = (myFunction, params) => {
     });
 };
 
-const statusOptions = [
-    { label: "All", value: null },
-    { label: "Active", value: 1 },
-    { label: "Inactive", value: 0 },
-];
-
 const getCategories = async () => {
     if (loading.value) return;
     loadingStates.value = [];
     loading.value = true;
     return new Promise((resolve, reject) => {
         axios
-            .get("api/admin/categories", {
-                params: {
-                    keyword: keyword.value,
-                    page: currentPage.value,
-                    per_page: per_page.value,
-                    start_date: format(start_date.value, "yyyy-MM-dd"),
-                    end_date: format(end_date.value, "yyyy-MM-dd"),
-                    status: status.value,
-                },
-            })
+            .get("api/admin/categories")
             .then((res) => {
-                console.log(res.data);
-                categories.value = res.data.data;
-                total.value = res.data.total;
-                currentPage.value = res.data.current_page;
-                per_page.value = res.data.per_page;
+                categories.value = res.data;
                 resolve(res.data);
             })
             .catch((err) => {
@@ -110,35 +81,12 @@ const getCategories = async () => {
     });
 };
 
-watchDebounced(
-    keyword,
-    () => {
-        if (keyword.value.length >= 3 || keyword.value.length == 0) {
-            getCategories();
-        }
-    },
-    { debounce: 1000, maxWait: 1000 },
-);
-
-const onPageChange = (event) => {
-    currentPage.value = event.page + 1;
-    per_page.value = event.rows;
-    current.value = {};
-    getCategories();
-};
-
 const openDetails = () => {
     isDetailsOpen.value = true;
 };
 
 const openEdit = () => {
     isEditOpen.value = true;
-};
-
-const reset = () => {
-    keyword.value = "";
-    status.value = null;
-    getCategories();
 };
 
 const createItem = (data) => {
@@ -179,7 +127,6 @@ const addItem = (data) => {
         current.value.children.push(data);
     } else {
         categories.value.push(data);
-        total.value++;
     }
 };
 
@@ -193,8 +140,6 @@ const changeStatus = async () => {
                 status: current.value.status ? 0 : 1,
             })
             .then((res) => {
-                console.log(res.data);
-
                 updateItemStatus(res.data.status);
                 emitter.emit("toast", {
                     summary: $t("status.success.title"),
@@ -229,10 +174,6 @@ const deleteItem = () => {
                 if (current.value && current.value.id) {
                     removeCategoryById(categories.value, current.value.id);
                 }
-                if (!current.value.parent_id) {
-                    console.log(current);
-                    total.value--;
-                }
 
                 emitter.emit("toast", {
                     summary: $t("status.success.title"),
@@ -263,37 +204,45 @@ const removeCategoryById = (categories, idToRemove) => {
 };
 
 const editItem = (val) => {
+    loading.value = true;
     return new Promise((resolve, reject) => {
         axios
-            .post("api/admin/categories/update", val, {
-                onUploadProgress: (progressEvent) => {
-                    uploadPercentage.value = Math.round(
-                        (progressEvent.loaded * 100) / progressEvent.total,
-                    );
-                },
-            })
-            .then((response) => {
-                uploadPercentage.value = 0;
-                isEditOpen.value = false;
-                updateItem(response.data.category);
+            .post("api/admin/categories/update", val)
+            .then((res) => {
+                console.log(res.data);
+
+                updateCategoryById(
+                    categories.value,
+                    res.data.category.id,
+                    res.data.category,
+                );
                 current.value = {};
+                isEditOpen.value = false;
                 emitter.emit("toast", {
                     summary: $t("status.success.title"),
                     message: $t("status.success.category.update"),
                     severity: "success",
                 });
-                resolve(response);
+                resolve(res);
             })
             .catch((error) => {
-                uploadPercentage.value = 0;
                 console.log(error);
                 reject(error);
+            })
+            .finally(() => {
+                loading.value = false;
             });
     });
 };
 
-const updateItem = (data) => {
-    current.value = data;
+const updateCategoryById = (categories, idToUpdate, newData) => {
+    categories.forEach((category, index) => {
+        if (category.id === idToUpdate) {
+            Object.assign(category, newData);
+        } else if (category.children && category.children.length > 0) {
+            updateCategoryById(category.children, idToUpdate, newData);
+        }
+    });
 };
 
 const loadingStates = ref({});
@@ -329,7 +278,6 @@ const updateOrder = (data) => {
 };
 
 onMounted(async () => {
-    start_date.value.setDate(start_date.value.getDate() - 17);
     await getCategories();
 });
 
@@ -374,14 +322,15 @@ const findCategoryById = (categories, id) => {
             :current="current"
             v-model:isOpen="isEditOpen"
             @editItem="editItem"
-        ></Edit>
+            :loading="loading"
+        />
 
         <Create
             v-model:isOpen="isCreateOpen"
             @createItem="createItem"
             :loading="loading"
             :parent="current ? current.id : {}"
-        ></Create>
+        />
 
         <ChangeOrder
             v-model:isOpen="isChangeOrderOpen"
@@ -389,7 +338,7 @@ const findCategoryById = (categories, id) => {
             :current="selectedCategories"
             :loading="loading"
             :parentName="current.name || ''"
-        ></ChangeOrder>
+        />
 
         <TreeTable
             :value="categories"
@@ -398,32 +347,29 @@ const findCategoryById = (categories, id) => {
             dataKey="id"
             :rowHover="true"
             size="small"
-            :rows="per_page"
-            :paginator="true"
-            :totalRecords="total"
-            lazy
-            @page="onPageChange"
-            :key="categories.length"
         >
             <template #empty>
                 <div class="text-center">{{ $t("common.no_data") }}</div>
             </template>
 
             <template #header>
-                <div class="flex justify-between items-center mb-4">
+                <div class="flex justify-between items-center flex-wrap mb-4">
                     <h1
                         class="text-xl font-bold mb-0 text-surface-900 dark:text-surface-0"
                     >
                         {{ $t("categories.page") }}
                     </h1>
-                    <div class="flex gap-2">
+                    <div class="flex gap-2 flex-wrap">
                         <Button
                             icon="ti ti-sort-descending-2"
                             :label="$t('categories.change_order')"
                             @click="openChangeOrder"
                             class="bold-label"
-                            v-tooltip.bottom="$t('categories.change_order')"
+                            v-tooltip.bottom="
+                                $t('categories.change_order_tooltip')
+                            "
                             severity="warn"
+                            outlined
                             v-if="ability.can('category', 'update')"
                         ></Button>
                         <Button
@@ -436,78 +382,6 @@ const findCategoryById = (categories, id) => {
                             severity="success"
                         />
                     </div>
-                </div>
-                <div class="flex flex-wrap gap-2 mb-4 w-full">
-                    <div class="flex gap-2 items-baseline">
-                        <span>{{ $t("common.from") }}</span>
-                        <DatePicker
-                            showIcon
-                            v-model="start_date"
-                            date-format="yy-mm-dd"
-                            :max-date="
-                                end_date
-                                    ? new Date(end_date)
-                                    : new Date(2025, 0, 1)
-                            "
-                            :min-date="new Date(2024, 0, 1)"
-                            showButtonBar
-                            @clear-click="() => (start_date = new Date())"
-                        />
-                    </div>
-
-                    <div class="flex gap-2 items-baseline">
-                        <span>{{ $t("common.to") }}</span>
-                        <DatePicker
-                            showIcon
-                            v-model="end_date"
-                            date-format="yy-mm-dd"
-                            :max-date="new Date()"
-                            :min-date="
-                                start_date
-                                    ? new Date(start_date)
-                                    : new Date(2024, 0, 1)
-                            "
-                            showButtonBar
-                            @clear-click="() => (end_date = new Date())"
-                        />
-                    </div>
-
-                    <IconField>
-                        <InputIcon class="pi pi-search" />
-                        <InputText
-                            v-model="keyword"
-                            :placeholder="$t('common.search')"
-                            @keyup.enter="getCategories"
-                        />
-                    </IconField>
-
-                    <Select
-                        v-model="status"
-                        :options="statusOptions"
-                        optionLabel="label"
-                        optionValue="value"
-                        :placeholder="$t('user.statusQuery')"
-                    />
-
-                    <Button
-                        :label="$t('common.search')"
-                        icon="ti ti-search"
-                        @click="getCategories"
-                        :disabled="!start_date || !end_date"
-                        :loading="loading"
-                        class="bold-label"
-                    />
-
-                    <Button
-                        :label="$t('common.reset')"
-                        icon="ti ti-restore"
-                        @click="reset"
-                        :loading="loading"
-                        class="bold-label"
-                        v-tooltip.bottom="$t('common.reset')"
-                        :disabled="!start_date || !end_date"
-                        severity="secondary"
-                    />
                 </div>
             </template>
 
@@ -578,19 +452,8 @@ const findCategoryById = (categories, id) => {
                     </Button>
                 </template>
             </Column>
-
-            <!-- <template #footer>
-                {{ $t("activities.total") }}
-                <span class="font-bold text-primary">
-                    {{ total }}
-                </span>
-                {{ $t("categories.title", total) }}.
-            </template> -->
         </TreeTable>
 
-        <pre>
-            {{ current }}
-        </pre>
         <Popover ref="actionsPopover" class="popover" position="right">
             <div class="content">
                 <Button
@@ -674,7 +537,7 @@ const findCategoryById = (categories, id) => {
                     severity="warn"
                     :label="$t('categories.change_order')"
                     @click="openChangeOrder"
-                    v-tooltip.bottom="$t('categories.change_order')"
+                    v-tooltip.bottom="$t('categories.change_order_tooltip')"
                     class="action-btn"
                     :loading="loadingStates[current.id]"
                     v-if="

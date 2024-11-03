@@ -32,6 +32,17 @@ const $emit = defineEmits(["update:isOpen", "createItem"]);
 
 const { isOpen, loading, parent } = toRefs(props);
 
+const statusOptions = [
+    {
+        name: $t("common.active"),
+        value: 1,
+    },
+    {
+        name: $t("common.inactive"),
+        value: 0,
+    },
+];
+
 const category = ref({
     name: "",
     description: "",
@@ -64,7 +75,7 @@ const v$ = useVuelidate(rules, category);
 let formData = new FormData();
 const previewImage = ref(categoryPlaceHolder);
 
-const updateCategoryPicture = async (e) => {
+const updatePicture = async (e) => {
     imageFile.value = await compressImage(e.target.files[0]);
     previewImage.value = URL.createObjectURL(imageFile.value);
     const compressedImage = new File(
@@ -134,8 +145,8 @@ const isEdited = computed(() => {
         !isEqual(category.value, {
             name: "",
             description: "",
-            status: false,
-        }) && previewImage.value !== categoryPlaceHolder
+            status: 0,
+        }) || previewImage.value !== categoryPlaceHolder
     );
 });
 
@@ -164,9 +175,9 @@ watch(
         :dismissable="false"
         :showCloseIcon="false"
         block-scroll
-        class="!w-full md:!w-[30rem] lg:!w-[25rem]"
+        class="small-drawer"
     >
-        <div class="flex flex-col min-h-full">
+        <div class="flex flex-col min-h-full drawer-container">
             <div
                 class="cursor-pointer mb-10 w-full aspect-[1/1] rounded-xl overflow-hidden relative"
             >
@@ -177,7 +188,7 @@ watch(
                     <input
                         type="file"
                         id="image"
-                        @change="updateCategoryPicture"
+                        @change="updatePicture"
                         accept="image/*"
                         class="hidden"
                     />
@@ -228,17 +239,34 @@ watch(
                 rows="3"
             />
 
-            <div slot="footer" class="mt-auto flex justify-evenly">
+            <label for="status" class="mb-5">{{
+                $t("categories.status")
+            }}</label>
+
+            <SelectButton
+                id="status"
+                v-model="category.status"
+                aria-labelledby="status"
+                fluid
+                :options="statusOptions"
+                optionLabel="name"
+                optionValue="value"
+                class="toggleStatusBtn"
+            />
+        </div>
+        <template #footer>
+            <div class="mt-auto flex justify-evenly">
                 <Button
-                    label="Cancel"
+                    :label="$t('common.cancel')"
                     icon="pi pi-times"
                     severity="danger"
                     @click="cancelConfirm"
+                    outlined
                     :disabled="loading"
                 />
 
                 <Button
-                    label="Save"
+                    :label="$t('common.save')"
                     icon="pi pi-check"
                     severity="success"
                     @click="createItem"
@@ -246,12 +274,8 @@ watch(
                     :disabled="loading"
                 />
             </div>
-        </div>
+        </template>
     </Drawer>
 </template>
 
-<style lang="scss" scoped>
-:deep(.p-multiselect-label) {
-    flex-wrap: wrap;
-}
-</style>
+<style lang="scss" scoped></style>

@@ -88,3 +88,17 @@ body {
     box-shadow: rgba(47, 43, 61, 0.12) 0px 2px 8px 0px;
 }
 
+.small-drawer {
+    width: 25rem !important;
+    @media screen and (max-width: 576px) {
+        width: 100% !important;
+    }
+}
+
+.toggleStatusBtn {
+    width: 100%;
+
+    & button {
+        width: 50%;
+    }
+}

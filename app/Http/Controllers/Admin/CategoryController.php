@@ -16,24 +16,26 @@ class CategoryController extends Controller
     public function getCategories(Request $request)
     {
         $this->authorize('category_view');
-        $categories = Category::with('children')->whereNull('parent_id')->whereDate('created_at', '>=', $request->start_date)
-            ->whereDate('created_at', '<=', $request->end_date)
-            ->where(function ($q) use ($request) {
-                $q->where('name', 'Like', '%' . $request->keyword . '%')
-                    ->orWhere('slug', 'Like', '%' . $request->keyword . '%');
-            })
-            ->when(isset($request->status) && $request->status !== '', function ($q) use ($request) {
-                $q->where('status', $request->status);
-            })
-            ->orderBy('order', 'ASC')
-            ->paginate($request->per_page);
-        return new CategoryCollection($categories);
+        // $categories = Category::with('children')->whereNull('parent_id')->whereDate('created_at', '>=', $request->start_date)
+        //     ->whereDate('created_at', '<=', $request->end_date)
+        //     ->where(function ($q) use ($request) {
+        //         $q->where('name', 'Like', '%' . $request->keyword . '%')
+        //             ->orWhere('slug', 'Like', '%' . $request->keyword . '%');
+        //     })
+        //     ->when(isset($request->status) && $request->status !== '', function ($q) use ($request) {
+        //         $q->where('status', $request->status);
+        //     })
+        //     ->orderBy('order', 'ASC')
+        //     ->paginate($request->per_page);
+        // return new CategoryCollection($categories);
+
+        $categories = Category::with('children')->whereNull('parent_id')->orderBy('order', 'ASC')->get();
+        return  CategoryResource::collection($categories);
     }
 
     public function create(Request $request)
     {
         $this->authorize('category_create');
-        debugbar()->log($request->all());
         $validatedData = $request->validate([
             'name' => 'required|string|max:255',
             'status' => 'required|boolean',
@@ -97,30 +99,65 @@ class CategoryController extends Controller
         return $imageName;
     }
 
-    public function update(Request $request, Category $category)
+    public function update(Request $request)
     {
         $this->authorize('category_edit');
-        $request->validate([
-            'name' => 'required',
-            'slug' => 'required',
-            'order' => 'required',
-            'status' => 'required',
+        $category = Category::findOrFail($request->id);
 
+        $validatedData = $request->validate([
+            'name' => 'required|string|max:255',
+            'status' => 'required|boolean',
+            'description' => 'required|string|max:255',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:2048', // Made image optional
         ]);
-        $category->update($request->all());
+
+        // Only regenerate slug if the name has changed
+        if ($category->name !== $validatedData['name']) {
+            $slug = Str::slug($validatedData['name']);
+
+            // Check if slug is unique
+            if (Category::where('slug', $slug)->where('id', '!=', $category->id)->exists()) {
+                return response()->json(['error' => 'The generated slug is already in use. Please choose a different name.'], 432);
+            }
+
+            $category->slug = $slug;
+        }
+
+        // Update fields
+        $category->name = $validatedData['name'];
+        $category->description = $validatedData['description'];
+        $category->status = $validatedData['status'];
+
+        // Update the image if provided
+        if (!empty($validatedData['image'])) {
+            if ($category->image) {
+                $oldImage = basename(parse_url($category->image, PHP_URL_PATH));
+                $oldImagePath = public_path('/storage/images/profile/' . $oldImage);
+
+                if (file_exists($oldImagePath)) {
+                    unlink($oldImagePath);
+                }
+            }
+            $category->image = $this->uploadImage($validatedData['image']);
+        }
+
+        $category->save();
+
         $agent = UA::parse($request->server('HTTP_USER_AGENT'));
         ActivityHistoryJob::dispatch(
             data: [
                 'model' => 'categories',
-                'action' => 'delete',
-                'data' => ['category' =>  $category],
+                'action' => 'update',
+                'data' => ['category' => $category],
                 'user_id' => $request->user()->id,
             ],
             platform: $agent->os->family,
             browser: $agent->ua->family,
         );
-        return response()->json($category);
+
+        return response()->json(['success' => 'Category updated successfully', 'category' => CategoryResource::make($category)], 200);
     }
+
 
     public function updateOrder(Request $request)
     {

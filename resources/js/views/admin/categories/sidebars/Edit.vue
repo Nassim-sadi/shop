@@ -1,12 +1,14 @@
 <script setup>
 import placeholder from "@/assets/images/avatar/profile-placeholder.png";
 import { $t } from "@/plugins/i18n";
-import { firstname, lastname } from "@/validators/CustomValidators";
+import { required } from "@vuelidate/validators";
 import useVuelidate from "@vuelidate/core";
 import imageCompression from "browser-image-compression";
+import { alphaSpace } from "@/validators/CustomValidators";
 import isEqual from "lodash.isequal";
 import { useConfirm } from "primevue/useconfirm";
 import { computed, ref, toRefs, watch } from "vue";
+import categoryPlaceHolder from "@/assets/images/placeholder.webp";
 const confirm = useConfirm();
 
 const props = defineProps({
@@ -18,9 +20,9 @@ const props = defineProps({
         type: Boolean,
         required: true,
     },
-    progress: {
-        type: Number,
-        required: false,
+    loading: {
+        type: Boolean,
+        required: true,
     },
 });
 
@@ -28,29 +30,74 @@ const $emit = defineEmits(["update:isOpen", "editItem"]);
 
 const { isOpen, current } = toRefs(props);
 
-const previewImage = ref(null);
-const editedUser = ref({});
-const formData = new FormData();
+const edited = ref({});
+const statusOptions = [
+    {
+        name: $t("common.active"),
+        value: 1,
+    },
+    {
+        name: $t("common.inactive"),
+        value: 0,
+    },
+];
 
-const rules = {
-    firstname: firstname,
-    lastname: lastname,
-};
+const rules = computed(() => ({
+    name: {
+        required,
+        alphaSpace,
+    },
+    description: {
+        alphaSpace,
+        required,
+    },
+}));
 
-const v$ = useVuelidate(rules, editedUser);
+const imageFile = ref(null);
 
-const updateProfilePicture = async (e) => {
-    let file = await compressImage(e.target.files[0]);
-    previewImage.value = URL.createObjectURL(file);
+const imageRules = computed(() => ({
+    imageFile: {
+        required,
+    },
+}));
+
+const imageV$ = useVuelidate(imageRules, { imageFile });
+
+const v$ = useVuelidate(rules, edited);
+let formData = new FormData();
+const previewImage = ref(categoryPlaceHolder);
+
+const updatePicture = async (e) => {
+    imageFile.value = await compressImage(e.target.files[0]);
+    previewImage.value = URL.createObjectURL(imageFile.value);
     const compressedImage = new File(
-        [file],
+        [imageFile.value],
         e.target.files[0].name.split(".")[0],
         {
-            type: file.type,
+            type: imageFile.value.type,
         },
     );
 
     formData.append("image", compressedImage);
+};
+
+const isEdited = computed(() => {
+    return !(
+        isEqual(edited.value, current.value) &&
+        previewImage.value === current.value.image
+    );
+});
+
+const editItem = () => {
+    v$.value.$touch();
+    if (!v$.value.$invalid && isEdited.value) {
+        formData.append("id", edited.value.id);
+        formData.append("name", edited.value.name);
+        formData.append("description", edited.value.description);
+        formData.append("status", edited.value.status);
+        $emit("editItem", formData);
+        v$.value.$reset();
+    }
 };
 
 const compressImage = async (image) => {
@@ -62,25 +109,7 @@ const compressImage = async (image) => {
     return await imageCompression(image, options);
 };
 
-const isEdited = computed(() => {
-    return !(
-        isEqual(editedUser.value, current.value) &&
-        previewImage.value === current.value.image
-    );
-});
-
-const updateItem = () => {
-    v$.value.$touch();
-    if (!v$.value.$invalid && isEdited.value) {
-        formData.append("id", current.value.id);
-        formData.append("firstname", editedUser.value.firstname);
-        formData.append("lastname", editedUser.value.lastname);
-        $emit("editItem", formData);
-        v$.value.$reset();
-    }
-};
-
-const cancelEdit = () => {
+const cancelConfirm = () => {
     if (isEdited.value) {
         confirm.require({
             header: $t("cancel.edit"),
@@ -109,11 +138,14 @@ watch(
     () => isOpen.value,
     (val) => {
         if (val) {
-            editedUser.value = { ...current.value };
+            edited.value.id = current.value.id;
+            edited.value.name = current.value.name;
+            edited.value.description = current.value.description;
+            edited.value.status = current.value.status ? 1 : 0;
             previewImage.value = current.value.image;
         } else {
             v$.value.$reset();
-            editedUser.value = {};
+            edited.value = {};
         }
     },
 );
@@ -127,10 +159,11 @@ watch(
         @update:visible="$emit('update:isOpen', $event)"
         :dismissable="false"
         :showCloseIcon="false"
+        class="small-drawer"
     >
-        <div class="flex flex-col min-h-full">
+        <div class="flex flex-col min-h-full drawer-container">
             <div
-                class="cursor-pointer mb-10 w-full aspect-[1/0.75] rounded-xl overflow-hidden relative"
+                class="cursor-pointer mb-10 w-full aspect-[1/1] rounded-xl overflow-hidden relative"
             >
                 <label
                     for="image"
@@ -139,79 +172,87 @@ watch(
                     <input
                         type="file"
                         id="image"
-                        @change="updateProfilePicture"
+                        @change="updatePicture"
                         accept="image/*"
                         class="hidden"
                     />
                     <img
-                        :src="previewImage || placeholder"
+                        :src="previewImage || categoryPlaceHolder"
                         class="w-full object-cover !h-full"
                     />
                 </label>
-                <div
-                    class="mb-5 absolute z-10 right-2 left-2 bottom-0"
-                    v-if="progress > 0"
-                >
-                    <ProgressBar :value="progress"></ProgressBar>
-                </div>
             </div>
-
-            <label
-                for="firstname"
-                class="mb-5 text-surface-700 dark:text-surface-0"
-                >{{ $t("firstname") }}</label
-            >
-            <InputText
-                id="firstname"
-                v-model="editedUser.firstname"
-                aria-labelledby="firstname"
-                class="w-full mb-5"
-            />
-
             <div
                 class="text-red-500 mb-5"
-                v-for="error of v$.firstname.$errors"
+                v-for="error of imageV$.imageFile.$errors"
                 :key="error.$uid"
             >
                 <Message severity="error">{{ error.$message }}</Message>
             </div>
 
-            <label
-                for="lastname"
-                class="mb-5 text-surface-700 dark:text-surface-0"
-                >{{ $t("lastname") }}</label
-            >
+            <label for="name" class="mb-5">{{ $t("roles.name") }}</label>
             <InputText
-                id="lastname"
-                v-model="editedUser.lastname"
-                aria-labelledby="lastname"
+                id="name"
+                v-model="edited.name"
+                aria-labelledby="name"
                 class="w-full mb-5"
             />
+
             <div
                 class="text-red-500 mb-5"
-                v-for="error of v$.lastname.$errors"
+                v-for="error of v$.name.$errors"
                 :key="error.$uid"
             >
                 <Message severity="error">{{ error.$message }}</Message>
             </div>
 
-            <div slot="footer" class="mt-auto flex justify-evenly">
+            <label for="description" class="mb-5">{{
+                $t("categories.description")
+            }}</label>
+            <Textarea
+                id="description"
+                v-model="edited.description"
+                aria-labelledby="description"
+                class="w-full mb-5"
+                rows="3"
+            />
+
+            <label for="status" class="mb-5">{{
+                $t("categories.status")
+            }}</label>
+
+            <SelectButton
+                id="status"
+                v-model="edited.status"
+                aria-labelledby="status"
+                fluid
+                :options="statusOptions"
+                optionLabel="name"
+                optionValue="value"
+                class="toggleStatusBtn"
+            />
+        </div>
+        <template #footer>
+            <div class="mt-auto flex justify-evenly">
                 <Button
-                    label="Cancel"
+                    :label="$t('common.cancel')"
                     icon="pi pi-times"
                     severity="danger"
-                    @click="cancelEdit"
+                    @click="cancelConfirm"
+                    outlined
+                    :disabled="loading"
                 />
+
                 <Button
-                    label="Save"
+                    :label="$t('common.save')"
                     icon="pi pi-check"
                     severity="success"
-                    @click="updateItem"
-                    :loading="progress > 0"
-                    :disabled="!isEdited"
+                    @click="editItem"
+                    :loading="loading"
+                    :disabled="loading"
                 />
             </div>
-        </div>
+        </template>
     </Drawer>
 </template>
 

@@ -88,13 +88,13 @@ const close = () => {
         <div class="flex justify-end gap-2">
             <Button
                 type="button"
-                label="Cancel"
+                :label="$t('common.cancel')"
                 severity="secondary"
                 @click="close"
             ></Button>
             <Button
                 type="button"
-                label="Save"
+                :label="$t('common.save')"
                 @click="changeOrder"
                 :disabled="loading"
             ></Button>
