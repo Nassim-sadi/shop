@@ -12,7 +12,7 @@ import piniaPersist from "pinia-plugin-persist";
 import { PerfectScrollbarPlugin } from "vue3-perfect-scrollbar";
 import router from "./router/Index";
 
-import "@/assets/myStyles.scss";
+import "@/assets/adminStyles.scss";
 import "@/assets/styles.scss";
 import "@/assets/tailwind.css";
 import { ability } from "@/plugins/ability";
