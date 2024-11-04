@@ -8,6 +8,8 @@ const categories = ref([]);
 const formattedCategories = ref([]);
 const loading = ref(false);
 const categoriesMenu = ref(false);
+import { authStore } from "@/store/AuthStore";
+const auth = authStore();
 const getCategories = async () => {
     loading.value = true;
     return new Promise((resolve, reject) => {
@@ -102,6 +104,26 @@ onMounted(async () => {
             <InputIcon class="pi pi-search" />
             <InputText v-model="search" placeholder="Search" />
         </IconField>
+
+        <div class="navbar-auth text-white">
+            <router-link
+                v-if="auth.user"
+                :to="{ name: 'dashboard' }"
+                class="navbar-item"
+                v-ripple
+            >
+                {{ auth.user.firstname }}
+                Admin
+            </router-link>
+            <router-link
+                v-else
+                :to="{ name: 'login' }"
+                class="navbar-item"
+                v-ripple
+            >
+                {{ $t("login") }}
+            </router-link>
+        </div>
     </div>
 
     <TieredMenu
@@ -143,7 +165,7 @@ onMounted(async () => {
     transition: left var(--layout-section-transition-duration);
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    gap: 2rem;
 
     .navbar-logo-container {
         width: 20rem;
@@ -168,7 +190,7 @@ onMounted(async () => {
     .navbar-items {
         display: flex;
         align-items: center;
-        gap: 2rem;
+        gap: 1rem;
 
         .navbar-item {
             color: var(--light-clr);

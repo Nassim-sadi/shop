@@ -366,9 +366,9 @@ const findCategoryById = (categories, id) => {
                             @click="openChangeOrder"
                             class="bold-label"
                             v-tooltip.bottom="
-                                $t('categories.change_order_tooltip')
+                                $t('categories.change_order_tooltip_main')
                             "
-                            severity="warn"
+                            severity="help"
                             outlined
                             v-if="ability.can('category', 'update')"
                         ></Button>

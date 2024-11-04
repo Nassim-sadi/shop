@@ -286,6 +286,7 @@
         "select_parent": "Select parent category",
         "add_sub": "Add sub category",
         "change_order": "Change order",
-        "change_order_tooltip": "Change order of sub categories"
+        "change_order_tooltip": "Change order of sub categories",
+        "change_order_tooltip_main": "Change order of main categories"
     }
 }
