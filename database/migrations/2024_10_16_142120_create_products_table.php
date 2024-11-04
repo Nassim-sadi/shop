@@ -16,9 +16,19 @@ return new class extends Migration
             $table->foreignId('category_id')->constrained()->onDelete('cascade');
             $table->string('name');
             $table->string('slug')->unique();
-            $table->text('description');
-            $table->boolean('is_active')->default(true);
+            $table->string('description', 255);
+            $table->longText('long_description');
+            $table->boolean('status')->default(false);
+            $table->integer('stock')->default(0);
             $table->decimal('price', 8, 2);
+            $table->decimal('cost', 8, 2);
+            $table->decimal('discount', 5, 2)->nullable();
+            $table->boolean('featured')->default(false);
+            $table->string('sku')->unique();
+            $table->string('main_image_path')->nullable();
+            $table->string('thumbnail_image_path')->nullable();
+            $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
+            $table->foreignId('updated_by')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamps();
         });
     }

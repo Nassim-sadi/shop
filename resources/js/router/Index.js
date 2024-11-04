@@ -51,7 +51,11 @@ const router = createRouter({
                     name: "dashboard",
                     component: () => import("@/views/admin/Dashboard.vue"),
                 },
-
+                {
+                    path: "products",
+                    name: "products",
+                    component: () => import("@/views/admin/products/Index.vue"),
+                },
                 {
                     path: "categories",
                     name: "categories",

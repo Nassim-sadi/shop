@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\ActivityHistoryController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\AuthController;
 use App\Http\Controllers\Admin\CategoryController;
+use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\ResetPasswordController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\UserController;
@@ -66,6 +67,14 @@ Route::middleware(["auth:sanctum"])->group(function () {
         Route::patch('/change-status', 'changeStatus');
         Route::patch('/update-order', 'updateOrder');
         Route::delete('/delete/{id}', 'delete');
+    });
+
+    Route::prefix('products')->controller(ProductController::class)->group(function () {
+        Route::get('/', 'get');
+        // Route::post('/create', 'create');
+        // Route::post('/update', 'update');
+        // Route::patch('/change-status', 'changeStatus');
+        // Route::delete('/delete/{id}', 'delete');
     });
 
 

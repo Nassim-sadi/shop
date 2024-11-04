@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Resources;
+namespace App\Http\Resources\Admin\Product;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\ResourceCollection;
@@ -16,6 +16,7 @@ class ProductCollection extends ResourceCollection
     {
         return ProductResource::collection($this->collection);
     }
+
 
     public function paginationInformation($request, $paginated, $default): array
     {
