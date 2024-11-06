@@ -22,9 +22,15 @@ class UserController extends Controller
         $users = User::whereDate('created_at', '>=', $request->start_date)
             ->whereDate('created_at', '<=', $request->end_date)
             ->where(function ($q) use ($request) {
-                $q->where('firstname', 'Like', '%' . $request->keyword . '%')
-                    ->orWhere('lastname', 'Like', '%' . $request->keyword . '%')
-                    ->orWhere('email', 'Like', '%' . $request->keyword . '%');
+                $q->where(function ($q) use ($request) {
+                    $q->whereRaw("LOWER(firstname) LIKE ?", ['%' . strtolower($request->keyword) . '%'])
+                        ->orWhereRaw("LOWER(lastname) LIKE ?", ['%' . strtolower($request->keyword) . '%']);
+                })
+                    ->orWhere(function ($q) use ($request) {
+                        $q->whereRaw("LOWER(CONCAT(firstname, ' ', lastname)) LIKE ?", ['%' . strtolower($request->keyword) . '%'])
+                            ->orWhereRaw("LOWER(CONCAT(lastname, ' ', firstname)) LIKE ?", ['%' . strtolower($request->keyword) . '%']);
+                    })
+                    ->orWhereRaw("LOWER(email) LIKE ?", ['%' . strtolower($request->keyword) . '%']);
             })->when(isset($request->role) && $request->role !== '', function ($query) use ($request) {
                 $query->whereHas('roles', function ($q) use ($request) {
                     $q->where('id', $request->role);
