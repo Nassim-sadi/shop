@@ -235,5 +235,14 @@
         "role_permission_exists": "An existing role already has these permissions",
         "existing_role_name": "An existing role already has this name",
         "existing_role_color": "An existing role already has this color"
+    },
+    "navigation": {
+        "home": "Home",
+        "pages": "Pages",
+        "dashboard": "Dashboard",
+        "users": "Users",
+        "roles": "Roles",
+        "activity_history": "Activity History",
+        "settings": "Settings"
     }
 }
