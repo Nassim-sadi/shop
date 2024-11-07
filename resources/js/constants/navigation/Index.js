@@ -16,13 +16,13 @@ export default [
         icon: "ti ti-briefcase",
         items: [
             {
-                label: "Products",
+                label: "navigation.products",
                 icon: "ti ti-packages",
                 to: "/admin/products",
                 access: "product_view",
             },
             {
-                label: "Categories",
+                label: "navigation.categories",
                 icon: "ti ti-list",
                 to: "/admin/categories",
                 access: "category_view",

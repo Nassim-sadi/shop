@@ -296,6 +296,8 @@
         "users": "Users",
         "roles": "Roles",
         "activity_history": "Activity History",
-        "settings": "Settings"
+        "settings": "Settings",
+        "categories": "Categories",
+        "products": "Products"
     }
 }
