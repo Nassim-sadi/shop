@@ -1,9 +1,9 @@
 export default [
     {
-        label: "Home",
+        label: "navigation.home",
         items: [
             {
-                label: "Dashboard",
+                label: "navigation.dashboard",
                 icon: "pi pi-fw pi-home",
                 to: "/admin",
                 color: "#238E3A",
@@ -12,7 +12,7 @@ export default [
     },
 
     {
-        label: "Pages",
+        label: "navigation.pages",
         icon: "ti ti-briefcase",
         items: [
             {
@@ -28,25 +28,25 @@ export default [
                 access: "category_view",
             },
             {
-                label: "Users",
+                label: "navigation.users",
                 icon: "ti ti-users",
                 to: "/admin/users",
                 access: "user_view",
             },
             {
-                label: "Activity History",
+                label: "navigation.activity_history",
                 icon: "ti ti-history",
                 to: "/admin/activity-history",
                 access: "activities_view",
             },
             {
-                label: "Roles",
+                label: "navigation.roles",
                 icon: "ti ti-lock",
                 to: "/admin/roles",
                 access: "role_view",
             },
             {
-                label: "Settings",
+                label: "navigation.settings",
                 icon: "ti ti-settings",
                 to: "/admin/settings",
             },

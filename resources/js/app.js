@@ -14,7 +14,7 @@ import router from "./router/Index";
 
 import "@/assets/styles.scss";
 import "@/assets/tailwind.css";
-import "@/assets/AdminStyles.scss";
+import "@/assets/adminStyles.scss";
 import "@/assets/myStyles.scss";
 import { ability } from "@/plugins/ability";
 import { abilitiesPlugin } from "@casl/vue";

@@ -288,5 +288,14 @@
         "change_order": "Change order",
         "change_order_tooltip": "Change order of sub categories",
         "change_order_tooltip_main": "Change order of main categories"
+    },
+    "navigation": {
+        "home": "Home",
+        "pages": "Pages",
+        "dashboard": "Dashboard",
+        "users": "Users",
+        "roles": "Roles",
+        "activity_history": "Activity History",
+        "settings": "Settings"
     }
 }

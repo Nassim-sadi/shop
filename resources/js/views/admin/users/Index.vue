@@ -590,9 +590,15 @@ onMounted(async () => {
             </Column>
 
             <Column :header="$t('common.created_at')" field="created_at">
+                <template #body="slotProps">
+                    {{ slotProps.data.created_at }}
+                </template>
             </Column>
 
             <Column :header="$t('common.updated_at')" field="created_at">
+                <template #body="slotProps">
+                    {{ slotProps.data.updated_at }}
+                </template>
             </Column>
 
             <Column :header="$t('activities.action')">
@@ -639,23 +645,23 @@ onMounted(async () => {
                     v-if="ability.can('user', 'view')"
                 />
 
-                <Button
-                    icon="ti ti-edit"
-                    rounded
-                    size="normal"
-                    text
-                    :label="$t('common.edit')"
-                    severity="success"
-                    @click="openEdit"
-                    v-tooltip.bottom="$t('common.edit')"
-                    class="action-btn"
-                    :loading="loadingStates[current.id]"
-                    v-if="ability.can('user', 'edit')"
-                />
-
                 <template
                     v-if="current.id !== auth.user.id && !current.deleted_at"
                 >
+                    <Button
+                        icon="ti ti-edit"
+                        rounded
+                        size="normal"
+                        text
+                        :label="$t('common.edit')"
+                        severity="success"
+                        @click="openEdit"
+                        v-tooltip.bottom="$t('common.edit')"
+                        class="action-btn"
+                        :loading="loadingStates[current.id]"
+                        v-if="ability.can('user', 'edit')"
+                    />
+
                     <Button
                         icon="ti ti-status-change"
                         rounded
