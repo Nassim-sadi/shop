@@ -15,6 +15,7 @@ class Product extends Model
         'slug',
         'description',
         'long_description',
+        'base_price',
         'status',
         'featured',
         'thumbnail_image_path',
@@ -26,8 +27,9 @@ class Product extends Model
 
     public function options()
     {
-        return $this->hasMany(ProductOption::class);
+        return $this->belongsToMany(ProductOption::class, 'product_option_product');
     }
+
 
     public function variants()
     {

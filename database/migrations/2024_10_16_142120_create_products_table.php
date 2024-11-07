@@ -19,6 +19,7 @@ return new class extends Migration
             $table->string('description', 255);
             $table->longText('long_description');
             $table->boolean('status')->default(false);
+            $table->integer('base_price');
             $table->boolean('featured')->default(false);
             $table->string('thumbnail_image_path')->nullable();
             $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();

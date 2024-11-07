@@ -3,10 +3,8 @@ import { $t } from "@/plugins/i18n";
 import useVuelidate from "@vuelidate/core";
 import { required } from "@vuelidate/validators";
 import { alphaSpace } from "@/validators/CustomValidators";
-import categoryPlaceHolder from "@/assets/images/placeholder.webp";
 import isEqual from "lodash.isequal";
 import { useConfirm } from "primevue/useconfirm";
-import imageCompression from "browser-image-compression";
 import { computed, ref, toRefs, watch } from "vue";
 const confirm = useConfirm();
 const props = defineProps({
@@ -43,10 +41,8 @@ const statusOptions = [
     },
 ];
 
-const category = ref({
+const productOption = ref({
     name: "",
-    description: "",
-    parent: parent.value | null,
     status: 0,
 });
 
@@ -55,63 +51,15 @@ const rules = computed(() => ({
         required,
         alphaSpace,
     },
-    description: {
-        alphaSpace,
-        required,
-    },
 }));
 
-const imageFile = ref(null);
-
-const imageRules = computed(() => ({
-    imageFile: {
-        required,
-    },
-}));
-
-const imageV$ = useVuelidate(imageRules, { imageFile });
-
-const v$ = useVuelidate(rules, category);
-let formData = new FormData();
-const previewImage = ref(categoryPlaceHolder);
-
-const updatePicture = async (e) => {
-    imageFile.value = await compressImage(e.target.files[0]);
-    previewImage.value = URL.createObjectURL(imageFile.value);
-    const compressedImage = new File(
-        [imageFile.value],
-        e.target.files[0].name.split(".")[0],
-        {
-            type: imageFile.value.type,
-        },
-    );
-
-    formData.append("image", compressedImage);
-};
-
-const compressImage = async (image) => {
-    const options = {
-        maxSizeMB: 2,
-        maxWidthOrHeight: 1000,
-        useWebWorker: true,
-    };
-    return await imageCompression(image, options);
-};
+const v$ = useVuelidate(rules, productOption);
 
 const createItem = () => {
     v$.value.$touch();
-    imageV$.value.$touch();
-    if (v$.value.$invalid || imageV$.value.$invalid) return;
-
-    if (parent.value != "not_set") {
-        formData.append("parent_id", parent.value);
-    }
-    formData.append("name", category.value.name);
-    formData.append("description", category.value.description);
-    formData.append("status", category.value.status);
-    console.log("status value: ", category.value.status);
-
-    $emit("createItem", formData);
+    if (v$.value.$invalid) return;
+    console.log("status value: ", productOption.value.status);
+    $emit("createItem", productOption.value);
     v$.value.$reset();
 };
 
@@ -141,13 +89,10 @@ const cancelConfirm = () => {
 };
 
 const isEdited = computed(() => {
-    return (
-        !isEqual(category.value, {
-            name: "",
-            description: "",
-            status: 0,
-        }) || previewImage.value !== categoryPlaceHolder
-    );
+    return !isEqual(productOption.value, {
+        name: "",
+        status: 0,
+    });
 });
 
 watch(
@@ -155,12 +100,11 @@ watch(
     (val) => {
         if (!val) {
             v$.value.$reset();
-            category.value = {
+            productOption.value = {
                 name: "",
                 description: "",
                 status: 0,
             };
-            previewImage.value = categoryPlaceHolder;
         }
     },
 );
@@ -169,7 +113,7 @@ watch(
 <template>
     <Drawer
         :visible="isOpen"
-        :header="$t('categories.create')"
+        :header="$t('productOptions.create')"
         position="right"
         @update:visible="$emit('update:isOpen', $event)"
         :dismissable="false"
@@ -178,44 +122,10 @@ watch(
         class="small-drawer"
     >
         <div class="flex flex-col min-h-full drawer-container">
-            <div
-                class="cursor-pointer mb-10 w-full aspect-[1/1] rounded-xl overflow-hidden relative"
-            >
-                <label
-                    for="image"
-                    class="w-full absolute top-0 right-0 left-0 bottom-0"
-                >
-                    <input
-                        type="file"
-                        id="image"
-                        @change="updatePicture"
-                        accept="image/*"
-                        class="hidden"
-                    />
-                    <img
-                        :src="previewImage || categoryPlaceHolder"
-                        class="w-full object-cover !h-full"
-                    />
-                </label>
-                <div
-                    class="mb-5 absolute z-10 right-2 left-2 bottom-0"
-                    v-if="progress > 0"
-                >
-                    <ProgressBar :value="progress"></ProgressBar>
-                </div>
-            </div>
-            <div
-                class="text-red-500 mb-5"
-                v-for="error of imageV$.imageFile.$errors"
-                :key="error.$uid"
-            >
-                <Message severity="error">{{ error.$message }}</Message>
-            </div>
-
             <label for="name" class="mb-5">{{ $t("roles.name") }}</label>
             <InputText
                 id="name"
-                v-model="category.name"
+                v-model="productOption.name"
                 aria-labelledby="name"
                 class="w-full mb-5"
             />
@@ -228,24 +138,13 @@ watch(
                 <Message severity="error">{{ error.$message }}</Message>
             </div>
 
-            <label for="description" class="mb-5">{{
-                $t("categories.description")
-            }}</label>
-            <Textarea
-                id="description"
-                v-model="category.description"
-                aria-labelledby="description"
-                class="w-full mb-5"
-                rows="3"
-            />
-
             <label for="status" class="mb-5">{{
                 $t("categories.status")
             }}</label>
 
             <SelectButton
                 id="status"
-                v-model="category.status"
+                v-model="productOption.status"
                 aria-labelledby="status"
                 fluid
                 :options="statusOptions"

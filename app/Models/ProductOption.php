@@ -10,9 +10,13 @@ class ProductOption extends Model
     use HasFactory;
 
     protected $fillable = [
-        'product_id',
         'name',
     ];
+
+    public function products()
+    {
+        return $this->belongsToMany(Product::class, 'product_option_product');
+    }
 
     public function values()
     {

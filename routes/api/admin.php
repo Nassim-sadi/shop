@@ -77,6 +77,15 @@ Route::middleware(["auth:sanctum"])->group(function () {
         // Route::delete('/delete/{id}', 'delete');
     });
 
+    Route::prefix('product-options')->controller(ProductController::class)->group(function () {
+        Route::get('/', 'get');
+        // Route::post('/create', 'create');
+        // Route::post('/update', 'update');
+        // Route::patch('/change-status', 'changeStatus');
+        // Route::delete('/delete/{id}', 'delete');
+    });
+
+
 
     // todo : add email verification
     // Route::controller(EmailVerificationController::class)->group(function () {
