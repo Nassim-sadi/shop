@@ -16,24 +16,26 @@ class Product extends Model
         'description',
         'long_description',
         'status',
-        'price',
-        'stock',
-        'discount',
         'featured',
-        'sku',
-        'main_image_path',
         'thumbnail_image_path',
         'created_by',
         'updated_by',
     ];
 
-    public function images()
-    {
-        return $this->hasMany(ProductImage::class);
-    }
+
 
     public function options()
     {
         return $this->hasMany(ProductOption::class);
+    }
+
+    public function variants()
+    {
+        return $this->hasMany(ProductVariant::class);
+    }
+
+    public function images()
+    {
+        return $this->hasMany(ProductImage::class);
     }
 }

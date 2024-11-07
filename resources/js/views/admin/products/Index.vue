@@ -126,7 +126,7 @@ const getProducts = async () => {
             .then((res) => {
                 console.log(res.data);
 
-                products.value = res.data.data;
+                // products.value = res.data.data;
                 total.value = res.data.total;
                 currentPage.value = res.data.current_page;
                 per_page.value = res.data.per_page;

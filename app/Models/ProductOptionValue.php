@@ -13,9 +13,4 @@ class ProductOptionValue extends Model
         'product_option_id',
         'value',
     ];
-
-    public function option()
-    {
-        return $this->belongsTo(ProductOption::class);
-    }
 }
