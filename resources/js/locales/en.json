@@ -162,7 +162,8 @@
         "perma_delete": "Delete permanently",
         "preview": "Preview",
         "status": "Status",
-        "actions": "Actions"
+        "actions": "Actions",
+        "total": "In total there are"
     },
     "roles": {
         "page": "Roles",
@@ -289,6 +290,44 @@
         "change_order_tooltip": "Change order of sub categories",
         "change_order_tooltip_main": "Change order of main categories"
     },
+    "products": {
+        "title": "product | products",
+        "subtitle": "List of products",
+        "page": "Products",
+        "name": "Name",
+        "description": "Description",
+        "no_description": "No description",
+        "price": "Price",
+        "status": "Status",
+        "no_product": "No product found",
+        "create": "Create product",
+        "edit": "Edit product",
+        "update": "Update product",
+        "delete": "Delete product",
+        "details": "Product details",
+        "create_success": "Product created successfully",
+        "update_success": "Product updated successfully",
+        "delete_success": "Product deleted successfully"
+    },
+    "productOptions": {
+        "title": "product option | product options",
+        "subtitle": "List of product options",
+        "page": "Product Options",
+        "name": "Name",
+        "description": "Description",
+        "no_description": "No description",
+        "price": "Price",
+        "status": "Status",
+        "no_productOption": "No product option found",
+        "create": "Create product option",
+        "edit": "Edit product option",
+        "update": "Update product option",
+        "delete": "Delete product option",
+        "details": "Product option details",
+        "create_success": "Product option created successfully",
+        "update_success": "Product option updated successfully",
+        "delete_success": "Product option deleted successfully"
+    },
     "navigation": {
         "home": "Home",
         "pages": "Pages",
@@ -298,6 +337,13 @@
         "activity_history": "Activity History",
         "settings": "Settings",
         "categories": "Categories",
-        "products": "Products"
+        "products": "Products",
+        "productOptions": "Product Options",
+        "not_found": "Page not found",
+        "login": "Login",
+        "forgot_password": "Forgot password",
+        "reset_password": "Reset password",
+        "access_denied": "Access denied",
+        "error": "Error"
     }
 }

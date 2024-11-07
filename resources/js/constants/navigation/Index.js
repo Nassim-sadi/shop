@@ -22,6 +22,12 @@ export default [
                 access: "product_view",
             },
             {
+                label: "navigation.productOptions",
+                icon: "ti ti-list-check",
+                to: "/admin/product-options",
+                access: "productOption_view",
+            },
+            {
                 label: "navigation.categories",
                 icon: "ti ti-list",
                 to: "/admin/categories",
