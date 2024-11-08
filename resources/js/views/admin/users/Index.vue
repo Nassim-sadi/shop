@@ -431,11 +431,13 @@ onMounted(async () => {
             </template>
 
             <template #header>
-                <h1
-                    class="text-xl font-bold mb-4 text-surface-900 dark:text-surface-0"
-                >
-                    {{ $t("user.page") }}
-                </h1>
+                <div class="table-title-header">
+                    <h1
+                        class="text-xl font-bold mb-4 text-surface-900 dark:text-surface-0"
+                    >
+                        {{ $t("user.page") }}
+                    </h1>
+                </div>
                 <div class="flex flex-wrap gap-2 mb-4 w-full">
                     <div class="flex gap-2 items-baseline">
                         <span>{{ $t("common.from") }}</span>

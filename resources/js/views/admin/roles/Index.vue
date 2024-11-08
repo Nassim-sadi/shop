@@ -250,7 +250,7 @@ onMounted(async () => {
             </template>
 
             <template #header>
-                <div class="flex justify-between align-center">
+                <div class="table-title-header">
                     <h1
                         class="text-xl font-bold mb-4 text-surface-900 dark:text-surface-0"
                     >

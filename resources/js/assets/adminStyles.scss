@@ -95,6 +95,13 @@ body {
     }
 }
 
+.large-drawer{
+    width: 50rem !important;
+    @media screen and (max-width: 576px) {
+        width: 100% !important;
+    }
+}
+
 .toggleStatusBtn {
     width: 100%;
 
@@ -133,4 +140,15 @@ body {
 
 .p-button-help:not(.p-button-outlined):not(.p-button-text):not(.p-button-link) {
     box-shadow: 0px 0px 8px rgba(102, 16, 242, 0.6);
+}
+
+.table-title-header{
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+}
+
+label{
+    display: inline-block;
 }

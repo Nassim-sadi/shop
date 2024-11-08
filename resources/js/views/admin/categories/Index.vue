@@ -353,7 +353,7 @@ const findCategoryById = (categories, id) => {
             </template>
 
             <template #header>
-                <div class="flex justify-between items-center flex-wrap mb-4">
+                <div class="table-title-header">
                     <h1
                         class="text-xl font-bold mb-0 text-surface-900 dark:text-surface-0"
                     >

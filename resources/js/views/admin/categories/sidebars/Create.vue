@@ -251,6 +251,7 @@ watch(
                 :options="statusOptions"
                 optionLabel="name"
                 optionValue="value"
+                :allow-empty="false"
                 class="toggleStatusBtn"
             />
         </div>

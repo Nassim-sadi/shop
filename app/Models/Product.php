@@ -25,11 +25,10 @@ class Product extends Model
 
 
 
-    public function options()
-    {
-        return $this->belongsToMany(ProductOption::class, 'product_option_product');
-    }
-
+    // public function options()
+    // {
+    //     return $this->belongsToMany(ProductOption::class, 'product_option_product');
+    // }
 
     public function variants()
     {
@@ -38,6 +37,6 @@ class Product extends Model
 
     public function images()
     {
-        return $this->hasMany(ProductImage::class);
+        return $this->morphMany(ProductImage::class, 'imageable');
     }
 }

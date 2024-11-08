@@ -228,6 +228,7 @@ watch(
                 fluid
                 :options="statusOptions"
                 optionLabel="name"
+                :allow-empty="false"
                 optionValue="value"
                 class="toggleStatusBtn"
             />

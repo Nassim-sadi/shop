@@ -13,11 +13,6 @@ class ProductOption extends Model
         'name',
     ];
 
-    public function products()
-    {
-        return $this->belongsToMany(Product::class, 'product_option_product');
-    }
-
     public function values()
     {
         return $this->hasMany(ProductOptionValue::class);

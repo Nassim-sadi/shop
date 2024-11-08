@@ -9,7 +9,7 @@ import { watchDebounced } from "@vueuse/core";
 import { format } from "date-fns";
 import { useConfirm } from "primevue/useconfirm";
 import { computed, onMounted, ref } from "vue";
-import ChangeRole from "./sidebars/ChangeRole.vue";
+import Create from "./sidebars/Create.vue";
 import Details from "./sidebars/Details.vue";
 import Edit from "./sidebars/Edit.vue";
 const Confirm = useConfirm();
@@ -21,7 +21,8 @@ const per_page = ref(10);
 const start_date = ref(new Date());
 const end_date = ref(new Date());
 const current = ref({});
-const isOpen = ref(false);
+const isDetailsOpen = ref(false);
+const isCreateOpen = ref(true);
 const isEditOpen = ref(false);
 const keyword = ref("");
 const status = ref(null);
@@ -29,7 +30,7 @@ const uploadPercentage = ref(0);
 const currentIndex = ref(null);
 const actionsPopover = ref();
 const isChangeRoleOpen = ref(false);
-
+const productOptions = ref([]);
 const togglePopover = ({ event: event, current: data, index: index }) => {
     current.value = data;
     currentIndex.value = index;
@@ -63,24 +64,15 @@ const statusOptions = [
 
 const deleted = ref(null);
 
-const deletedOptions = [
-    { label: "Non-deleted", value: null },
-    { label: "All", value: "with" },
-    { label: "Deleted only", value: "only" },
-];
-
 const auth = authStore();
 
-const role = ref(null);
-const roleOptions = ref([{ label: "All", value: null }]);
-const roles = ref([]);
-const getRoles = async () => {
+const getProductOptions = async () => {
     return new Promise((resolve, reject) => {
         axios
-            .get("api/admin/roles")
+            .get("api/admin/product-options/all")
             .then((res) => {
-                roles.value = res.data;
-                setRoleOptions(res.data);
+                console.log(res.data);
+                productOptions.value = res.data;
                 resolve(res.data);
             })
             .catch((err) => {
@@ -91,21 +83,17 @@ const getRoles = async () => {
     });
 };
 
-const setRoleOptions = (data) => {
-    roleOptions.value = [
-        ...roleOptions.value,
-        ...data.map((role) => {
-            return {
-                label: role.name,
-                value: role.id,
-            };
-        }),
-    ];
-};
-
-const isSuper = computed(() => {
-    return auth.user.roles.name === "Super Admin";
-});
+// const setRoleOptions = (data) => {
+//     roleOptions.value = [
+//         ...roleOptions.value,
+//         ...data.map((role) => {
+//             return {
+//                 label: role.name,
+//                 value: role.id,
+//             };
+//         }),
+//     ];
+// };
 
 const getProducts = async () => {
     if (loading.value) return;
@@ -161,26 +149,20 @@ const onPageChange = (event) => {
 };
 
 const openDetails = () => {
-    isOpen.value = true;
+    isDetailsOpen.value = true;
+};
+
+const openCreate = () => {
+    isCreateOpen.value = true;
 };
 
 const openEdit = () => {
     isEditOpen.value = true;
 };
 
-const roleColorMap = {
-    "Super Admin": "super",
-    Admin: "admin",
-    User: "user",
-};
-
-const roleColor = (role) => roleColorMap[role] || "neutral";
-
 const reset = () => {
     keyword.value = "";
     status.value = null;
-    role.value = null;
-    deleted.value = null;
     getProducts();
 };
 
@@ -198,7 +180,7 @@ const changeStatus = async () => {
                 updateItemStatus(res.data.status);
                 emitter.emit("toast", {
                     summary: $t("status.success.title"),
-                    message: $t("status.success.user.change_status"),
+                    message: $t("status.success.product.change_status"),
                     severity: "success",
                 });
                 resolve(res.data);
@@ -223,77 +205,14 @@ const deleteItem = () => {
 
     return new Promise((resolve, reject) => {
         axios
-            .delete("api/admin/users/delete/" + current.value.id)
-            .then((res) => {
-                if (deleted.value !== null) {
-                    products.value[currentIndex.value].deleted_at =
-                        res.data.deleted_at;
-                } else {
-                    products.value.splice(currentIndex.value, 1);
-                    total.value--;
-                }
-
-                emitter.emit("toast", {
-                    summary: $t("status.success.title"),
-                    message: $t("status.success.user.delete"),
-                    severity: "success",
-                });
-                resolve(res.data);
-            })
-            .catch((err) => {
-                console.log(err);
-                reject(err);
-            })
-            .finally(() => {
-                setLoadingState(current.value.id, false);
-            });
-    });
-};
-
-const deleteItemPermanently = () => {
-    if (loadingStates.value[current.value.id]) return;
-    setLoadingState(current.value.id, true);
-
-    return new Promise((resolve, reject) => {
-        axios
-            .delete("api/admin/products/delete-permanently/" + current.value.id)
+            .delete("api/admin/products/delete/" + current.value.id)
             .then((res) => {
                 products.value.splice(currentIndex.value, 1);
                 total.value--;
+
                 emitter.emit("toast", {
                     summary: $t("status.success.title"),
-                    message: $t("status.success.user.perma_delete"),
-                    severity: "success",
-                });
-                resolve(res.data);
-            })
-            .catch((err) => {
-                console.log(err);
-                reject(err);
-            })
-            .finally(() => {
-                setLoadingState(current.value.id, false);
-            });
-    });
-};
-
-const restoreItem = () => {
-    if (loadingStates.value[current.value.id]) return;
-    setLoadingState(current.value.id, true);
-
-    return new Promise((resolve, reject) => {
-        axios
-            .post("api/admin/products/restore/" + current.value.id)
-            .then((res) => {
-                if (deleted.value === "only") {
-                    products.value.splice(currentIndex.value, 1);
-                    total.value--;
-                } else {
-                    products.value[currentIndex.value].deleted_at = null;
-                }
-                emitter.emit("toast", {
-                    summary: $t("status.success.title"),
-                    message: $t("status.success.user.restore"),
+                    message: $t("status.success.product.delete"),
                     severity: "success",
                 });
                 resolve(res.data);
@@ -351,42 +270,14 @@ const setLoadingState = (userId, isLoading) => {
     loadingStates.value[userId] = isLoading;
 };
 
-const openChangeRole = () => {
-    isChangeRoleOpen.value = true;
-};
+const createItem = (val) => {
+    console.log("Creating");
 
-const changeRole = (val) => {
-    setLoadingState(current.id, true);
-    return new Promise((resolve, reject) => {
-        axios
-            .patch("api/admin/products/change-role", val)
-            .then((res) => {
-                updateItem(res.data.user);
-                emitter.emit("toast", {
-                    summary: $t("status.success.title"),
-                    message: $t("status.success.user.change_role"),
-                    severity: "success",
-                });
-                resolve(res.data);
-            })
-            .catch((err) => {
-                console.log(err);
-                emitter.emit("toast", {
-                    summary: $t("status.error.title"),
-                    message: $t("status.error.user.change_role"),
-                    severity: "error",
-                });
-                reject(err);
-            })
-            .finally(() => {
-                setLoadingState(current.id, false);
-                isChangeRoleOpen.value = false;
-            });
-    });
+    console.log(val);
 };
 
 onMounted(async () => {
-    await getRoles();
+    await getProductOptions();
     start_date.value.setDate(start_date.value.getDate() - 17);
     await getProducts();
 });
@@ -394,21 +285,22 @@ onMounted(async () => {
 
 <template>
     <div class="card">
-        <Details :current="current ? current : {}" v-model:isOpen="isOpen" />
+        <Details
+            :current="current ? current : {}"
+            v-model:isOpen="isDetailsOpen"
+        />
+
+        <Create
+            v-model:isOpen="isCreateOpen"
+            @createItem="createItem"
+            :options="productOptions"
+        />
 
         <Edit
             :current="current"
             v-model:isOpen="isEditOpen"
             @editItem="editItem"
         ></Edit>
-
-        <ChangeRole
-            :current="current"
-            v-model:isOpen="isChangeRoleOpen"
-            @submit="changeRole"
-            :roles="roles"
-            :loading="loadingStates[current.id]"
-        ></ChangeRole>
 
         <DataTable
             :value="products"
@@ -431,11 +323,23 @@ onMounted(async () => {
             </template>
 
             <template #header>
-                <h1
-                    class="text-xl font-bold mb-4 text-surface-900 dark:text-surface-0"
-                >
-                    {{ $t("user.page") }}
-                </h1>
+                <div class="table-title-header">
+                    <h1
+                        class="text-xl font-bold mb-4 text-surface-900 dark:text-surface-0"
+                    >
+                        {{ $t("user.page") }}
+                    </h1>
+
+                    <Button
+                        icon="ti ti-plus"
+                        @click="openCreate"
+                        :label="$t('common.create')"
+                        severity="success"
+                        v-tooltip.bottom="$t('common.create')"
+                        class="bold-label"
+                        v-if="ability.can('user', 'create')"
+                    />
+                </div>
                 <div class="flex flex-wrap gap-2 mb-4 w-full">
                     <div class="flex gap-2 items-baseline">
                         <span>{{ $t("common.from") }}</span>
@@ -488,22 +392,14 @@ onMounted(async () => {
                         :placeholder="$t('user.statusQuery')"
                     />
 
-                    <Select
+                    <!-- <Select
                         v-model="role"
                         :options="roleOptions"
                         optionLabel="label"
                         optionValue="value"
                         :placeholder="$t('user.roleQuery')"
                     />
-
-                    <Select
-                        v-if="isSuper"
-                        v-model="deleted"
-                        :options="deletedOptions"
-                        optionLabel="label"
-                        optionValue="value"
-                        :placeholder="$t('user.deletedQuery')"
-                    />
+ -->
 
                     <Button
                         :label="$t('common.search')"
@@ -541,32 +437,6 @@ onMounted(async () => {
                             slotProps.data.lastname
                         }}
                     </div>
-                </template>
-            </Column>
-
-            <Column :header="$t('activities.role')">
-                <template #body="slotProps">
-                    <div
-                        class="highlight"
-                        :style="`background-color: #${slotProps.data.role.color} ; color : #${slotProps.data.role.text_color}`"
-                    >
-                        {{ slotProps.data.role.name }}
-                    </div>
-                </template>
-            </Column>
-
-            <Column :header="$t('user.email')">
-                <template #body="slotProps">
-                    {{ slotProps.data.email }}
-                    <span
-                        class="ti ti-rosette-discount-check-filled text-green-500 font-bold"
-                        v-if="slotProps.data.email_verified_at"
-                        v-tooltip.bottom="
-                            $t('user.verified_at') +
-                            ' ' +
-                            slotProps.data.email_verified_at
-                        "
-                    ></span>
                 </template>
             </Column>
 
@@ -636,7 +506,7 @@ onMounted(async () => {
                     v-tooltip.bottom="$t('common.view_details')"
                     class="action-btn"
                     :loading="loadingStates[current.id]"
-                    v-if="ability.can('user', 'view')"
+                    v-if="ability.can('product', 'view')"
                 />
 
                 <Button
@@ -650,53 +520,49 @@ onMounted(async () => {
                     v-tooltip.bottom="$t('common.edit')"
                     class="action-btn"
                     :loading="loadingStates[current.id]"
-                    v-if="ability.can('user', 'edit')"
+                    v-if="ability.can('product', 'edit')"
                 />
 
-                <template
-                    v-if="current.id !== auth.user.id && !current.deleted_at"
-                >
-                    <Button
-                        icon="ti ti-status-change"
-                        rounded
-                        size="normal"
-                        text
-                        severity="help"
-                        :label="$t('common.change_status')"
-                        @click="confirm(changeStatus)"
-                        v-tooltip.bottom="$t('common.change_status')"
-                        class="action-btn"
-                        :loading="loadingStates[current.id]"
-                        v-if="ability.can('user', 'changeStatus')"
-                    />
-                    <Button
-                        icon="ti ti-user-edit"
-                        rounded
-                        size="normal"
-                        text
-                        severity="warning"
-                        :label="$t('users.change_role')"
-                        @click="openChangeRole"
-                        v-tooltip.bottom="$t('users.change_role')"
-                        class="action-btn"
-                        :loading="loadingStates[current.id]"
-                        v-if="ability.can('user', 'changeRole')"
-                    />
+                <Button
+                    icon="ti ti-status-change"
+                    rounded
+                    size="normal"
+                    text
+                    severity="help"
+                    :label="$t('common.change_status')"
+                    @click="confirm(changeStatus)"
+                    v-tooltip.bottom="$t('common.change_status')"
+                    class="action-btn"
+                    :loading="loadingStates[current.id]"
+                    v-if="ability.can('product', 'changeStatus')"
+                />
+                <!-- <Button
+                    icon="ti ti-user-edit"
+                    rounded
+                    size="normal"
+                    text
+                    severity="warning"
+                    :label="$t('users.change_role')"
+                    @click="openChangeRole"
+                    v-tooltip.bottom="$t('users.change_role')"
+                    class="action-btn"
+                    :loading="loadingStates[current.id]"
+                    v-if="ability.can('product', 'changeRole')"
+                /> -->
 
-                    <Button
-                        icon="ti ti-trash"
-                        rounded
-                        size="normal"
-                        text
-                        severity="danger"
-                        :label="$t('common.delete')"
-                        @click="confirm(deleteItem)"
-                        v-tooltip.bottom="$t('common.delete')"
-                        class="action-btn"
-                        :loading="loadingStates[current.id]"
-                        v-if="ability.can('user', 'delete')"
-                    />
-                </template>
+                <Button
+                    icon="ti ti-trash"
+                    rounded
+                    size="normal"
+                    text
+                    severity="danger"
+                    :label="$t('common.delete')"
+                    @click="confirm(deleteItem)"
+                    v-tooltip.bottom="$t('common.delete')"
+                    class="action-btn"
+                    :loading="loadingStates[current.id]"
+                    v-if="ability.can('product', 'delete')"
+                />
                 <template
                     v-if="
                         current.deleted_at &&
@@ -715,7 +581,7 @@ onMounted(async () => {
                         v-tooltip.bottom="$t('common.perma_delete')"
                         class="action-btn"
                         :loading="loadingStates[current.id]"
-                        v-if="ability.can('user', 'permaDelete')"
+                        v-if="ability.can('product', 'permaDelete')"
                     />
 
                     <Button
@@ -729,7 +595,7 @@ onMounted(async () => {
                         v-tooltip.bottom="$t('common.restore')"
                         class="action-btn"
                         :loading="loadingStates[current.id]"
-                        v-if="ability.can('user', 'restore')"
+                        v-if="ability.can('product', 'restore')"
                     />
                 </template>
             </div>

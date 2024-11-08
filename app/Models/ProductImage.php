@@ -9,14 +9,10 @@ class ProductImage extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
-        'option_value_id',
-        'url',
-        'is_main',
-    ];
+    protected $fillable = ['url', 'alt_text'];
 
-    public function optionValue()
+    public function imageable()
     {
-        return $this->belongsTo(ProductOptionValue::class);
+        return $this->morphTo();
     }
 }

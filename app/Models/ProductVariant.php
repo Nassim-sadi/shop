@@ -8,9 +8,8 @@ class ProductVariant extends Model
 {
     protected $fillable = ['product_id', 'sku', 'price', 'quantity', 'weight', 'status'];
 
-
-    public function optionValues()
+    public function images()
     {
-        return $this->belongsToMany(ProductOptionValue::class, 'product_variant_option_value');
+        return $this->morphMany(ProductImage::class, 'imageable');
     }
 }
