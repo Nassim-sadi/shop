@@ -43,7 +43,7 @@ const statusOptions = [
 
 const productOption = ref({
     name: "",
-    status: 0,
+    values: [{ value: "" }], // Initially one empty value field
 });
 
 const rules = computed(() => ({
@@ -51,10 +51,30 @@ const rules = computed(() => ({
         required,
         alphaSpace,
     },
+    values: {
+        $each: {
+            value: {
+                required,
+                alphaSpace,
+            },
+        },
+    },
 }));
 
 const v$ = useVuelidate(rules, productOption);
+const addOptionValue = () => {
+    // Push the new value first so Vuelidate can see it
+    productOption.value.values.push({ value: "" });
 
+    // Now touch and validate the updated values array
+    v$.value.values.$touch();
+
+    // Stop if any of the values are invalid
+    if (v$.value.values.$invalid) {
+        values.value.pop(); // Remove the invalid value if validation fails
+        return;
+    }
+};
 const createItem = () => {
     v$.value.$touch();
     if (v$.value.$invalid) return;
@@ -102,8 +122,6 @@ watch(
             v$.value.$reset();
             productOption.value = {
                 name: "",
-                description: "",
-                status: 0,
             };
         }
     },
@@ -121,38 +139,56 @@ watch(
         block-scroll
         class="small-drawer"
     >
-        <div class="flex flex-col min-h-full drawer-container">
-            <label for="name" class="mb-5">{{ $t("roles.name") }}</label>
-            <InputText
-                id="name"
-                v-model="productOption.name"
-                aria-labelledby="name"
-                class="w-full mb-5"
-            />
+        <div class="grid grid-cols-12 gap-5">
+            <div class="col-span-12">
+                <label for="name" class="mb-5">{{
+                    $t("productOptions.name")
+                }}</label>
+                <InputText
+                    id="name"
+                    v-model="productOption.name"
+                    aria-labelledby="name"
+                    class="w-full mb-5"
+                />
 
-            <div
-                class="text-red-500 mb-5"
-                v-for="error of v$.name.$errors"
-                :key="error.$uid"
-            >
-                <Message severity="error">{{ error.$message }}</Message>
+                <div
+                    class="text-red-500 mb-5"
+                    v-for="error of v$.name.$errors"
+                    :key="error.$uid"
+                >
+                    <Message severity="error">{{ error.$message }}</Message>
+                </div>
             </div>
 
-            <label for="status" class="mb-5">{{
-                $t("categories.status")
-            }}</label>
+            <div
+                v-for="(optionValue, index) in productOption.values"
+                :key="index"
+                class="col-span-12"
+            >
+                <label :for="'optionValue' + index"
+                    >Option Value {{ index + 1 }}</label
+                >
+                <input
+                    :id="'optionValue' + index"
+                    v-model="optionValue.value"
+                />
+                <div
+                    class="text-red-500 mb-5"
+                    v-for="error of v$.values.$errors"
+                    :key="error.$uid"
+                >
+                    <Message severity="error">{{ error.$message }}</Message>
+                </div>
+            </div>
 
-            <SelectButton
-                id="status"
-                v-model="productOption.status"
-                aria-labelledby="status"
-                fluid
-                :options="statusOptions"
-                optionLabel="name"
-                optionValue="value"
-                class="toggleStatusBtn"
-            />
+            <Button @click="addOptionValue" class="col-span-12">
+                Add Option Value
+            </Button>
+            <pre>
+                {{ productOption }}
+            </pre>
         </div>
+
         <template #footer>
             <div class="mt-auto flex justify-evenly">
                 <Button
