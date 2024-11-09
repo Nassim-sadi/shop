@@ -1,5 +1,4 @@
 <script setup>
-import placeholder from "@/assets/images/avatar/profile-placeholder.png";
 import { ability } from "@/plugins/ability";
 import axios from "@/plugins/axios";
 import emitter from "@/plugins/emitter";
@@ -8,7 +7,7 @@ import { authStore } from "@/store/AuthStore";
 import { watchDebounced } from "@vueuse/core";
 import { format } from "date-fns";
 import { useConfirm } from "primevue/useconfirm";
-import { computed, onMounted, ref } from "vue";
+import { onMounted, ref } from "vue";
 import Details from "./sidebars/Details.vue";
 import Edit from "./sidebars/Edit.vue";
 import Create from "./sidebars/Create.vue";
@@ -24,7 +23,6 @@ const current = ref({});
 const isDetailsOpen = ref(false);
 const isEditOpen = ref(false);
 const keyword = ref("");
-const status = ref(null);
 const uploadPercentage = ref(0);
 const currentIndex = ref(null);
 const actionsPopover = ref();
@@ -54,12 +52,6 @@ const confirm = (myFunction, params) => {
     });
 };
 
-const statusOptions = [
-    { label: "All", value: null },
-    { label: "Active", value: 1 },
-    { label: "Inactive", value: 0 },
-];
-
 const auth = authStore();
 
 const getProductOptions = async () => {
@@ -75,7 +67,6 @@ const getProductOptions = async () => {
                     per_page: per_page.value,
                     start_date: format(start_date.value, "yyyy-MM-dd"),
                     end_date: format(end_date.value, "yyyy-MM-dd"),
-                    status: status.value,
                 },
             })
             .then((res) => {
@@ -129,41 +120,7 @@ const openEdit = () => {
 
 const reset = () => {
     keyword.value = "";
-    status.value = null;
     getProductOptions();
-};
-
-const changeStatus = async () => {
-    if (loadingStates.value[current.value.id]) return;
-    setLoadingState(current.value.id, true);
-
-    return new Promise((resolve, reject) => {
-        axios
-            .patch("api/admin/products/change-status", {
-                id: current.value.id,
-                status: !current.value.status ? 1 : 0,
-            })
-            .then((res) => {
-                updateItemStatus(res.data.status);
-                emitter.emit("toast", {
-                    summary: $t("status.success.title"),
-                    message: $t("status.success.user.change_status"),
-                    severity: "success",
-                });
-                resolve(res.data);
-            })
-            .catch((err) => {
-                console.log(err);
-                reject(err);
-            })
-            .finally(() => {
-                setLoadingState(current.value.id, false);
-            });
-    });
-};
-
-const updateItemStatus = (status) => {
-    productOptions.value[currentIndex.value].status = status;
 };
 
 const deleteItem = () => {
@@ -171,8 +128,10 @@ const deleteItem = () => {
     setLoadingState(current.value.id, true);
     return new Promise((resolve, reject) => {
         axios
-            .delete("api/admin/users/delete/" + current.value.id)
+            .delete("api/admin/product-options/delete/" + current.value.id)
             .then((res) => {
+                console.log(res.data);
+
                 productOptions.value.splice(currentIndex.value, 1);
                 total.value--;
                 emitter.emit("toast", {
@@ -195,7 +154,7 @@ const deleteItem = () => {
 const editItem = (val) => {
     return new Promise((resolve, reject) => {
         axios
-            .post("api/admin/products/update", val, {
+            .post("api/admin/product-options/update", val, {
                 onUploadProgress: (progressEvent) => {
                     uploadPercentage.value = Math.round(
                         (progressEvent.loaded * 100) / progressEvent.total,
@@ -232,17 +191,27 @@ const setLoadingState = (userId, isLoading) => {
 };
 
 const createItem = (val) => {
+    loading.value = true;
     return new Promise((resolve, reject) => {
         axios
-            .post("api/admin/products/create", val)
+            .post("api/admin/product-options/create", val)
             .then((res) => {
                 console.log(res.data);
-
+                productOptions.value.push(res.data);
+                isCreateOpen.value = false;
+                emitter.emit("toast", {
+                    summary: $t("status.success.title"),
+                    message: $t("status.success.user.create"),
+                    severity: "success",
+                });
                 resolve(res);
             })
             .catch((err) => {
                 console.log(err);
                 reject(err);
+            })
+            .finally(() => {
+                loading.value = false;
             });
     });
 };
@@ -352,14 +321,6 @@ onMounted(async () => {
                         />
                     </IconField>
 
-                    <Select
-                        v-model="status"
-                        :options="statusOptions"
-                        optionLabel="label"
-                        optionValue="value"
-                        :placeholder="$t('user.statusQuery')"
-                    />
-
                     <Button
                         :label="$t('common.search')"
                         icon="ti ti-search"
@@ -390,24 +351,13 @@ onMounted(async () => {
                 </template>
             </Column>
 
-            <!-- <Column :header="$t('user.status')">
+            <Column :header="$t('productOptions.values')">
                 <template #body="slotProps">
-                    <span
-                        :class="
-                            slotProps.data.status
-                                ? 'text-green-500'
-                                : 'text-red-500'
-                        "
-                        class="font-bold"
-                    >
-                        {{
-                            slotProps.data.status
-                                ? $t("common.active")
-                                : $t("common.inactive")
-                        }}
+                    <span v-for="value in slotProps.data.values">
+                        {{ value.value }},
                     </span>
                 </template>
-            </Column> -->
+            </Column>
 
             <Column :header="$t('common.created_at')" field="created_at">
             </Column>
@@ -456,7 +406,7 @@ onMounted(async () => {
                     v-tooltip.bottom="$t('common.view_details')"
                     class="action-btn"
                     :loading="loadingStates[current.id]"
-                    v-if="ability.can('user', 'view')"
+                    v-if="ability.can('productOption', 'view')"
                 />
 
                 <Button
@@ -470,84 +420,26 @@ onMounted(async () => {
                     v-tooltip.bottom="$t('common.edit')"
                     class="action-btn"
                     :loading="loadingStates[current.id]"
-                    v-if="ability.can('user', 'edit')"
+                    v-if="ability.can('productOption', 'edit')"
                 />
 
-                <template
-                    v-if="current.id !== auth.user.id && !current.deleted_at"
-                >
-                    <Button
-                        icon="ti ti-status-change"
-                        rounded
-                        size="normal"
-                        text
-                        severity="help"
-                        :label="$t('common.change_status')"
-                        @click="confirm(changeStatus)"
-                        v-tooltip.bottom="$t('common.change_status')"
-                        class="action-btn"
-                        :loading="loadingStates[current.id]"
-                        v-if="ability.can('user', 'changeStatus')"
-                    />
-                    <Button
-                        icon="ti ti-user-edit"
-                        rounded
-                        size="normal"
-                        text
-                        severity="warning"
-                        :label="$t('users.change_role')"
-                        @click="openChangeRole"
-                        v-tooltip.bottom="$t('users.change_role')"
-                        class="action-btn"
-                        :loading="loadingStates[current.id]"
-                        v-if="ability.can('user', 'changeRole')"
-                    />
-
-                    <Button
-                        icon="ti ti-trash"
-                        rounded
-                        size="normal"
-                        text
-                        severity="danger"
-                        :label="$t('common.delete')"
-                        @click="confirm(deleteItem)"
-                        v-tooltip.bottom="$t('common.delete')"
-                        class="action-btn"
-                        :loading="loadingStates[current.id]"
-                        v-if="ability.can('user', 'delete')"
-                    />
-                </template>
-                <template
-                    v-if="current.deleted_at && current.id !== auth.user.id"
-                >
-                    <Button
-                        icon="ti ti-trash"
-                        rounded
-                        size="normal"
-                        :label="$t('common.perma_delete')"
-                        text
-                        severity="danger"
-                        @click="confirm(deleteItemPermanently)"
-                        v-tooltip.bottom="$t('common.perma_delete')"
-                        class="action-btn"
-                        :loading="loadingStates[current.id]"
-                        v-if="ability.can('user', 'permaDelete')"
-                    />
-
-                    <Button
-                        icon="ti ti-restore"
-                        rounded
-                        size="normal"
-                        text
-                        :label="$t('common.restore')"
-                        severity="success"
-                        @click="confirm(restoreItem)"
-                        v-tooltip.bottom="$t('common.restore')"
-                        class="action-btn"
-                        :loading="loadingStates[current.id]"
-                        v-if="ability.can('user', 'restore')"
-                    />
-                </template>
+                <Button
+                    icon="ti ti-trash"
+                    rounded
+                    size="normal"
+                    text
+                    severity="danger"
+                    :label="$t('common.delete')"
+                    @click="confirm(deleteItem)"
+                    v-tooltip.bottom="$t('common.delete')"
+                    class="action-btn"
+                    :loading="loadingStates[current.id]"
+                    v-if="
+                        ability.can('productOption', 'delete') &&
+                        (current.products_count === 0 ||
+                            current.products_count === null)
+                    "
+                />
             </div>
         </Popover>
     </div>

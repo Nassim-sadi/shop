@@ -28,8 +28,7 @@ const $emit = defineEmits(["update:isOpen", "editItem"]);
 
 const { isOpen, current } = toRefs(props);
 
-const previewImage = ref(null);
-const editedUser = ref({});
+const edited = ref({});
 const formData = new FormData();
 
 const rules = {
@@ -37,45 +36,16 @@ const rules = {
     lastname: lastname,
 };
 
-const v$ = useVuelidate(rules, editedUser);
-
-const updateProfilePicture = async (e) => {
-    let file = await compressImage(e.target.files[0]);
-    previewImage.value = URL.createObjectURL(file);
-    const compressedImage = new File(
-        [file],
-        e.target.files[0].name.split(".")[0],
-        {
-            type: file.type,
-        },
-    );
-
-    formData.append("image", compressedImage);
-};
-
-const compressImage = async (image) => {
-    const options = {
-        maxSizeMB: 2,
-        maxWidthOrHeight: 1000,
-        useWebWorker: true,
-    };
-    return await imageCompression(image, options);
-};
+const v$ = useVuelidate(rules, edited);
 
 const isEdited = computed(() => {
-    return !(
-        isEqual(editedUser.value, current.value) &&
-        previewImage.value === current.value.image
-    );
+    return !isEqual(edited.value, current.value);
 });
 
 const updateItem = () => {
     v$.value.$touch();
     if (!v$.value.$invalid && isEdited.value) {
-        formData.append("id", current.value.id);
-        formData.append("firstname", editedUser.value.firstname);
-        formData.append("lastname", editedUser.value.lastname);
-        $emit("editItem", formData);
+        $emit("editItem", edited.value);
         v$.value.$reset();
     }
 };
@@ -109,11 +79,11 @@ watch(
     () => isOpen.value,
     (val) => {
         if (val) {
-            editedUser.value = { ...current.value };
+            edited.value = { ...current.value };
             previewImage.value = current.value.image;
         } else {
             v$.value.$reset();
-            editedUser.value = {};
+            edited.value = {};
         }
     },
 );
@@ -163,7 +133,7 @@ watch(
             >
             <InputText
                 id="firstname"
-                v-model="editedUser.firstname"
+                v-model="edited.firstname"
                 aria-labelledby="firstname"
                 class="w-full mb-5"
             />
@@ -183,7 +153,7 @@ watch(
             >
             <InputText
                 id="lastname"
-                v-model="editedUser.lastname"
+                v-model="edited.lastname"
                 aria-labelledby="lastname"
                 class="w-full mb-5"
             />

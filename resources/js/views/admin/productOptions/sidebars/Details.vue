@@ -13,60 +13,33 @@ const props = defineProps({
     },
 });
 
-const changes = computed(() => {
-    if (props.current.data && props.current.data.changes) {
-        return filterChanges(props.current.data);
-    } else {
-        return null;
-    }
-});
-
 const $emit = defineEmits(["update:isOpen"]);
 
 const { isOpen, current } = toRefs(props);
-
-const filterChanges = (data) => {
-    const { user, changes } = data;
-    const result = {};
-    Object.keys(changes).forEach((key) => {
-        if (user[key] !== changes[key]) {
-            result[key] = {
-                prevValue: user[key],
-                newValue: changes[key],
-            };
-        }
-    });
-    return result;
-};
-
-import { PerfectScrollbar } from "vue3-perfect-scrollbar";
 </script>
 
 <template>
-    <Drawer :visible="isOpen" :header="$t('users.details')" position="right" @update:visible="$emit('update:isOpen', $event)" class="!w-full md:!w-[30rem] lg:!w-[25rem] sidebar" blockScroll>
+    <Drawer
+        :visible="isOpen"
+        :header="$t('productOptions.details')"
+        position="right"
+        @update:visible="$emit('update:isOpen', $event)"
+        class="small-drawer"
+        blockScroll
+    >
         <div class="mb-4">
-            <div class="flex items-center gap-2 mt-2">
-                <Avatar :image="current.image || placeholder" shape="circle" size="large"></Avatar>
-                {{ current.firstname + " " + current.lastname }}
-            </div>
-
-            <p class="font-bold mt-2">{{ $t("user.email") }} :</p>
-            {{ current.email }}
+            <p class="font-bold">{{ $t("productOptions.name") }} :</p>
+            {{ current.name }}
         </div>
 
         <div class="mb-4">
-            <p class="font-bold">{{ $t("user.verified_at") }} :</p>
-            {{ current.email_verified_at }}
+            <p class="font-bold">{{ $t("productOptions.products_count") }} :</p>
+            {{ current.products_count }}
         </div>
 
         <div class="mb-4">
-            <p class="font-bold">{{ $t("activities.role") }} :</p>
-            {{ current.role.name }}
-        </div>
-
-        <div class="mb-4">
-            <p class="font-bold">{{ $t("user.status") }} :</p>
-            {{ current.status ? $t("common.active") : $t("common.inactive") }}
+            <p class="font-bold">{{ $t("productOptions.values") }} :</p>
+            <span v-for="value in current.values"> {{ value.value }}, </span>
         </div>
 
         <div class="mb-4">

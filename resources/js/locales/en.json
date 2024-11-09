@@ -264,7 +264,9 @@
         "invalid_color": "Invalid color code",
         "role_permission_exists": "An existing role already has these permissions",
         "existing_role_name": "An existing role already has this name",
-        "existing_role_color": "An existing role already has this color"
+        "existing_role_color": "An existing role already has this color",
+        "uniqueValue": "Value already exists",
+        "atLeastTwoValues": "At least two values are required"
     },
     "categories": {
         "title": "category | categories",
@@ -314,12 +316,17 @@
         "subtitle": "List of product options",
         "page": "Product Options",
         "name": "Name",
+        "value": "Value",
+        "values": "Values",
+        "no_values": "No values for this product option",
         "description": "Description",
         "no_description": "No description",
         "price": "Price",
         "status": "Status",
+        "products_count": "Products count",
         "no_productOption": "No product option found",
         "create": "Create product option",
+        "add_value": "Add value",
         "edit": "Edit product option",
         "update": "Update product option",
         "delete": "Delete product option",

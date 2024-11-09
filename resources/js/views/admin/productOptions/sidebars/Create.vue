@@ -28,22 +28,31 @@ const props = defineProps({
 
 const $emit = defineEmits(["update:isOpen", "createItem"]);
 
-const { isOpen, loading, parent } = toRefs(props);
+const { isOpen, loading } = toRefs(props);
 
-const statusOptions = [
-    {
-        name: $t("common.active"),
-        value: 1,
+const isAdding = ref(false);
+
+const newOptionValue = ref(null);
+const valueRules = computed(() => ({
+    newOptionValue: {
+        required,
+        alphaSpace,
+        uniqueValue: {
+            $message: $t("validation.uniqueValue"),
+            $validator: uniqueValue,
+        },
     },
-    {
-        name: $t("common.inactive"),
-        value: 0,
-    },
-];
+}));
+
+const uniqueValue = (value) => {
+    return !productOption.value.values.some((option) => option.value === value);
+};
+
+const v$Value = useVuelidate(valueRules, { newOptionValue });
 
 const productOption = ref({
     name: "",
-    values: [{ value: "" }], // Initially one empty value field
+    values: [], // Initially one empty value field
 });
 
 const rules = computed(() => ({
@@ -52,33 +61,32 @@ const rules = computed(() => ({
         alphaSpace,
     },
     values: {
-        $each: {
-            value: {
-                required,
-                alphaSpace,
-            },
+        atLeastTwoValues: {
+            $message: $t("validation.atLeastTwoValues"),
+            $validator: atLeastTwoValues,
         },
     },
 }));
 
+const atLeastTwoValues = (values) => {
+    return values.length >= 2;
+};
 const v$ = useVuelidate(rules, productOption);
+
 const addOptionValue = () => {
-    // Push the new value first so Vuelidate can see it
-    productOption.value.values.push({ value: "" });
-
-    // Now touch and validate the updated values array
-    v$.value.values.$touch();
-
-    // Stop if any of the values are invalid
-    if (v$.value.values.$invalid) {
-        values.value.pop(); // Remove the invalid value if validation fails
-        return;
+    v$Value.value.$touch();
+    if (!v$Value.value.$invalid) {
+        productOption.value.values.push(newOptionValue.value);
+        newOptionValue.value = null;
+        v$Value.value.$reset();
+        isAdding.value = false;
     }
 };
+
 const createItem = () => {
     v$.value.$touch();
     if (v$.value.$invalid) return;
-    console.log("status value: ", productOption.value.status);
+    console.log("status value: ", productOption.value);
     $emit("createItem", productOption.value);
     v$.value.$reset();
 };
@@ -111,7 +119,7 @@ const cancelConfirm = () => {
 const isEdited = computed(() => {
     return !isEqual(productOption.value, {
         name: "",
-        status: 0,
+        values: [],
     });
 });
 
@@ -122,6 +130,7 @@ watch(
             v$.value.$reset();
             productOption.value = {
                 name: "",
+                values: [],
             };
         }
     },
@@ -148,45 +157,88 @@ watch(
                     id="name"
                     v-model="productOption.name"
                     aria-labelledby="name"
-                    class="w-full mb-5"
+                    class="w-full"
                 />
 
                 <div
-                    class="text-red-500 mb-5"
+                    class="text-red-500 mt-5 col-span-12"
                     v-for="error of v$.name.$errors"
                     :key="error.$uid"
                 >
                     <Message severity="error">{{ error.$message }}</Message>
                 </div>
             </div>
+            <div class="col-span-12 flex items-center justify-between">
+                <span>{{ $t("productOptions.values") }} </span>
+                <Button
+                    @click="isAdding = true"
+                    class="col-span-12"
+                    icon="ti ti-plus"
+                    severity="success"
+                    size="small"
+                    v-tooltip.bottom="$t('productOptions.add_value')"
+                />
+            </div>
+
+            <transition-group
+                name="list"
+                tag="div"
+                class="list-container col-span-12"
+            >
+                <div
+                    v-for="(optionValue, index) in productOption.values"
+                    :key="optionValue"
+                    class="custom-list-item col-span-12 mb-5 flex items-center justify-between"
+                >
+                    <span>{{ optionValue }}</span>
+                    <Button
+                        icon="ti ti-trash"
+                        severity="danger"
+                        class="float-right"
+                        size="small"
+                        @click="productOption.values.splice(index, 1)"
+                    />
+                </div>
+            </transition-group>
+
+            <template v-if="productOption.values.length === 0">
+                <div class="col-span-12">
+                    <p>{{ $t("productOptions.no_values") }}</p>
+                </div>
+            </template>
 
             <div
-                v-for="(optionValue, index) in productOption.values"
-                :key="index"
-                class="col-span-12"
+                class="text-red-500 mt-5 col-span-12"
+                v-for="error of v$.values.$errors"
+                :key="error.$uid"
             >
-                <label :for="'optionValue' + index"
-                    >Option Value {{ index + 1 }}</label
-                >
-                <input
-                    :id="'optionValue' + index"
-                    v-model="optionValue.value"
-                />
+                <Message severity="error">{{ error.$message }}</Message>
+            </div>
+
+            <template v-if="isAdding">
+                <InputText v-model="newOptionValue" class="col-span-12" />
                 <div
-                    class="text-red-500 mb-5"
-                    v-for="error of v$.values.$errors"
+                    class="text-red-500 mb-5 col-span-12"
+                    v-for="error of v$Value.newOptionValue.$errors"
                     :key="error.$uid"
                 >
                     <Message severity="error">{{ error.$message }}</Message>
                 </div>
-            </div>
 
-            <Button @click="addOptionValue" class="col-span-12">
-                Add Option Value
-            </Button>
-            <pre>
-                {{ productOption }}
-            </pre>
+                <Button
+                    @click="isAdding = false"
+                    class="col-span-6"
+                    outlined
+                    severity="danger"
+                    :label="$t('common.cancel')"
+                />
+
+                <Button
+                    @click="addOptionValue"
+                    class="col-span-6"
+                    :label="$t('productOptions.add_value')"
+                />
+            </template>
         </div>
 
         <template #footer>
@@ -206,11 +258,38 @@ watch(
                     severity="success"
                     @click="createItem"
                     :loading="loading"
-                    :disabled="loading"
+                    :disabled="loading || !isEdited || isAdding"
                 />
             </div>
         </template>
     </Drawer>
 </template>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+/* Basic styling */
+.list-container {
+    padding: 0;
+    margin: 0;
+
+    .custom-list-item {
+        list-style-type: none;
+        transition: all 0.3s ease;
+    }
+
+    /* Transition animations */
+    .list-enter-active,
+    .list-leave-active {
+        transition: all 0.3s ease;
+    }
+
+    .list-enter-from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    .list-leave-to {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+}
+</style>

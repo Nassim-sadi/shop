@@ -81,10 +81,10 @@ Route::middleware(["auth:sanctum"])->group(function () {
     Route::prefix('product-options')->controller(ProductOptionController::class)->group(function () {
         Route::get('/', 'get');
         Route::get('/all', 'getAll');
-        // Route::post('/create', 'create');
+        Route::post('/create', 'create');
         // Route::post('/update', 'update');
         // Route::patch('/change-status', 'changeStatus');
-        // Route::delete('/delete/{id}', 'delete');
+        Route::delete('/delete/{id}', 'delete');
     });
 
 
