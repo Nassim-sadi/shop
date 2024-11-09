@@ -2,11 +2,13 @@
 
 namespace App\Models;
 
+use App\Traits\FormateDate;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class ActivityHistory extends Model
 {
+    use FormateDate;
     use HasFactory;
     protected $table = 'activity_histories';
 
@@ -15,22 +17,6 @@ class ActivityHistory extends Model
     protected $casts = [
         'data' => 'object',
     ];
-
-    public function getCreatedAtAttribute($value)
-    {
-        return $this->formatDate($value);
-    }
-
-    public function getUpdatedAtAttribute($value)
-    {
-        return $this->formatDate($value);
-    }
-
-    protected function formatDate($value)
-    {
-        $format = env('DATE_FORMAT', 'Y-m-d H:i:s'); // default format
-        return \Carbon\Carbon::parse($value)->format($format);
-    }
 
     public function user()
     {

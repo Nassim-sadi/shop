@@ -4,10 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\FormateDate;
 
 class OrderItemOption extends Model
 {
-    use HasFactory;
+    use HasFactory, FormateDate;
 
     protected $fillable = [
         'order_item_id',
