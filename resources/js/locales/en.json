@@ -220,6 +220,18 @@
                 "update": "Product updated successfully",
                 "delete": "Product deleted successfully",
                 "change_status": "Product status changed successfully"
+            },
+            "productOption": {
+                "create": "Product option created successfully",
+                "update": "Product option updated successfully",
+                "delete": "Product option deleted successfully",
+                "change_status": "Product option status changed successfully"
+            },
+            "order": {
+                "create": "Order created successfully",
+                "update": "Order updated successfully",
+                "delete": "Order deleted successfully",
+                "change_status": "Order status changed successfully"
             }
         },
         "error": {
@@ -245,6 +257,25 @@
                 "delete": "Category deletion failed",
                 "change_status": "Category status change failed"
             },
+            "product": {
+                "create": "Product creation failed",
+                "update": "Product update failed",
+                "delete": "Product deletion failed",
+                "change_status": "Product status change failed"
+            },
+            "productOption": {
+                "create": "Product option creation failed",
+                "update": "Product option update failed",
+                "delete": "Product option deletion failed",
+                "change_status": "Product option status change failed"
+            }
+        },
+        "message": {
+            "success": "Success",
+            "created": "Resource created successfully.",
+            "updated": "Resource updated successfully.",
+            "deleted": "Resource deleted successfully.",
+            "restored": "Resource restored successfully.",
             "not_found": "Resource not found.",
             "server_error": "An unexpected server error occurred.",
             "unauthorized": "You are not authorized to perform this action.",

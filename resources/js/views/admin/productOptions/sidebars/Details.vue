@@ -39,7 +39,13 @@ const { isOpen, current } = toRefs(props);
 
         <div class="mb-4">
             <p class="font-bold">{{ $t("productOptions.values") }} :</p>
-            <span v-for="value in current.values"> {{ value.value }}, </span>
+            <span v-for="(value, index) in current.values">
+                {{ value.value }}
+
+                <template v-if="current.values.length > index + 1">
+                    ,
+                </template>
+            </span>
         </div>
 
         <div class="mb-4">

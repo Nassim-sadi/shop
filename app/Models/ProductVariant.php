@@ -15,4 +15,9 @@ class ProductVariant extends Model
     {
         return $this->morphMany(ProductImage::class, 'imageable');
     }
+
+    public function optionValues()
+    {
+        return $this->belongsToMany(ProductOptionValue::class, 'product_variant_option_value', 'product_variant_id', 'product_option_value_id');
+    }
 }

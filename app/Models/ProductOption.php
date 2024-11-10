@@ -12,6 +12,7 @@ class ProductOption extends Model
 
     protected $fillable = [
         'name',
+        'status'
     ];
 
     public function values()

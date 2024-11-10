@@ -17,6 +17,7 @@ class ProductOptionValueResource extends JsonResource
         return [
             'id' => $this->id,
             'value' => $this->value,
+            'variants_count' => $this->variants_count,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at
         ];

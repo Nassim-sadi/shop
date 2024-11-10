@@ -22,6 +22,7 @@ class CategoryController extends Controller
 
     public function create(Request $request)
     {
+        debugbar()->log($request->all());
         $this->authorize('category_create');
         $validatedData = $request->validate([
             'name' => 'required|string|max:255',

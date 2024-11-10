@@ -232,6 +232,8 @@ watch(
                 optionValue="value"
                 class="toggleStatusBtn"
             />
+
+            {{ edited.status }}
         </div>
         <template #footer>
             <div class="mt-auto flex justify-evenly">

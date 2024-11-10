@@ -33,6 +33,7 @@ const { isOpen, loading } = toRefs(props);
 const isAdding = ref(false);
 
 const newOptionValue = ref(null);
+
 const valueRules = computed(() => ({
     newOptionValue: {
         required,
@@ -44,15 +45,27 @@ const valueRules = computed(() => ({
     },
 }));
 
+const statusOptions = [
+    {
+        name: $t("common.active"),
+        value: 1,
+    },
+    {
+        name: $t("common.inactive"),
+        value: 0,
+    },
+];
+
 const uniqueValue = (value) => {
-    return !productOption.value.values.some((option) => option.value === value);
+    return !productOption.value.values.some((option) => option === value);
 };
 
 const v$Value = useVuelidate(valueRules, { newOptionValue });
 
 const productOption = ref({
     name: "",
-    values: [], // Initially one empty value field
+    values: [],
+    status: 0,
 });
 
 const rules = computed(() => ({
@@ -86,7 +99,6 @@ const addOptionValue = () => {
 const createItem = () => {
     v$.value.$touch();
     if (v$.value.$invalid) return;
-    console.log("status value: ", productOption.value);
     $emit("createItem", productOption.value);
     v$.value.$reset();
 };
@@ -120,6 +132,7 @@ const isEdited = computed(() => {
     return !isEqual(productOption.value, {
         name: "",
         values: [],
+        status: 0,
     });
 });
 
@@ -131,6 +144,7 @@ watch(
             productOption.value = {
                 name: "",
                 values: [],
+                status: 0,
             };
         }
     },
@@ -168,6 +182,22 @@ watch(
                     <Message severity="error">{{ error.$message }}</Message>
                 </div>
             </div>
+
+            <label for="status" class="mb-5">{{
+                $t("productOptions.status")
+            }}</label>
+
+            <SelectButton
+                id="status"
+                v-model="productOption.status"
+                aria-labelledby="status"
+                fluid
+                :options="statusOptions"
+                optionLabel="name"
+                optionValue="value"
+                class="toggleStatusBtn col-span-12"
+            />
+
             <div class="col-span-12 flex items-center justify-between">
                 <span>{{ $t("productOptions.values") }} </span>
                 <Button
@@ -267,29 +297,4 @@ watch(
 
 <style lang="scss" scoped>
 /* Basic styling */
-.list-container {
-    padding: 0;
-    margin: 0;
-
-    .custom-list-item {
-        list-style-type: none;
-        transition: all 0.3s ease;
-    }
-
-    /* Transition animations */
-    .list-enter-active,
-    .list-leave-active {
-        transition: all 0.3s ease;
-    }
-
-    .list-enter-from {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-
-    .list-leave-to {
-        opacity: 0;
-        transform: translateX(-20px);
-    }
-}
 </style>

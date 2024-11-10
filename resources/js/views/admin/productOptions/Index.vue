@@ -136,7 +136,7 @@ const deleteItem = () => {
                 total.value--;
                 emitter.emit("toast", {
                     summary: $t("status.success.title"),
-                    message: $t("status.success.user.delete"),
+                    message: $t("status.success.productOption.delete"),
                     severity: "success",
                 });
                 resolve(res.data);
@@ -151,23 +151,51 @@ const deleteItem = () => {
     });
 };
 
-const editItem = (val) => {
+const changeStatus = async () => {
+    if (loadingStates.value[current.value.id]) return;
+    setLoadingState(current.value.id, true);
     return new Promise((resolve, reject) => {
         axios
-            .post("api/admin/product-options/update", val, {
-                onUploadProgress: (progressEvent) => {
-                    uploadPercentage.value = Math.round(
-                        (progressEvent.loaded * 100) / progressEvent.total,
-                    );
-                },
+            .patch("api/admin/product-options/change-status", {
+                id: current.value.id,
+                status: current.value.status ? 0 : 1,
             })
-            .then((response) => {
-                uploadPercentage.value = 0;
-                isEditOpen.value = false;
-                updateItem(response.data.user);
+            .then((res) => {
+                updateItemStatus(res.data.status);
                 emitter.emit("toast", {
-                    summary: $t("status.success.user.update"),
-                    message: $t("update.success_message"),
+                    summary: $t("status.success.title"),
+                    message: $t("status.success.productOption.change_status"),
+                    severity: "success",
+                });
+                resolve(res.data);
+            })
+            .catch((err) => {
+                console.log(err);
+                reject(err);
+            })
+            .finally(() => {
+                setLoadingState(current.value.id, false);
+            });
+    });
+};
+
+const updateItemStatus = (status) => {
+    productOptions.value[currentIndex.value].status = status;
+};
+
+const editItem = (val) => {
+    console.log("updating ", val);
+
+    return new Promise((resolve, reject) => {
+        axios
+            .patch("api/admin/product-options/update", val)
+            .then((response) => {
+                console.log(response.data);
+                isEditOpen.value = false;
+                updateItem(response.data);
+                emitter.emit("toast", {
+                    summary: $t("status.success.title"),
+                    message: $t("status.success.productOption.update"),
                     severity: "success",
                 });
                 resolve(response);
@@ -181,7 +209,7 @@ const editItem = (val) => {
 };
 
 const updateItem = (data) => {
-    productOptions.value[currentIndex.value] = data;
+    productOptions.value[currentIndex.value] = { ...data };
 };
 
 const loadingStates = ref({}); // Holds loading state for each user
@@ -193,10 +221,12 @@ const setLoadingState = (userId, isLoading) => {
 const createItem = (val) => {
     loading.value = true;
     return new Promise((resolve, reject) => {
+        console.log(val);
         axios
             .post("api/admin/product-options/create", val)
             .then((res) => {
                 console.log(res.data);
+
                 productOptions.value.push(res.data);
                 isCreateOpen.value = false;
                 emitter.emit("toast", {
@@ -353,8 +383,32 @@ onMounted(async () => {
 
             <Column :header="$t('productOptions.values')">
                 <template #body="slotProps">
-                    <span v-for="value in slotProps.data.values">
-                        {{ value.value }},
+                    <span v-for="(value, index) in slotProps.data.values">
+                        {{ value.value }}
+                        <template
+                            v-if="slotProps.data.values.length > index + 1"
+                        >
+                            ,
+                        </template>
+                    </span>
+                </template>
+            </Column>
+
+            <Column :header="$t('user.status')">
+                <template #body="slotProps">
+                    <span
+                        :class="
+                            slotProps.data.status
+                                ? 'text-green-500'
+                                : 'text-red-500'
+                        "
+                        class="font-bold"
+                    >
+                        {{
+                            slotProps.data.status
+                                ? $t("common.active")
+                                : $t("common.inactive")
+                        }}
                     </span>
                 </template>
             </Column>
@@ -407,6 +461,20 @@ onMounted(async () => {
                     class="action-btn"
                     :loading="loadingStates[current.id]"
                     v-if="ability.can('productOption', 'view')"
+                />
+
+                <Button
+                    icon="ti ti-status-change"
+                    rounded
+                    size="normal"
+                    text
+                    severity="help"
+                    :label="$t('common.change_status')"
+                    @click="confirm(changeStatus)"
+                    v-tooltip.bottom="$t('common.change_status')"
+                    class="action-btn"
+                    :loading="loadingStates[current.id]"
+                    v-if="ability.can('productOption', 'changeStatus')"
                 />
 
                 <Button

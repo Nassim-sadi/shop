@@ -20,7 +20,9 @@ class ProductOptionController extends Controller
             ->when(isset($request->status) && $request->status !== '', function ($q) use ($request) {
                 $q->where('status', $request->status);
             })
-            ->with('values')
+            ->with(['values' => function ($query) {
+                $query->withCount('variants');
+            }])
             ->withCount('products')
             ->orderBy('created_at', 'DESC')
             ->paginate($request->per_page);
@@ -37,10 +39,12 @@ class ProductOptionController extends Controller
 
     public function create(Request $request)
     {
+
         $this->authorize('productOption_create');
         debugbar()->log($request->all());
         $request->validate([
             'name' => 'required|unique:product_options,name',
+            'status' => 'required|boolean',
             'values' => 'required|array|min:1',
             'values.*' => 'required|string',
         ]);
@@ -49,9 +53,9 @@ class ProductOptionController extends Controller
         if (count($request->values) !== count($uniqueValues)) {
             return response()->json(['message' => 'All values must be unique'], 400);
         }
-
         $productOption = ProductOption::create([
             'name' => $request->name,
+            'status' => $request->status
         ]);
 
         foreach ($request->values as $value) {
@@ -61,6 +65,68 @@ class ProductOptionController extends Controller
         }
 
 
+        return response()->json(ProductOptionResource::make($productOption), 200);
+    }
+
+    public function changeStatus(Request $request)
+    {
+        $this->authorize('productOption_update');
+        $productOption = ProductOption::findOrFail($request->id);
+        $productOption->status = $request->status;
+        $productOption->save();
+
+        return response()->json(['status' => $productOption->status, 'message' => 'Product option status changed successfully'], 200);
+    }
+
+    public function update(Request $request)
+    {
+        $this->authorize('productOption_update');
+
+        // Validate the request
+        $request->validate([
+            'id' => 'required|exists:product_options,id',
+            'name' => 'required|unique:product_options,name,' . $request->id,
+            'status' => 'required|boolean',
+            'values' => 'required|array|min:1',
+            'values.*.id' => 'nullable|exists:product_option_values,id',
+            'values.*.value' => 'required|string',
+        ]);
+
+        $uniqueValues = array_unique(array_column($request->values, 'value'));
+        if (count($request->values) !== count($uniqueValues)) {
+            return response()->json(['message' => 'All values must be unique'], 400);
+        }
+
+        // Find the product option
+        $productOption = ProductOption::findOrFail($request->id);
+        $productOption->name = $request->name;
+        $productOption->status = $request->status;
+        $productOption->save();
+
+        // fetch count 
+
+        // Retrieve existing values as a collection for easy comparison
+        $existingValues = $productOption->values()->get()->keyBy('id');
+
+        // Prepare to collect the new and updated values
+        $incomingValues = collect($request->values);
+
+        // Delete values that are not in the incoming request
+        $existingValues->whereNotIn('id', $incomingValues->pluck('id')->filter())->each->delete();
+
+        // Process incoming values
+        foreach ($incomingValues as $valueData) {
+            if (isset($valueData['id']) && $existingValues->has($valueData['id'])) {
+                // Update the existing value
+                $existingValues[$valueData['id']]->update(['value' => $valueData['value']]);
+            } else {
+                // Create a new value
+                $productOption->values()->create(['value' => $valueData['value']]);
+            }
+        }
+        $productOption->loadCount('products')->load('values');
+
+        // Return the updated product option resource
         return response()->json(ProductOptionResource::make($productOption), 200);
     }
 

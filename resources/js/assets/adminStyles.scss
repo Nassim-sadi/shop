@@ -130,7 +130,7 @@ body {
     box-shadow: 0px 0px 8px rgba(23, 162, 184, 0.6);
 }
 
-.p-button-warning:not(.p-button-outlined):not(.p-button-text):not(.p-button-link) {
+.p-button-warn:not(.p-button-outlined):not(.p-button-text):not(.p-button-link) {
     box-shadow: 0px 0px 8px rgba(255, 193, 7, 0.6);
 }
 
@@ -151,4 +151,30 @@ body {
 
 label{
     display: inline-block;
+}
+
+.list-container {
+    padding: 0;
+    margin: 0;
+
+    .custom-list-item {
+        list-style-type: none;
+        transition: all 0.3s ease;
+    }
+
+    /* Transition animations */
+    .list-enter-active,
+    .list-leave-active {
+        transition: all 0.3s ease;
+    }
+
+    .list-enter-from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    .list-leave-to {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
 }

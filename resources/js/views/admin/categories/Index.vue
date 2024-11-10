@@ -90,6 +90,7 @@ const openEdit = () => {
 };
 
 const createItem = (data) => {
+    console.log(data);
     if (loading.value) return;
     loading.value = true;
     return new Promise((resolve, reject) => {
