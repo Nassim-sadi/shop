@@ -57,9 +57,10 @@ const statusOptions = [
 ];
 
 const uniqueValue = (value) => {
-    return !productOption.value.values.some((option) => option === value);
+    return !edited.value.values.some(
+        (option) => option.value.toLowerCase() === value.toLowerCase(),
+    );
 };
-
 const v$Value = useVuelidate(valueRules, { newOptionValue });
 
 const productOption = ref({

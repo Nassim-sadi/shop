@@ -51,7 +51,9 @@ const valueRules = computed(() => ({
 }));
 
 const uniqueValue = (value) => {
-    return !edited.value.values.some((option) => option.value === value);
+    return !edited.value.values.some(
+        (option) => option.value.toLowerCase() === value.toLowerCase(),
+    );
 };
 
 const v$Value = useVuelidate(valueRules, { newOptionValue });
