@@ -5,8 +5,10 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Admin\ProductOption\ProductOptionCollection;
 use App\Http\Resources\Admin\ProductOption\ProductOptionResource;
+use App\Jobs\ActivityHistoryJob;
 use App\Models\ProductOption;
 use Illuminate\Http\Request;
+use UA;
 
 class ProductOptionController extends Controller
 {
@@ -64,6 +66,18 @@ class ProductOptionController extends Controller
             ]);
         }
 
+        $agent = UA::parse($request->server('HTTP_USER_AGENT'));
+        ActivityHistoryJob::dispatch(
+            data: [
+                'model' => 'product_options',
+                'action' => 'create',
+                'data' => ['product-option' =>  $productOption],
+                'user_id' => $request->user()->id,
+            ],
+            platform: $agent->os->family,
+            browser: $agent->ua->family,
+        );
+
 
         return response()->json(ProductOptionResource::make($productOption), 200);
     }
@@ -74,7 +88,17 @@ class ProductOptionController extends Controller
         $productOption = ProductOption::findOrFail($request->id);
         $productOption->status = $request->status;
         $productOption->save();
-
+        $agent = UA::parse($request->server('HTTP_USER_AGENT'));
+        ActivityHistoryJob::dispatch(
+            data: [
+                'model' => 'product_options',
+                'action' => 'update',
+                'data' => ['product-option' =>  $productOption],
+                'user_id' => $request->user()->id,
+            ],
+            platform: $agent->os->family,
+            browser: $agent->ua->family,
+        );
         return response()->json(['status' => $productOption->status, 'message' => 'Product option status changed successfully'], 200);
     }
 
@@ -125,12 +149,22 @@ class ProductOptionController extends Controller
             }
         }
         $productOption->loadCount('products')->load('values');
-
+        $agent = UA::parse($request->server('HTTP_USER_AGENT'));
+        ActivityHistoryJob::dispatch(
+            data: [
+                'model' => 'product_options',
+                'action' => 'update',
+                'data' => ['product-option' =>  $productOption],
+                'user_id' => $request->user()->id,
+            ],
+            platform: $agent->os->family,
+            browser: $agent->ua->family,
+        );
         // Return the updated product option resource
         return response()->json(ProductOptionResource::make($productOption), 200);
     }
 
-    public function delete($id)
+    public function delete(Request $request, $id)
     {
         $this->authorize('productOption_delete');
         $productOption = ProductOption::findOrFail($id);
@@ -138,7 +172,20 @@ class ProductOptionController extends Controller
         if ($productOption->products()->count() != 0) {
             return response()->json(['message' => 'Product option is associated with variants'], 400);
         }
+
+        $agent = UA::parse($request->server('HTTP_USER_AGENT'));
+        ActivityHistoryJob::dispatch(
+            data: [
+                'model' => 'product_options',
+                'action' => 'delete',
+                'data' => ['product-option' =>  $productOption],
+                'user_id' => $request->user()->id,
+            ],
+            platform: $agent->os->family,
+            browser: $agent->ua->family,
+        );
         $productOption->delete();
+
         return response()->json(['message' => 'Product option deleted successfully'], 200);
     }
 }
