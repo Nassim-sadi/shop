@@ -462,7 +462,7 @@ onMounted(async () => {
             <Column :header="$t('common.created_at')" field="created_at">
             </Column>
 
-            <Column :header="$t('common.updated_at')" field="created_at">
+            <Column :header="$t('common.updated_at')" field="updated_at">
             </Column>
 
             <Column :header="$t('activities.action')">

@@ -3,10 +3,8 @@ import { ability } from "@/plugins/ability";
 import axios from "@/plugins/axios";
 import emitter from "@/plugins/emitter";
 import { $t } from "@/plugins/i18n";
-import { authStore } from "@/store/AuthStore";
-import { format } from "date-fns";
 import { useConfirm } from "primevue/useconfirm";
-import { computed, onMounted, ref } from "vue";
+import { onMounted, ref } from "vue";
 import Create from "./sidebars/Create.vue";
 import Details from "./sidebars/Details.vue";
 import Edit from "./sidebars/Edit.vue";
@@ -319,15 +317,9 @@ onMounted(async () => {
             </Column>
 
             <Column :header="$t('common.created_at')" field="created_at">
-                <template #body="slotProps">
-                    {{ format(slotProps.data.created_at, "yyy-mm-dd hh:mm") }}
-                </template>
             </Column>
 
-            <Column :header="$t('common.updated_at')" field="created_at">
-                <template #body="slotProps">
-                    {{ format(slotProps.data.updated_at, "yyy-mm-dd hh:mm") }}
-                </template>
+            <Column :header="$t('common.updated_at')" field="updated_at">
             </Column>
 
             <Column :header="$t('activities.action')">

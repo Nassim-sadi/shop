@@ -425,15 +425,9 @@ const findCategoryById = (categories, id) => {
             </Column>
 
             <Column :header="$t('common.created_at')" field="created_at">
-                <template #body="slotProps">
-                    {{ slotProps.node.created_at }}
-                </template>
             </Column>
 
-            <Column :header="$t('common.updated_at')">
-                <template #body="slotProps">
-                    {{ slotProps.node.updated_at }}
-                </template>
+            <Column :header="$t('common.updated_at')" field="updated_at">
             </Column>
 
             <Column :header="$t('activities.action')">

@@ -597,7 +597,7 @@ onMounted(async () => {
                 </template>
             </Column>
 
-            <Column :header="$t('common.updated_at')" field="created_at">
+            <Column :header="$t('common.updated_at')" field="updated_at">
                 <template #body="slotProps">
                     {{ slotProps.data.updated_at }}
                 </template>
