@@ -13,7 +13,7 @@ class ProductController extends Controller
 {
     public function get(Request $request)
     {
-        $this->authorize('user_view');
+        $this->authorize('product_view');
         $products = Product::whereDate('created_at', '>=', $request->start_date)
             ->whereDate('created_at', '<=', $request->end_date)
             ->where(function ($q) use ($request) {
@@ -44,9 +44,9 @@ class ProductController extends Controller
 
     public function create(Request $request)
     {
+        $this->authorize('product_create');
         // Start a transaction to ensure data integrity
         DB::beginTransaction();
-
         try {
             // Create the main product
             $product = Product::create([

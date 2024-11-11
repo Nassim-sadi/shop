@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('name')->unique();
             $table->text('description');
             $table->string('image');
-            $table->boolean('status')->default(false);
+            $table->boolean('status')->default(true);
             $table->integer('order')->default(0);
             $table->timestamps();
         });

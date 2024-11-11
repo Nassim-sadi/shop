@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Http\Resources\Admin\Category\CategoryCollection;
 use App\Http\Resources\Admin\Category\CategoryResource;
 use App\Jobs\ActivityHistoryJob;
 use App\Models\Category;
@@ -18,6 +17,21 @@ class CategoryController extends Controller
         $this->authorize('category_view');
         $categories = Category::with('children')->whereNull('parent_id')->orderBy('order', 'ASC')->get();
         return  CategoryResource::collection($categories);
+    }
+
+
+
+    public function getChildren(Request $request)
+    {
+        $this->authorize('category_view');
+
+        $categories = Category::with('parent')
+            ->whereDoesntHave('children')
+            ->where('status', 1)
+            ->orderBy('created_at', 'ASC')
+            ->get();
+
+        return CategoryResource::collection($categories);
     }
 
     public function create(Request $request)

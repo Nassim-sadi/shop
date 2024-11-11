@@ -24,13 +24,6 @@ class Product extends Model
         'updated_by',
     ];
 
-
-
-    // public function options()
-    // {
-    //     return $this->belongsToMany(ProductOption::class, 'product_option_product');
-    // }
-
     public function variants()
     {
         return $this->hasMany(ProductVariant::class);

@@ -6,6 +6,13 @@ import { alphaSpace } from "@/validators/CustomValidators";
 import isEqual from "lodash.isequal";
 import { useConfirm } from "primevue/useconfirm";
 import { computed, ref, toRefs, watch } from "vue";
+import { useImageCompression } from "@/utils/useImageCompression";
+import productPlaceHolder from "@/assets/images/placeholder.webp";
+import {
+    productImageSize,
+    productThumbnailImageSize,
+} from "@/constants/imagesSize/Index";
+
 const confirm = useConfirm();
 const props = defineProps({
     isOpen: {
@@ -20,6 +27,10 @@ const props = defineProps({
         type: Array,
         required: true,
     },
+    categories: {
+        type: Array,
+        required: true,
+    },
     progress: {
         type: Number,
         required: false,
@@ -28,7 +39,7 @@ const props = defineProps({
 
 const $emit = defineEmits(["update:isOpen", "createItem"]);
 
-const { isOpen, loading, options } = toRefs(props);
+const { isOpen, loading, options, categories, progress } = toRefs(props);
 
 const statusOptions = [
     {
@@ -41,9 +52,26 @@ const statusOptions = [
     },
 ];
 
-const productOption = ref({
+const featuredOptions = [
+    {
+        name: $t("products.featured"),
+        value: 1,
+    },
+    {
+        name: $t("products.not_featured"),
+        value: 0,
+    },
+];
+
+const product = ref({
     name: "",
+    description: "",
+    long_description: "",
+    base_price: "",
+    featured: 0,
+    category: null,
     status: 0,
+    variants: [],
 });
 
 const rules = computed(() => ({
@@ -53,14 +81,36 @@ const rules = computed(() => ({
     },
 }));
 
-const v$ = useVuelidate(rules, productOption);
+const v$ = useVuelidate(rules, product);
 
 const createItem = () => {
     v$.value.$touch();
     if (v$.value.$invalid) return;
-    console.log("status value: ", productOption.value.status);
-    $emit("createItem", productOption.value);
+    console.log("status value: ", product.value.status);
+    $emit("createItem", product.value);
     v$.value.$reset();
+};
+
+const imageFile = ref(null);
+
+const imageRules = computed(() => ({
+    imageFile: {
+        required,
+    },
+}));
+
+const imageV$ = useVuelidate(imageRules, { imageFile });
+
+let formData = new FormData();
+const previewImage = ref(productPlaceHolder);
+
+const updatePicture = async (event, size) => {
+    const { compressedImage, preview } = await useImageCompression(
+        event.target.files[0],
+        size,
+    );
+    previewImage.value = preview;
+    formData.append("thumbnail_image_path", compressedImage);
 };
 
 const cancelConfirm = () => {
@@ -89,10 +139,17 @@ const cancelConfirm = () => {
 };
 
 const isEdited = computed(() => {
-    return !isEqual(productOption.value, {
-        name: "",
-        status: 0,
-    });
+    return (
+        !isEqual(product.value, {
+            name: "",
+            description: "",
+            long_description: "",
+            base_price: "",
+            featured: 0,
+            category: null,
+            status: 0,
+        }) || previewImage !== productPlaceHolder
+    );
 });
 
 watch(
@@ -100,9 +157,13 @@ watch(
     (val) => {
         if (!val) {
             v$.value.$reset();
-            productOption.value = {
+            product.value = {
                 name: "",
                 description: "",
+                long_description: "",
+                base_price: "",
+                featured: 0,
+                category: null,
                 status: 0,
             };
         }
@@ -113,7 +174,7 @@ watch(
 <template>
     <Drawer
         :visible="isOpen"
-        :header="$t('productOptions.create')"
+        :header="$t('products.create')"
         position="right"
         @update:visible="$emit('update:isOpen', $event)"
         :dismissable="false"
@@ -121,45 +182,167 @@ watch(
         block-scroll
         class="large-drawer"
     >
-        <div class="grid grid-cols-12 gap-5">
-            <div class="col-span-12 md:col-span-6">
-                <label for="name" class="mb-5">{{ $t("products.name") }}</label>
-                <InputText
-                    id="name"
-                    v-model="productOption.name"
-                    aria-labelledby="name"
-                    class="w-full mb-5"
-                />
-
-                <div
-                    class="text-red-500 mb-5"
-                    v-for="error of v$.name.$errors"
-                    :key="error.$uid"
+        <div class="column-1 md:columns-2 gap-5">
+            <label class="mb-5">{{ $t("products.thumbnail") }}</label>
+            <div
+                class="cursor-pointer mb-10 w-full aspect-[1/1] rounded-xl overflow-hidden relative"
+            >
+                <label
+                    for="image"
+                    class="w-full absolute top-0 right-0 left-0 bottom-0"
                 >
-                    <Message severity="error">{{ error.$message }}</Message>
+                    <input
+                        type="file"
+                        id="image"
+                        @change="updatePicture($event, productImageSize)"
+                        accept="image/*"
+                        class="hidden"
+                    />
+                    <img
+                        :src="previewImage || productPlaceHolder"
+                        class="w-full object-cover !h-full"
+                    />
+                </label>
+                <div
+                    class="mb-5 absolute z-10 right-2 left-2 bottom-0"
+                    v-if="progress > 0"
+                >
+                    <ProgressBar :value="progress"></ProgressBar>
                 </div>
             </div>
+            <div
+                class="text-red-500 mb-5"
+                v-for="error of imageV$.imageFile.$errors"
+                :key="error.$uid"
+            >
+                <Message severity="error">{{ error.$message }}</Message>
+            </div>
+            <label for="name" class="mb-5">{{ $t("products.name") }}</label>
+            <InputText
+                id="name"
+                v-model="product.name"
+                aria-labelledby="name"
+                class="w-full mb-5"
+            />
 
-            <div class="col-span-12 md:col-span-6">
-                <label for="status" class="mb-5">{{
-                    $t("products.status")
+            <div
+                class="text-red-500 mb-5"
+                v-for="error of v$.name.$errors"
+                :key="error.$uid"
+            >
+                <Message severity="error">{{ error.$message }}</Message>
+            </div>
+
+            <label for="status" class="mb-5">{{ $t("products.status") }}</label>
+
+            <SelectButton
+                :allow-empty="false"
+                id="status"
+                v-model="product.status"
+                aria-labelledby="status"
+                fluid
+                :options="statusOptions"
+                optionLabel="name"
+                optionValue="value"
+                class="toggleStatusBtn mb-5"
+            />
+            <div>
+                <label for="description" class="mb-5">{{
+                    $t("products.description")
                 }}</label>
 
-                <SelectButton
-                    :allow-empty="false"
-                    id="status"
-                    v-model="productOption.status"
-                    aria-labelledby="status"
+                <Textarea
+                    id="description"
+                    v-model="product.description"
+                    rows="4"
                     fluid
-                    :options="statusOptions"
-                    optionLabel="name"
-                    optionValue="value"
-                    class="toggleStatusBtn"
+                    maxlength="255"
+                    class="mb-5"
                 />
             </div>
+
+            <label for="long_description" class="mb-5">{{
+                $t("products.long_description")
+            }}</label>
+
+            <Textarea
+                id="long_description"
+                v-model="product.long_description"
+                rows="6"
+                fluid
+                maxlength="1000"
+                class="mb-5"
+            />
+            <label for="featured" class="mb-5">{{
+                $t("products.featured")
+            }}</label>
+
+            <SelectButton
+                :allow-empty="false"
+                id="featured"
+                v-model="product.featured"
+                aria-labelledby="featured"
+                fluid
+                :options="featuredOptions"
+                optionLabel="name"
+                optionValue="value"
+                class="toggleStatusBtn mb-5"
+            />
+
+            <label for="category" class="mb-5">{{
+                $t("products.category")
+            }}</label>
+
+            <Select
+                v-model="product.category"
+                :options="categories"
+                filter
+                optionLabel="name"
+                :placeholder="$t('products.categoryQuery')"
+                data-key="id"
+                fluid
+                class="mb-5"
+            >
+                <template #value="slotProps">
+                    <div v-if="slotProps.value" class="flex items-center">
+                        <div>{{ slotProps.value.name }}</div>
+                    </div>
+                </template>
+                <template #option="slotProps">
+                    <div class="flex items-center">
+                        <div>{{ slotProps.option.name }}</div>
+                    </div>
+                </template>
+            </Select>
+
+            <label for="base_price" class="mb-5">{{
+                $t("products.base_price")
+            }}</label>
+
+            <InputText
+                :aria-labelledby="$t('products.base_price')"
+                id="base_price"
+                type="number"
+                v-model="product.base_price"
+                fluid
+            />
         </div>
+
+        <!-- <div>
+            <div v-for="item in options" :key="item.id">
+                <Select
+                    v-model="product.variants"
+                    :options="item.values"
+                    class="mb-5"
+                    optionLabel="value"
+                    data-key="id"
+                    :placeholder="$t('products.categoryQuery')"
+                >
+                </Select>
+            </div>
+        </div> -->
         <template #footer>
-            <div class="mt-auto flex justify-evenly">
+            <div class="flex justify-end gap-5">
                 <Button
                     :label="$t('common.cancel')"
                     icon="pi pi-times"

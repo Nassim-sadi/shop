@@ -29,7 +29,7 @@ const status = ref(null);
 const uploadPercentage = ref(0);
 const currentIndex = ref(null);
 const actionsPopover = ref();
-const isChangeRoleOpen = ref(false);
+const categories = ref([]);
 const productOptions = ref([]);
 const togglePopover = ({ event: event, current: data, index: index }) => {
     current.value = data;
@@ -61,8 +61,6 @@ const statusOptions = [
     { label: "Active", value: 1 },
     { label: "Inactive", value: 0 },
 ];
-
-const deleted = ref(null);
 
 const auth = authStore();
 
@@ -276,7 +274,24 @@ const createItem = (val) => {
     console.log(val);
 };
 
+const getCategories = async () => {
+    return new Promise((resolve, reject) => {
+        axios
+            .get("api/admin/categories/get-children")
+            .then((res) => {
+                console.log(res);
+                categories.value = res.data;
+                resolve(res.data);
+            })
+            .catch((err) => {
+                console.log(err);
+                reject(err);
+            });
+    });
+};
+
 onMounted(async () => {
+    await getCategories();
     await getProductOptions();
     start_date.value.setDate(start_date.value.getDate() - 17);
     await getProducts();
@@ -294,6 +309,8 @@ onMounted(async () => {
             v-model:isOpen="isCreateOpen"
             @createItem="createItem"
             :options="productOptions"
+            :categories="categories"
+            :loading="loading"
         />
 
         <Edit
@@ -418,7 +435,7 @@ onMounted(async () => {
                         class="bold-label"
                         v-tooltip.bottom="$t('common.reset')"
                         :disabled="!start_date || !end_date"
-                        severity="secondary"
+                        severity="info"
                     />
                 </div>
             </template>
