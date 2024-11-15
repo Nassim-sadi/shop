@@ -18,6 +18,14 @@ const lastname = {
     alphaSpace,
 };
 
+const validateDecimalFormat = helpers.withMessage(
+    "Invalid format. Max 6 digits before decimal and 2 after.",
+    (value) => {
+        const regex = /^\d{1,6}(\.\d{1,2})?$/; // 1-6 digits before, 0-2 digits after
+        return regex.test(value);
+    },
+);
+
 const hexColor = helpers.regex(
     "hexColor",
     /^#?([A-Fa-f0-9]{6})$/, // Matches 6-digit hex color, with or without #
@@ -30,4 +38,11 @@ const Color = {
     hexColor,
 };
 
-export { alphaSpace, Color, firstname, hexColor, lastname };
+export {
+    alphaSpace,
+    Color,
+    firstname,
+    hexColor,
+    lastname,
+    validateDecimalFormat,
+};
