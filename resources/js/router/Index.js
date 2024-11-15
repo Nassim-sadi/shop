@@ -61,6 +61,13 @@ const router = createRouter({
                     component: () => import("@/views/admin/products/Index.vue"),
                 },
                 {
+                    path: "products/:id",
+                    name: "ProductVariants",
+                    meta: { title: $t("navigation.products") },
+                    component: () => import("@/views/admin/variants/Index.vue"),
+                    props: true,
+                },
+                {
                     path: "product-options",
                     name: "product-options",
                     meta: { title: $t("navigation.productOptions") },

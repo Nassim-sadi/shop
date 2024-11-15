@@ -17,9 +17,9 @@ return new class extends Migration
             $table->string('name');
             $table->string('slug')->unique();
             $table->string('description', 255);
-            $table->longText('long_description');
+            $table->text('long_description', 2000);
             $table->boolean('status')->default(false);
-            $table->integer('base_price');
+            $table->decimal('base_price', 8, 2);
             $table->boolean('featured')->default(false);
             $table->string('thumbnail_image_path')->nullable();
             $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();

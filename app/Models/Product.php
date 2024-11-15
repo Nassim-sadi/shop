@@ -17,6 +17,8 @@ class Product extends Model
         'description',
         'long_description',
         'base_price',
+        'listing_price',
+        'base_quantity',
         'status',
         'featured',
         'thumbnail_image_path',
