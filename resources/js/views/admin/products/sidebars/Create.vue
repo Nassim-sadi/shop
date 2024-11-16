@@ -6,6 +6,7 @@ import {
     alphaSpace,
     validateDecimalFormat,
 } from "@/validators/CustomValidators";
+import ImageInput from "@/components/admin/products/imagesInput/Index.vue";
 import isEqual from "lodash.isequal";
 import { useConfirm } from "primevue/useconfirm";
 import { computed, ref, toRefs, watch } from "vue";
@@ -15,6 +16,7 @@ import {
     productImageSize,
     productThumbnailImageSize,
 } from "@/constants/imagesSize/Index";
+const activeStep = ref(1);
 
 const confirm = useConfirm();
 const props = defineProps({
@@ -148,7 +150,7 @@ const updatePicture = async (event, size) => {
         console.log(error);
         return;
     }
-    console.log("sucess");
+    console.log("success");
 
     previewImage.value = preview;
     formData.append("thumbnail_image_path", compressedImage);
@@ -197,11 +199,6 @@ const isEdited = computed(() => {
     );
 });
 
-const handleProductImages = (activateCallback) => {
-    send.value = true;
-    activateCallback("3");
-};
-
 const addProductImages = (val) => {
     val.forEach((image) => {
         console.log(image);
@@ -229,8 +226,6 @@ watch(
         }
     },
 );
-
-import ImageInput from "@/components/admin/products/imagesInput/Index.vue";
 </script>
 
 <template>
@@ -244,8 +239,8 @@ import ImageInput from "@/components/admin/products/imagesInput/Index.vue";
         block-scroll
         class="large-drawer"
     >
-        <Stepper value="1" :linear="true">
-            <StepItem value="1">
+        <Stepper v-model:value="activeStep" :linear="true">
+            <StepItem :value="1">
                 <Step>{{ $t("products.p_thumbnail") }}</Step>
                 <StepPanel v-slot="{ activateCallback }">
                     <div
@@ -272,12 +267,6 @@ import ImageInput from "@/components/admin/products/imagesInput/Index.vue";
                                 class="w-full object-cover !h-full"
                             />
                         </label>
-                        <div
-                            class="mb-5 absolute z-10 right-2 left-2 bottom-0"
-                            v-if="progress > 0"
-                        >
-                            <ProgressBar :value="progress"></ProgressBar>
-                        </div>
                     </div>
                     <div
                         class="text-red-500 mb-5"
@@ -286,31 +275,20 @@ import ImageInput from "@/components/admin/products/imagesInput/Index.vue";
                     >
                         <Message severity="error">{{ error.$message }}</Message>
                     </div>
-                    <div class="py-6">
-                        <Button label="Next" @click="activateCallback('2')" />
-                    </div>
                 </StepPanel>
             </StepItem>
-            <StepItem value="2">
+            <StepItem :value="2">
                 <Step>{{ $t("products.p_images") }}</Step>
-                <StepPanel v-slot="{ activateCallback }">
-                    <ImageInput @add-images="addProductImages" :send="send" />
-                    <div class="flex py-6 gap-2">
-                        <Button
-                            label="Back"
-                            severity="secondary"
-                            @click="activateCallback('1')"
-                        />
-                        <Button
-                            label="Next"
-                            @click="handleProductImages(activateCallback)"
-                        />
-                    </div>
+                <StepPanel>
+                    <ImageInput
+                        @add-images="addProductImages"
+                        :step="activeStep"
+                    />
                 </StepPanel>
             </StepItem>
-            <StepItem value="3">
+            <StepItem :value="3">
                 <Step>{{ $t("products.p_info") }}</Step>
-                <StepPanel v-slot="{ activateCallback }">
+                <StepPanel>
                     <div class="column-1 md:columns-2 gap-5 mb-5">
                         <div class="mb-5">
                             <label for="name" class="mb-5">{{
@@ -460,6 +438,7 @@ import ImageInput from "@/components/admin/products/imagesInput/Index.vue";
                                 }}</Message>
                             </div>
                         </div>
+
                         <div class="mb-5">
                             <label for="base_quantity" class="mb-5">{{
                                 $t("products.base_quantity")
@@ -489,7 +468,6 @@ import ImageInput from "@/components/admin/products/imagesInput/Index.vue";
                             <label for="base_price" class="mb-5">{{
                                 $t("products.base_price")
                             }}</label>
-
                             <InputText
                                 :aria-labelledby="$t('products.base_price')"
                                 id="base_price"
@@ -535,14 +513,6 @@ import ImageInput from "@/components/admin/products/imagesInput/Index.vue";
                             </div>
                         </div>
                     </div>
-
-                    <div class="flex py-6 gap-2">
-                        <Button
-                            label="Back"
-                            severity="secondary"
-                            @click="activateCallback('2')"
-                        />
-                    </div>
                 </StepPanel>
             </StepItem>
         </Stepper>
@@ -556,8 +526,21 @@ import ImageInput from "@/components/admin/products/imagesInput/Index.vue";
                     outlined
                     :disabled="loading"
                 />
+                <Button
+                    :label="$t('common.back')"
+                    severity="secondary"
+                    @click="activeStep--"
+                    v-if="activeStep !== 1"
+                />
 
                 <Button
+                    :label="$t('common.next')"
+                    @click="activeStep++"
+                    v-if="activeStep !== 3"
+                />
+
+                <Button
+                    v-if="activeStep === 3"
                     :label="$t('common.save')"
                     icon="pi pi-check"
                     severity="success"

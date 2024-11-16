@@ -1,59 +1,73 @@
-
-
 <script setup>
-import { ref, watch , toRefs} from "vue";
+import { ref, watch, toRefs } from "vue";
 import { useImageCompression } from "@/utils/useImageCompression";
 import { productImageSize } from "@/constants/imagesSize/Index";
+import { $t } from "@/plugins/i18n";
+import emitter from "@/plugins/emitter";
+import ProductImage from "./ProductImage.vue";
 const previewImages = ref([]);
-// let formData = new FormData();
-const images = []
+const loading = ref([]); // Array to track loading state for each image
+const existingFiles = ref([]);
+const images = [];
 const props = defineProps({
-    send : {
-        type: Boolean,
-        required: true
-    }
-})
+    step: {
+        type: Number,
+        required: true,
+    },
+});
 
-const { send } = toRefs(props);
+const { step } = toRefs(props);
 const $emit = defineEmits(["add-images"]);
-
 
 const updatePicture = async (event) => {
     const files = Array.from(event.target.files);
-    console.log("files");
-
-    console.log(event);
 
     for (const file of files) {
-        const result = await useImageCompression(file, productImageSize);
-        if (result) {
-            const { compressedImage, preview } = result;
-            previewImages.value.push(preview);
-            // formData.append("images[]", compressedImage);
-            images.push(compressedImage)
-            // $emit("addImage", compressedImage);
-        } else {
-            console.warn(`Skipping file: ${file.name}`);
+        if (existingFiles.value.includes(file.name)) {
+            emitter.emit("toast", {
+                summary: $t("validation.file_already_exist"),
+                message: file.name,
+                severity: "error",
+            });
+            continue;
+        }
+        const tempIndex = previewImages.value.length;
+        existingFiles.value.push(file.name);
+        previewImages.value.push(null);
+        loading.value.push(true);
+
+        try {
+            const result = await useImageCompression(file, productImageSize);
+            if (result) {
+                const { compressedImage, preview } = result;
+                previewImages.value[tempIndex] = preview;
+                images[tempIndex] = compressedImage;
+            } else {
+                console.warn(`Skipping file: ${file.name}`);
+                previewImages.value.splice(tempIndex, 1);
+                loading.value.splice(tempIndex, 1);
+            }
+        } finally {
+            loading.value[tempIndex] = false;
         }
     }
+    event.target.value = "";
 };
 
 const removeImage = (index) => {
+    existingFiles.value.splice(index, 1);
     previewImages.value.splice(index, 1);
-    formData = new FormData();
-    previewImages.value.forEach((_, i) => {
-        formData.append("images[]", previewImages.value[i]);
-    });
+    loading.value.splice(index, 1);
+    images.splice(index, 1);
 };
 
-watch(send, (val) => {
-    if (val) {
-        console.log('sending');
+watch(step, (val) => {
+    if (val === 3) {
+        console.log("sending");
         $emit("add-images", images);
     }
 });
 </script>
-
 <template>
     <div>
         <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
@@ -75,23 +89,13 @@ watch(send, (val) => {
                     </div>
                 </label>
             </div>
-
-            <div
-                v-for="(image, index) in previewImages"
-                :key="index"
-                class="relative group"
-            >
-                <img
-                    :src="image"
-                    class="w-full aspect-[1/1] object-cover rounded-xl"
-                ></img>
-                <button
-                    @click="removeImage(index)"
-                    class="absolute top-2 right-2 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition"
-                >
-                    ✕
-                </button>
-            </div>
+            <template v-for="(image, index) in previewImages" :key="index">
+                <ProductImage
+                    :image="image"
+                    :loading="loading[index]"
+                    @remove-image="removeImage(index)"
+                />
+            </template>
         </div>
     </div>
 </template>

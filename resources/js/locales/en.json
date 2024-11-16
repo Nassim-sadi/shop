@@ -134,6 +134,8 @@
         "no": "No",
         "for": "for",
         "cancel": "Cancel",
+        "back": "Back",
+        "next": "Next",
         "save": "Save",
         "create": "Create",
         "edit": "Edit",
@@ -297,7 +299,8 @@
         "existing_role_name": "An existing role already has this name",
         "existing_role_color": "An existing role already has this color",
         "uniqueValue": "Value already exists",
-        "atLeastTwoValues": "At least two values are required"
+        "atLeastTwoValues": "At least two values are required",
+        "file_already_exist": "File already exists"
     },
     "categories": {
         "title": "category | categories",
