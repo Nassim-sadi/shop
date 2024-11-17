@@ -16,6 +16,7 @@ import {
     productImageSize,
     productThumbnailImageSize,
 } from "@/constants/imagesSize/Index";
+
 const activeStep = ref(1);
 
 const confirm = useConfirm();
@@ -39,6 +40,7 @@ const props = defineProps({
     progress: {
         type: Number,
         required: false,
+        default: 0,
     },
 });
 
@@ -195,7 +197,7 @@ const isEdited = computed(() => {
             featured: 0,
             category: null,
             status: 0,
-        }) || previewImage !== productPlaceHolder
+        }) || previewImage.value !== productPlaceHolder
     );
 });
 
@@ -235,14 +237,14 @@ watch(
         position="right"
         @update:visible="$emit('update:isOpen', $event)"
         :dismissable="false"
-        :showCloseIcon="false"
+        :show-close-icon="false"
         block-scroll
         class="large-drawer"
     >
         <Stepper v-model:value="activeStep" :linear="true">
             <StepItem :value="1">
                 <Step>{{ $t("products.p_thumbnail") }}</Step>
-                <StepPanel v-slot="{ activateCallback }">
+                <StepPanel>
                     <div
                         class="cursor-pointer mb-5 w-1/2 aspect-[1/1] rounded-xl overflow-hidden relative"
                     >
@@ -324,8 +326,8 @@ watch(
                                 aria-labelledby="status"
                                 fluid
                                 :options="statusOptions"
-                                optionLabel="name"
-                                optionValue="value"
+                                option-label="name"
+                                option-value="value"
                                 class="toggleStatusBtn"
                             />
                         </div>
@@ -392,8 +394,8 @@ watch(
                                 aria-labelledby="featured"
                                 fluid
                                 :options="featuredOptions"
-                                optionLabel="name"
-                                optionValue="value"
+                                option-label="name"
+                                option-value="value"
                                 class="toggleStatusBtn"
                             />
                         </div>
@@ -407,7 +409,7 @@ watch(
                                 v-model="product.category"
                                 :options="categories"
                                 filter
-                                optionLabel="name"
+                                option-label="name"
                                 :placeholder="$t('products.categoryQuery')"
                                 data-key="id"
                                 fluid
@@ -516,6 +518,7 @@ watch(
                 </StepPanel>
             </StepItem>
         </Stepper>
+
         <template #footer>
             <div class="flex justify-end gap-5">
                 <Button
