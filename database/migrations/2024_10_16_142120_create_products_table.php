@@ -20,6 +20,8 @@ return new class extends Migration
             $table->text('long_description', 2000);
             $table->boolean('status')->default(false);
             $table->decimal('base_price', 8, 2);
+            $table->integer('base_quantity')->default(0);
+            $table->decimal('listing_price', 8, 2);
             $table->boolean('featured')->default(false);
             $table->string('thumbnail_image_path')->nullable();
             $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();

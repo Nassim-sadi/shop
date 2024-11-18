@@ -1,5 +1,5 @@
 <script setup>
-import { ref, watch, toRefs } from "vue";
+import { ref, computed } from "vue";
 import { useImageCompression } from "@/utils/useImageCompression";
 import { productImageSize } from "@/constants/imagesSize/Index";
 import { $t } from "@/plugins/i18n";
@@ -8,16 +8,19 @@ import ProductImage from "./ProductImage.vue";
 const previewImages = ref([]);
 const loading = ref([]); // Array to track loading state for each image
 const existingFiles = ref([]);
-const images = [];
 const props = defineProps({
-    step: {
-        type: Number,
-        required: true,
+    modelValue: {
+        type: Array,
+        default: () => [],
     },
 });
 
-const { step } = toRefs(props);
-const $emit = defineEmits(["add-images"]);
+const $emit = defineEmits(["update:modelValue"]);
+
+const images = computed({
+    get: () => props.modelValue,
+    set: (val) => $emit("update:modelValue", val),
+});
 
 const updatePicture = async (event) => {
     const files = Array.from(event.target.files);
@@ -33,7 +36,7 @@ const updatePicture = async (event) => {
         }
         const tempIndex = previewImages.value.length;
         existingFiles.value.push(file.name);
-        previewImages.value.push(null);
+        previewImages.value.push("null");
         loading.value.push(true);
 
         try {
@@ -41,7 +44,7 @@ const updatePicture = async (event) => {
             if (result) {
                 const { compressedImage, preview } = result;
                 previewImages.value[tempIndex] = preview;
-                images[tempIndex] = compressedImage;
+                images.value[tempIndex] = compressedImage;
             } else {
                 console.warn(`Skipping file: ${file.name}`);
                 previewImages.value.splice(tempIndex, 1);
@@ -58,15 +61,8 @@ const removeImage = (index) => {
     existingFiles.value.splice(index, 1);
     previewImages.value.splice(index, 1);
     loading.value.splice(index, 1);
-    images.splice(index, 1);
+    images.value.splice(index, 1);
 };
-
-watch(step, (val) => {
-    if (val === 3) {
-        console.log("sending");
-        $emit("add-images", images);
-    }
-});
 </script>
 <template>
     <div>

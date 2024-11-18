@@ -12,13 +12,10 @@ import { useConfirm } from "primevue/useconfirm";
 import { computed, ref, toRefs, watch } from "vue";
 import { useImageCompression } from "@/utils/useImageCompression";
 import productPlaceHolder from "@/assets/images/placeholder.webp";
-import {
-    productImageSize,
-    productThumbnailImageSize,
-} from "@/constants/imagesSize/Index";
+import { productThumbnailImageSize } from "@/constants/imagesSize/Index";
 
 const activeStep = ref(1);
-
+const previewImage = ref(productPlaceHolder);
 const confirm = useConfirm();
 const props = defineProps({
     isOpen: {
@@ -46,7 +43,7 @@ const props = defineProps({
 
 const $emit = defineEmits(["update:isOpen", "createItem"]);
 
-const { isOpen, loading, categories, progress } = toRefs(props);
+const { isOpen, loading, categories } = toRefs(props);
 
 const statusOptions = [
     {
@@ -122,14 +119,6 @@ const rules = computed(() => ({
 
 const v$ = useVuelidate(rules, product);
 
-const createItem = () => {
-    v$.value.$touch();
-    if (v$.value.$invalid) return;
-    console.log("status value: ", product.value.status);
-    $emit("createItem", product.value);
-    v$.value.$reset();
-};
-
 const imageFile = ref(null);
 
 const imageRules = computed(() => ({
@@ -140,9 +129,17 @@ const imageRules = computed(() => ({
 
 const imageV$ = useVuelidate(imageRules, { imageFile });
 
-let formData = new FormData();
-const previewImage = ref(productPlaceHolder);
+const imagesRules = computed(() => ({
+    images: {
+        required,
+        minLength: minLength(1),
+    },
+}));
+const images = ref([]);
 
+const imagesV$ = useVuelidate(imagesRules, { images: images });
+
+let formData = new FormData();
 const updatePicture = async (event, size) => {
     const { compressedImage, preview, error } = await useImageCompression(
         event.target.files[0],
@@ -152,13 +149,10 @@ const updatePicture = async (event, size) => {
         console.log(error);
         return;
     }
-    console.log("success");
 
     previewImage.value = preview;
-    formData.append("thumbnail_image_path", compressedImage);
+    imageFile.value = compressedImage;
 };
-
-const send = ref(false);
 
 const cancelConfirm = () => {
     if (isEdited.value) {
@@ -201,14 +195,6 @@ const isEdited = computed(() => {
     );
 });
 
-const addProductImages = (val) => {
-    val.forEach((image) => {
-        console.log(image);
-        formData.append("images[]", image);
-    });
-    send.value = false;
-};
-
 watch(
     () => isOpen.value,
     (val) => {
@@ -228,6 +214,47 @@ watch(
         }
     },
 );
+
+const createItem = () => {
+    v$.value.$touch();
+    if (v$.value.$invalid) return;
+    images.value.forEach((image) => {
+        formData.append("images[]", image);
+    });
+    formData.append("thumbnail_image_path", imageFile.value);
+    formData.append("name", product.value.name);
+    formData.append("description", product.value.description);
+    formData.append("long_description", product.value.long_description);
+    formData.append("base_price", product.value.base_price);
+    formData.append("listing_price", product.value.listing_price);
+    formData.append("base_quantity", product.value.base_quantity);
+    formData.append("featured", product.value.featured);
+    formData.append("category_id", product.value.category.id);
+    formData.append("status", product.value.status);
+
+    $emit("createItem", formData);
+
+    v$.value.$reset();
+};
+
+const nextStep = () => {
+    if (activeStep.value == 1) {
+        imageV$.value.$touch();
+        if (imageV$.value.$invalid) return;
+    }
+
+    if (activeStep.value == 2) {
+        imagesV$.value.$touch();
+        if (imagesV$.value.$invalid) return;
+    }
+    activeStep.value++;
+};
+
+const prevStep = () => {
+    if (activeStep.value > 1) {
+        activeStep.value--;
+    }
+};
 </script>
 
 <template>
@@ -241,7 +268,19 @@ watch(
         block-scroll
         class="large-drawer"
     >
-        <Stepper v-model:value="activeStep" :linear="true">
+        <div
+            class="h-full w-full flex items-center justify-center"
+            v-if="loading"
+        >
+            <ProgressBar :value="progress" v-if="progress > 0"></ProgressBar>
+            <ProgressSpinner
+                stroke-width="8"
+                fill="transparent"
+                animation-duration=".5s"
+                aria-label="Custom ProgressSpinner"
+            />
+        </div>
+        <Stepper v-model:value="activeStep" :linear="true" v-if="!loading">
             <StepItem :value="1">
                 <Step>{{ $t("products.p_thumbnail") }}</Step>
                 <StepPanel>
@@ -279,15 +318,21 @@ watch(
                     </div>
                 </StepPanel>
             </StepItem>
+
             <StepItem :value="2">
                 <Step>{{ $t("products.p_images") }}</Step>
                 <StepPanel>
-                    <ImageInput
-                        @add-images="addProductImages"
-                        :step="activeStep"
-                    />
+                    <ImageInput v-model="images" />
+                    <div
+                        class="text-red-500 mb-5"
+                        v-for="error of imagesV$.images.$errors"
+                        :key="error.$uid"
+                    >
+                        <Message severity="error">{{ error.$message }}</Message>
+                    </div>
                 </StepPanel>
             </StepItem>
+
             <StepItem :value="3">
                 <Step>{{ $t("products.p_info") }}</Step>
                 <StepPanel>
@@ -372,7 +417,6 @@ watch(
                             />
 
                             <div
-                                class="text-red-500"
                                 v-for="error of v$.long_description.$errors"
                                 :key="error.$uid"
                             >
@@ -499,7 +543,7 @@ watch(
                                 :aria-labelledby="$t('products.listing_price')"
                                 id="listing_price"
                                 type="number"
-                                v-model="product.base_price"
+                                v-model="product.listing_price"
                                 fluid
                                 class="mb-5"
                             />
@@ -532,13 +576,13 @@ watch(
                 <Button
                     :label="$t('common.back')"
                     severity="secondary"
-                    @click="activeStep--"
+                    @click="prevStep"
                     v-if="activeStep !== 1"
                 />
 
                 <Button
                     :label="$t('common.next')"
-                    @click="activeStep++"
+                    @click="nextStep"
                     v-if="activeStep !== 3"
                 />
 

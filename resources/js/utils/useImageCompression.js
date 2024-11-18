@@ -45,8 +45,11 @@ export async function useImageCompression(file, maxSizeMB = 2) {
     };
 
     try {
-        const compressedImage = await imageCompression(file, options);
-        const preview = URL.createObjectURL(compressedImage);
+        let imageFile = await imageCompression(file, options);
+        const preview = URL.createObjectURL(imageFile);
+        const compressedImage = new File([imageFile], file.name.split(".")[0], {
+            type: imageFile.type,
+        });
         return { compressedImage, preview };
     } catch (error) {
         console.error("Image compression failed:", error);

@@ -267,11 +267,35 @@ const loadingStates = ref({}); // Holds loading state for each user
 const setLoadingState = (userId, isLoading) => {
     loadingStates.value[userId] = isLoading;
 };
-
+const loadingCreate = ref(false);
 const createItem = (val) => {
-    console.log("Creating");
-
     console.log(val);
+    loadingCreate.value = true;
+    return new Promise((resolve, reject) => {
+        axios
+            .post("api/admin/products/create", val, {
+                onUploadProgress: (progressEvent) => {
+                    uploadPercentage.value = Math.round(
+                        (progressEvent.loaded * 100) / progressEvent.total,
+                    );
+                },
+            })
+            .then((res) => {
+                console.log(res.data);
+                products.value.push(res.data);
+                isCreateOpen.value = false;
+                emitter.emit("toast", {
+                    summary: $t("status.success.title"),
+                    message: $t("status.success.product.create"),
+                    severity: "success",
+                });
+                resolve(res);
+            })
+            .catch((err) => {
+                console.log(err);
+                reject(err);
+            });
+    });
 };
 
 const getCategories = async () => {
@@ -289,10 +313,10 @@ const getCategories = async () => {
             });
     });
 };
-import router from "@/router/Index";
-const goToProductVariants = (productId) => {
-    router.push({ name: "ProductVariants", params: { id: productId } });
-};
+// import router from "@/router/Index";
+// const goToProductVariants = (productId) => {
+//     router.push({ name: "ProductVariants", params: { id: productId } });
+// };
 
 onMounted(async () => {
     await getCategories();
@@ -314,7 +338,8 @@ onMounted(async () => {
             @create-item="createItem"
             :options="productOptions"
             :categories="categories"
-            :loading="loading"
+            :loading="loadingCreate"
+            :progress="uploadPercentage"
         />
 
         <Edit

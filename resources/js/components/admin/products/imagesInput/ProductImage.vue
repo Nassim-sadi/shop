@@ -1,4 +1,6 @@
 <script setup>
+import { toRefs } from "vue";
+
 const props = defineProps({
     image: {
         type: String || null,
@@ -9,6 +11,8 @@ const props = defineProps({
         required: true,
     },
 });
+
+const { image, loading } = toRefs(props);
 
 const emit = defineEmits(["removeImage"]);
 const removeImage = () => {
@@ -22,9 +26,9 @@ const removeImage = () => {
             class="absolute inset-0 flex items-center justify-center bg-white bg-opacity-50"
         >
             <ProgressSpinner
-                strokeWidth="8"
+                stroke-width="8"
                 fill="transparent"
-                animationDuration=".5s"
+                animation-duration=".5s"
                 aria-label="Custom ProgressSpinner"
             />
         </div>

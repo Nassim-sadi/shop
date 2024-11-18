@@ -8,6 +8,8 @@ use App\Models\Product;
 use App\Models\ProductVariant;
 use DB;
 use Illuminate\Http\Request;
+use Str;
+use App\Helpers\ImageUpload;
 
 class ProductController extends Controller
 {
@@ -44,56 +46,53 @@ class ProductController extends Controller
 
     public function create(Request $request)
     {
+        debugbar()->log($request->all());
         $this->authorize('product_create');
+        $request->validate([
+            'name' => 'required',
+            'description' => 'required|string|min:10|max:255',
+            'long_description' => 'required|string|min:10|max:2000',
+            'base_price' => 'required|numeric',
+            'listing_price' => 'required|numeric',
+            'base_quantity' => 'required|numeric',
+            'category_id' => 'required|exists:categories,id',
+            'thumbnail_image_path' => 'required|image|mimes:jpeg,png,jpg,gif,svg,webp|max:2048',
+            'status' => 'required|boolean',
+            'featured' => 'required|boolean',
+            'images' => 'required|array|min:1',
+        ]);
+
         // Start a transaction to ensure data integrity
         DB::beginTransaction();
         try {
             // Create the main product
+            $slug = Str::slug($request->name);
             $product = Product::create([
                 'name' => $request->name,
+                'slug' => $slug,
                 'description' => $request->description,
+                'long_description' => $request->long_description,
                 'base_price' => $request->base_price,
                 'base_quantity' => $request->base_quantity,
+                'listing_price' => $request->listing_price,
+                'status' => $request->status,
+                'category_id' => $request->category_id
             ]);
 
-            // Attach images to the product
-            foreach ($request->product_images as $image) {
+            // Upload the thumbnail image
+
+            $product->thumbnail_image_path = ImageUpload::uploadImage($request->file('thumbnail_image_path'), 'products/' . $slug);
+            $product->save();
+
+
+            foreach ($request->file('images') as $image) {
+                $imagePath = ImageUpload::uploadImage($image, 'products/' . $product->slug);
                 $product->images()->create([
-                    'url' => $image['url'],
-                    'alt_text' => $image['alt_text'] ?? '',
+                    'url' => "/storage/images/products/{$product->slug}/$imagePath",
+                    'alt_text' => $image->getClientOriginalName() ?? '',
                 ]);
             }
-
-            // Process each variation
-            foreach ($request->variations as $variation) {
-                // Create the variant with its specific SKU, price, quantity, etc.
-                $variant = ProductVariant::create([
-                    'product_id' => $product->id,
-                    'sku' => $variation['sku'],
-                    'price' => $variation['price'],
-                    'quantity' => $variation['quantity'],
-                    'status' => $variation['status'] ?? 'active',
-                ]);
-
-                // Attach images to the variant (optional)
-                if (isset($variation['images'])) {
-                    foreach ($variation['images'] as $variantImage) {
-                        $variant->images()->create([
-                            'url' => $variantImage['url'],
-                            'alt_text' => $variantImage['alt_text'] ?? '',
-                        ]);
-                    }
-                }
-
-                // Attach global option values (e.g., size, color) to the variant
-                foreach ($variation['option_values'] as $valueId) {
-                    $variant->optionValues()->attach($valueId);
-                }
-            }
-
-            // Commit transaction if everything went well
             DB::commit();
-
             return response()->json(['message' => 'Product and variants with options and images created successfully']);
         } catch (\Exception $e) {
             // Rollback transaction on any error
