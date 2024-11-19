@@ -17,4 +17,10 @@ class ProductImage extends Model
     {
         return $this->morphTo();
     }
+
+    public function getUrlAttribute($value)
+    {
+        return asset($value);
+        // return asset("storage/images/products/{$this->imageable->slug}/$value");
+    }
 }

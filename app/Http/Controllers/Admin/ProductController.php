@@ -10,6 +10,7 @@ use DB;
 use Illuminate\Http\Request;
 use Str;
 use App\Helpers\ImageUpload;
+use App\Http\Resources\Admin\Product\ProductResource;
 
 class ProductController extends Controller
 {
@@ -93,7 +94,7 @@ class ProductController extends Controller
                 ]);
             }
             DB::commit();
-            return response()->json(['message' => 'Product and variants with options and images created successfully']);
+            return response()->json(['message' => 'Product created successfully', 'product' =>  new ProductResource($product)]);
         } catch (\Exception $e) {
             // Rollback transaction on any error
             DB::rollback();

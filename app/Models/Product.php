@@ -22,8 +22,6 @@ class Product extends Model
         'status',
         'featured',
         'thumbnail_image_path',
-        'created_by',
-        'updated_by',
     ];
 
     public function variants()
@@ -39,5 +37,10 @@ class Product extends Model
     public function images()
     {
         return $this->morphMany(ProductImage::class, 'imageable');
+    }
+
+    public function getThumbnailImagePAthAttribute($value)
+    {
+        return asset("storage/images/products/{$this->slug}/$value");
     }
 }

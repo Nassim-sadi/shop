@@ -24,8 +24,6 @@ return new class extends Migration
             $table->decimal('listing_price', 8, 2);
             $table->boolean('featured')->default(false);
             $table->string('thumbnail_image_path')->nullable();
-            $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
-            $table->foreignId('updated_by')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamps();
         });
     }

@@ -22,7 +22,7 @@ const start_date = ref(new Date());
 const end_date = ref(new Date());
 const current = ref({});
 const isDetailsOpen = ref(false);
-const isCreateOpen = ref(true);
+const isCreateOpen = ref(false);
 const isEditOpen = ref(false);
 const keyword = ref("");
 const status = ref(null);
@@ -111,8 +111,7 @@ const getProducts = async () => {
             })
             .then((res) => {
                 console.log(res.data);
-
-                // products.value = res.data.data;
+                products.value = res.data.data;
                 total.value = res.data.total;
                 currentPage.value = res.data.current_page;
                 per_page.value = res.data.per_page;
@@ -282,7 +281,7 @@ const createItem = (val) => {
             })
             .then((res) => {
                 console.log(res.data);
-                products.value.push(res.data);
+                products.value.push(res.data.product);
                 isCreateOpen.value = false;
                 emitter.emit("toast", {
                     summary: $t("status.success.title"),
@@ -348,6 +347,10 @@ onMounted(async () => {
             @edit-item="editItem"
         ></Edit>
 
+        <pre>
+            {{ products[0] }}
+        </pre>
+
         <DataTable
             :value="products"
             table-style="min-width: 50rem"
@@ -373,7 +376,7 @@ onMounted(async () => {
                     <h1
                         class="text-xl font-bold mb-4 text-surface-900 dark:text-surface-0"
                     >
-                        {{ $t("user.page") }}
+                        {{ $t("products.page") }}
                     </h1>
 
                     <Button
@@ -469,24 +472,26 @@ onMounted(async () => {
                 </div>
             </template>
 
-            <Column :header="$t('user.name')">
+            <Column :header="$t('products.name')">
                 <template #body="slotProps">
                     <div class="flex items-center gap-2 font-semibold">
-                        <Avatar
-                            shape="circle"
-                            size="large"
-                            :image="slotProps.data.image || placeholder"
-                        />
-                        {{
-                            slotProps.data.firstname +
-                            " " +
-                            slotProps.data.lastname
-                        }}
+                        {{ slotProps.data.name }}
                     </div>
                 </template>
             </Column>
 
-            <Column :header="$t('user.status')">
+            <Column :header="$t('products.thumbnail')">
+                <template #body="slotProps">
+                    <div class="flex items-center gap-2 font-semibold">
+                        <img
+                            :src="slotProps.data.thumbnail_image_path"
+                            class="admin-product_img"
+                        />
+                    </div>
+                </template>
+            </Column>
+
+            <Column :header="$t('products.status')">
                 <template #body="slotProps">
                     <span
                         :class="
@@ -505,13 +510,25 @@ onMounted(async () => {
                 </template>
             </Column>
 
+            <Column :header="$t('products.featured')">
+                <template #body="slotProps">
+                    <span class="font-bold">
+                        {{
+                            slotProps.data.featured
+                                ? $t("products.featured")
+                                : $t("products.not_featured")
+                        }}
+                    </span>
+                </template>
+            </Column>
+
             <Column :header="$t('common.created_at')" field="created_at">
             </Column>
 
             <Column :header="$t('common.updated_at')" field="updated_at">
             </Column>
 
-            <Column :header="$t('activities.action')">
+            <!-- <Column :header="$t('activities.action')">
                 <template #body="slotProps">
                     <Button
                         icon="ti ti-dots-vertical"
@@ -528,7 +545,7 @@ onMounted(async () => {
                     >
                     </Button>
                 </template>
-            </Column>
+            </Column> -->
 
             <template #footer>
                 {{ $t("activities.total") }}
@@ -663,5 +680,12 @@ onMounted(async () => {
     margin: 0 !important;
     width: 100%;
     justify-content: flex-start;
+}
+
+.admin-product_img {
+    width: 5rem;
+    height: auto;
+    aspect-ratio: 1/1;
+    border-radius: 0.25rem;
 }
 </style>
