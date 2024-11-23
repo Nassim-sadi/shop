@@ -1,5 +1,4 @@
 <script setup>
-import placeholder from "@/assets/images/avatar/profile-placeholder.png";
 import { ability } from "@/plugins/ability";
 import axios from "@/plugins/axios";
 import emitter from "@/plugins/emitter";
@@ -81,6 +80,25 @@ const getProductOptions = async () => {
     });
 };
 
+const getProductImages = async () => {
+    loadingStates.value[current.value.id] = true;
+    return new Promise((resolve, reject) => {
+        axios
+            .get(`api/admin/products/${current.value.id}/images`)
+            .then((res) => {
+                current.value.images = res.data.images;
+                resolve(res.data);
+            })
+            .catch((err) => {
+                console.log(err);
+                reject(err);
+            })
+            .finally(() => {
+                loadingStates.value[current.value.id] = false;
+            });
+    });
+};
+
 // const setRoleOptions = (data) => {
 //     roleOptions.value = [
 //         ...roleOptions.value,
@@ -146,6 +164,7 @@ const onPageChange = (event) => {
 };
 
 const openDetails = () => {
+    getProductImages();
     isDetailsOpen.value = true;
 };
 
@@ -330,6 +349,7 @@ onMounted(async () => {
         <Details
             :current="current ? current : {}"
             v-model:is-open="isDetailsOpen"
+            :loading="loadingStates[current.id]"
         />
 
         <Create
@@ -346,10 +366,6 @@ onMounted(async () => {
             v-model:is-open="isEditOpen"
             @edit-item="editItem"
         ></Edit>
-
-        <pre>
-            {{ products[0] }}
-        </pre>
 
         <DataTable
             :value="products"
@@ -528,7 +544,7 @@ onMounted(async () => {
             <Column :header="$t('common.updated_at')" field="updated_at">
             </Column>
 
-            <!-- <Column :header="$t('activities.action')">
+            <Column :header="$t('activities.action')">
                 <template #body="slotProps">
                     <Button
                         icon="ti ti-dots-vertical"
@@ -545,7 +561,7 @@ onMounted(async () => {
                     >
                     </Button>
                 </template>
-            </Column> -->
+            </Column>
 
             <template #footer>
                 {{ $t("activities.total") }}
@@ -663,6 +679,10 @@ onMounted(async () => {
                 </template>
             </div>
         </Popover>
+
+        <pre>
+            {{ products[0] }}
+        </pre>
     </div>
 </template>
 

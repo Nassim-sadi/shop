@@ -73,6 +73,7 @@ Route::middleware(["auth:sanctum"])->group(function () {
 
     Route::prefix('products')->controller(ProductController::class)->group(function () {
         Route::get('/', 'get');
+        Route::get('/{id}/images', 'getImages');
         Route::post('/create', 'create');
         // Route::post('/update', 'update');
         // Route::patch('/change-status', 'changeStatus');

@@ -95,6 +95,13 @@ body {
     }
 }
 
+.medium-drawer {
+    width: 35rem !important;
+    @media screen and (max-width: 576px) {
+        width: 100% !important;
+    }
+}
+
 .large-drawer{
     width: 50rem !important;
     @media screen and (max-width: 576px) {
@@ -178,3 +185,4 @@ label{
         transform: translateX(-20px);
     }
 }
+

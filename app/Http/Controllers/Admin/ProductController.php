@@ -11,6 +11,8 @@ use Illuminate\Http\Request;
 use Str;
 use App\Helpers\ImageUpload;
 use App\Http\Resources\Admin\Product\ProductResource;
+use App\Jobs\ActivityHistoryJob;
+use UA;
 
 class ProductController extends Controller
 {
@@ -94,11 +96,31 @@ class ProductController extends Controller
                 ]);
             }
             DB::commit();
+
+            $agent = UA::parse($request->server('HTTP_USER_AGENT'));
+            ActivityHistoryJob::dispatch(
+                data: [
+                    'model' => 'products',
+                    'action' => 'create',
+                    'data' => ['product' =>  $product],
+                    'user_id' => $request->user()->id,
+                ],
+                platform: $agent->os->family,
+                browser: $agent->ua->family,
+            );
             return response()->json(['message' => 'Product created successfully', 'product' =>  new ProductResource($product)]);
         } catch (\Exception $e) {
             // Rollback transaction on any error
             DB::rollback();
             return response()->json(['error' => 'Failed to create product: ' . $e->getMessage()], 500);
         }
+    }
+
+    public function getImages(Request $request, $id)
+    {
+        $this->authorize('product_view');
+        $product = Product::findOrFail($id);
+        $product->load('images');
+        return response()->json(['id' => $product->id, 'images' => $product->images]);
     }
 }

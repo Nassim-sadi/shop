@@ -8,7 +8,13 @@ import { defineConfig } from "vite";
 export default defineConfig({
     base: "./",
     plugins: [
-        vue(),
+        vue({
+            template: {
+                compilerOptions: {
+                    isCustomElement: (tag) => tag.startsWith("swiper"),
+                },
+            },
+        }),
         Components({
             resolvers: [PrimeVueResolver()],
         }),
