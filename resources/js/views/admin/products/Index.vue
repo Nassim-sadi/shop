@@ -173,6 +173,7 @@ const openCreate = () => {
 };
 
 const openEdit = () => {
+    getProductImages();
     isEditOpen.value = true;
 };
 
@@ -243,7 +244,9 @@ const deleteItem = () => {
     });
 };
 
+const loadingEdit = ref(false);
 const editItem = (val) => {
+    loadingEdit.value = true;
     return new Promise((resolve, reject) => {
         axios
             .post("api/admin/products/update", val, {
@@ -268,6 +271,9 @@ const editItem = (val) => {
                 uploadPercentage.value = 0;
                 console.log(error);
                 reject(error);
+            })
+            .finally(() => {
+                loadingEdit.value = false;
             });
     });
 };
@@ -312,6 +318,9 @@ const createItem = (val) => {
             .catch((err) => {
                 console.log(err);
                 reject(err);
+            })
+            .finally(() => {
+                loadingCreate.value = false;
             });
     });
 };
@@ -365,6 +374,11 @@ onMounted(async () => {
             :current="current"
             v-model:is-open="isEditOpen"
             @edit-item="editItem"
+            :options="productOptions"
+            :categories="categories"
+            :loading="loadingEdit"
+            :loading-images="loadingStates[current.id]"
+            :progress="uploadPercentage"
         ></Edit>
 
         <DataTable
@@ -511,14 +525,14 @@ onMounted(async () => {
                 <template #body="slotProps">
                     <span
                         :class="
-                            slotProps.data.status
+                            slotProps.data.status == 1
                                 ? 'text-green-500'
                                 : 'text-red-500'
                         "
                         class="font-bold"
                     >
                         {{
-                            slotProps.data.status
+                            slotProps.data.status == 1
                                 ? $t("common.active")
                                 : $t("common.inactive")
                         }}
@@ -530,7 +544,7 @@ onMounted(async () => {
                 <template #body="slotProps">
                     <span class="font-bold">
                         {{
-                            slotProps.data.featured
+                            slotProps.data.featured == 1
                                 ? $t("products.featured")
                                 : $t("products.not_featured")
                         }}

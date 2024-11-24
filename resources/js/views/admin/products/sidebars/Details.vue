@@ -1,6 +1,6 @@
 <script setup>
 import { $t } from "@/plugins/i18n";
-import { toRefs } from "vue";
+import { ref, toRefs } from "vue";
 const props = defineProps({
     current: {
         required: true,
@@ -21,8 +21,10 @@ const $emit = defineEmits(["update:isOpen"]);
 const { isOpen, current } = toRefs(props);
 import { Swiper, SwiperSlide } from "swiper/vue";
 import { Navigation, Pagination } from "swiper/modules";
+
+const currentIndex = ref(0);
 const onSwiper = (swiper) => {
-    console.log(swiper);
+    currentIndex.value = swiper.activeIndex;
 };
 </script>
 
@@ -32,61 +34,75 @@ const onSwiper = (swiper) => {
         :header="$t('products.details')"
         position="right"
         @update:visible="$emit('update:isOpen', $event)"
-        class="medium-drawer"
+        class="small-drawer"
         block-scroll
     >
-        <Swiper
-            :slides-per-view="1"
-            :space-between="10"
-            @swiper="onSwiper"
-            :modules="[Navigation, Pagination]"
-            :pagination="{
-                el: '.swiper-pagination',
-                clickable: true,
-                type: 'bullets',
-                bulletActiveClass: 'swiper-pagination-bullet-active',
-            }"
-            :navigation="{
-                nextEl: '.swiper-button-next',
-                prevEl: '.swiper-button-prev',
-                clickable: true,
-            }"
-            class="mySwiper"
-        >
-            <Swiper-slide v-for="item in current.images" :key="item.id">
-                <img :src="item.url" class="w-full aspect-square bg-cover" />
-            </Swiper-slide>
-            <div class="swiper-controller">
-                <Button
-                    class="swiper-button-prev"
-                    icon="ti ti-chevron-left"
-                    rounded
-                ></Button>
-                <div class="swiper-pagination"></div>
-
-                <Button
-                    class="swiper-button-next"
-                    icon="ti ti-chevron-right"
-                    rounded
-                ></Button>
-            </div>
-        </Swiper>
-
         <div class="mb-4">
-            <div class="flex items-center gap-2 mt-2">
+            <p class="font-bold">{{ $t("products.thumbnail_image") }}</p>
+            <div
+                class="flex items-center gap-2 mt-2 rounded-xl overflow-hidden"
+            >
                 <img
                     :src="current.thumbnail_image_path"
                     shape="circle"
                     size="large"
+                    class="w-full object-cover"
                 />
             </div>
         </div>
 
         <div class="mb-4">
-            <p class="font-bold">{{ $t("user.status") }} :</p>
+            <p class="font-bold">{{ $t("products.name") }} :</p>
+            {{ current.name }}
+        </div>
+
+        <div class="mb-4">
+            <p class="font-bold">{{ $t("products.description") }} :</p>
+            {{ current.description }}
+        </div>
+
+        <div class="mb-4">
+            <p class="font-bold">{{ $t("products.long_description") }} :</p>
+            {{ current.long_description }}
+        </div>
+
+        <div class="mb-4">
+            <p class="font-bold">{{ $t("products.status") }} :</p>
             {{ current.status ? $t("common.active") : $t("common.inactive") }}
         </div>
 
+        <div class="mb-4">
+            <p class="font-bold">{{ $t("products.featured") }} :</p>
+            {{
+                current.featured
+                    ? $t("products.featured")
+                    : $t("products.not_featured")
+            }}
+        </div>
+
+        <div class="mb-4">
+            <p class="font-bold">{{ $t("products.base_quantity") }} :</p>
+            {{ current.base_quantity }}
+        </div>
+
+        <div class="mb-4">
+            <p class="font-bold">{{ $t("products.base_price") }} :</p>
+            {{ current.base_price }}
+        </div>
+
+        <div class="mb-4">
+            <p class="font-bold">{{ $t("products.listing_price") }} :</p>
+            {{ current.listing_price }}
+        </div>
+
+        <div class="mb-4">
+            <p class="font-bold">{{ $t("products.featured") }} :</p>
+            {{
+                current.featured
+                    ? $t("products.featured")
+                    : $t("products.not_featured")
+            }}
+        </div>
         <div class="mb-4">
             <p class="font-bold">{{ $t("common.created_at") }} :</p>
             {{ current.created_at }}
@@ -97,9 +113,48 @@ const onSwiper = (swiper) => {
             {{ current.updated_at }}
         </div>
 
-        <pre>
-            {{ current }}
-        </pre>
+        <div class="mb-4">
+            <p class="font-bold">{{ $t("products.images") }}</p>
+            <Swiper
+                :slides-per-view="1"
+                :space-between="10"
+                @swiper="onSwiper"
+                :modules="[Navigation, Pagination]"
+                :pagination="{
+                    el: '.swiper-pagination',
+                    clickable: true,
+                    type: 'bullets',
+                    bulletActiveClass: 'swiper-pagination-bullet-active',
+                }"
+                :navigation="{
+                    nextEl: '.swiper-button-next',
+                    prevEl: '.swiper-button-prev',
+                    clickable: true,
+                }"
+                class="mySwiper"
+            >
+                <SwiperSlide v-for="item in current.images" :key="item.id">
+                    <img
+                        :src="item.url"
+                        class="w-full aspect-square bg-cover"
+                    />
+                </SwiperSlide>
+                <div class="swiper-controller">
+                    <Button
+                        class="swiper-button-prev"
+                        icon="ti ti-chevron-left"
+                        rounded
+                    ></Button>
+                    <div class="swiper-pagination"></div>
+
+                    <Button
+                        class="swiper-button-next"
+                        icon="ti ti-chevron-right"
+                        rounded
+                    ></Button>
+                </div>
+            </Swiper>
+        </div>
     </Drawer>
 </template>
 

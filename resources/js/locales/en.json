@@ -355,7 +355,9 @@
         "details": "Product details",
         "create_success": "Product created successfully",
         "update_success": "Product updated successfully",
-        "delete_success": "Product deleted successfully"
+        "delete_success": "Product deleted successfully",
+        "images": "Images",
+        "thumbnail_image": "Thumbnail image"
     },
     "productOptions": {
         "title": "product option | product options",

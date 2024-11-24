@@ -1,86 +1,170 @@
 <script setup>
-import placeholder from "@/assets/images/avatar/profile-placeholder.png";
 import { $t } from "@/plugins/i18n";
-import { firstname, lastname } from "@/validators/CustomValidators";
 import useVuelidate from "@vuelidate/core";
-import imageCompression from "browser-image-compression";
+import { maxLength, required, numeric, minLength } from "@vuelidate/validators";
+import {
+    alphaSpace,
+    validateDecimalFormat,
+} from "@/validators/CustomValidators";
+import ImageInput from "@/components/admin/products/imagesInput/Index.vue";
 import isEqual from "lodash.isequal";
 import { useConfirm } from "primevue/useconfirm";
 import { computed, ref, toRefs, watch } from "vue";
-const confirm = useConfirm();
+import { useImageCompression } from "@/utils/useImageCompression";
+import productPlaceHolder from "@/assets/images/placeholder.webp";
+import { productThumbnailImageSize } from "@/constants/imagesSize/Index";
 
+const activeStep = ref(1);
+const previewImage = ref(productPlaceHolder);
+const confirm = useConfirm();
 const props = defineProps({
     current: {
-        type: Object,
         required: true,
+        type: Object,
     },
     isOpen: {
         type: Boolean,
         required: true,
     },
+    loading: {
+        type: Boolean,
+        required: false,
+    },
+    options: {
+        type: Array,
+        required: true,
+    },
+    categories: {
+        type: Array,
+        required: true,
+    },
     progress: {
         type: Number,
         required: false,
+        default: 0,
+    },
+    loadingImages: {
+        type: Boolean,
+        required: false,
+        default: false,
     },
 });
 
-const $emit = defineEmits(["update:isOpen", "editItem"]);
+const $emit = defineEmits(["update:isOpen", "createItem"]);
 
-const { isOpen, current } = toRefs(props);
+const { isOpen, loading, categories, options, current, loadingImages } =
+    toRefs(props);
 
-const previewImage = ref(null);
-const editedUser = ref({});
-const formData = new FormData();
+const statusOptions = [
+    {
+        name: $t("common.active"),
+        value: 1,
+    },
+    {
+        name: $t("common.inactive"),
+        value: 0,
+    },
+];
 
-const rules = {
-    firstname: firstname,
-    lastname: lastname,
-};
+const featuredOptions = [
+    {
+        name: $t("products.featured"),
+        value: 1,
+    },
+    {
+        name: $t("products.not_featured"),
+        value: 0,
+    },
+];
 
-const v$ = useVuelidate(rules, editedUser);
-
-const updateProfilePicture = async (e) => {
-    let file = await compressImage(e.target.files[0]);
-    previewImage.value = URL.createObjectURL(file);
-    const compressedImage = new File(
-        [file],
-        e.target.files[0].name.split(".")[0],
-        {
-            type: file.type,
-        },
-    );
-
-    formData.append("image", compressedImage);
-};
-
-const compressImage = async (image) => {
-    const options = {
-        maxSizeMB: 2,
-        maxWidthOrHeight: 1000,
-        useWebWorker: true,
-    };
-    return await imageCompression(image, options);
-};
-
-const isEdited = computed(() => {
-    return !(
-        isEqual(editedUser.value, current.value) &&
-        previewImage.value === current.value.image
-    );
+const edited = ref({
+    name: "",
+    description: "",
+    long_description: "",
+    base_price: "",
+    listing_price: "",
+    base_quantity: "",
+    featured: 0,
+    category: null,
+    status: 0,
 });
 
-const updateItem = () => {
-    v$.value.$touch();
-    if (!v$.value.$invalid && isEdited.value) {
-        formData.append("id", current.value.id);
-        formData.append("firstname", editedUser.value.firstname);
-        formData.append("lastname", editedUser.value.lastname);
-        $emit("editItem", formData);
-        v$.value.$reset();
+const rules = computed(() => ({
+    name: {
+        required,
+        alphaSpace,
+        maxLength: maxLength(255),
+        minLength: minLength(3),
+    },
+    description: {
+        alphaSpace,
+        required,
+        maxLength: maxLength(255),
+        minLength: minLength(10),
+    },
+    long_description: {
+        required,
+        alphaSpace,
+        maxLength: maxLength(2000),
+        minLength: minLength(10),
+    },
+    base_price: {
+        required,
+        numeric,
+        validateDecimalFormat,
+    },
+    listing_price: {
+        required,
+        numeric,
+        validateDecimalFormat,
+    },
+    base_quantity: {
+        numeric,
+        required,
+    },
+    category: {
+        required,
+    },
+}));
+
+const v$ = useVuelidate(rules, edited);
+
+const imageFile = ref(null);
+
+const imageRules = computed(() => ({
+    imageFile: {
+        required,
+    },
+}));
+
+const imageV$ = useVuelidate(imageRules, { imageFile });
+
+const imagesRules = computed(() => ({
+    images: {
+        required,
+        minLength: minLength(1),
+    },
+}));
+const images = ref([]);
+
+const imagesV$ = useVuelidate(imagesRules, { images: images });
+
+let formData = new FormData();
+const updatePicture = async (event, size) => {
+    const { compressedImage, preview, error } = await useImageCompression(
+        event.target.files[0],
+        size,
+    );
+    if (error) {
+        console.log(error);
+        return;
     }
+
+    previewImage.value = preview;
+    imageFile.value = compressedImage;
 };
 
-const cancelEdit = () => {
+const cancelConfirm = () => {
     if (isEdited.value) {
         confirm.require({
             header: $t("cancel.edit"),
@@ -105,15 +189,93 @@ const cancelEdit = () => {
     }
 };
 
+const isEdited = computed(() => {
+    return (
+        !isEqual(edited.value, {
+            name: "",
+            description: "",
+            long_description: "",
+            base_price: "",
+            listing_price: "",
+            base_quantity: "",
+            featured: 0,
+            category: null,
+            status: 0,
+        }) || previewImage.value !== productPlaceHolder
+    );
+});
+
+const createItem = () => {
+    v$.value.$touch();
+    if (v$.value.$invalid) return;
+    images.value.forEach((image) => {
+        formData.append("images[]", image);
+    });
+    if (imageFile.value !== current.value.thumbnail_image_path) {
+        formData.append("thumbnail_image_path", imageFile.value);
+    }
+
+    formData.append("name", edited.value.name);
+    formData.append("description", edited.value.description);
+    formData.append("long_description", edited.value.long_description);
+    formData.append("base_price", edited.value.base_price);
+    formData.append("listing_price", edited.value.listing_price);
+    formData.append("base_quantity", edited.value.base_quantity);
+    formData.append("featured", edited.value.featured);
+    formData.append("category_id", edited.value.category.id);
+    formData.append("status", edited.value.status);
+
+    $emit("createItem", formData);
+
+    v$.value.$reset();
+};
+
+const nextStep = () => {
+    if (activeStep.value == 1) {
+        imageV$.value.$touch();
+        if (imageV$.value.$invalid) return;
+    }
+
+    if (activeStep.value == 2) {
+        imagesV$.value.$touch();
+        if (imagesV$.value.$invalid) return;
+    }
+    activeStep.value++;
+};
+
+const prevStep = () => {
+    if (activeStep.value > 1) {
+        activeStep.value--;
+    }
+};
+
 watch(
     () => isOpen.value,
     (val) => {
         if (val) {
-            editedUser.value = { ...current.value };
-            previewImage.value = current.value.image;
+            edited.value = JSON.parse(JSON.stringify(current.value));
+            edited.value.status = current.value.status ? 1 : 0;
+            edited.value.featured = current.value.featured ? 1 : 0;
+
+            previewImage.value = current.value.thumbnail_image_path;
+            imageFile.value = current.value.thumbnail_image_path;
+            images.value = current.value.images;
         } else {
             v$.value.$reset();
-            editedUser.value = {};
+            imagesV$.value.$reset();
+            imageV$.value.$reset();
+            edited.value = {};
+        }
+    },
+);
+
+watch(
+    () => loadingImages.value,
+    (val) => {
+        if (!val) {
+            edited.value.images = JSON.parse(
+                JSON.stringify(current.value.images),
+            );
         }
     },
 );
@@ -122,96 +284,347 @@ watch(
 <template>
     <Drawer
         :visible="isOpen"
-        header="Edit Profile"
+        :header="$t('products.create')"
         position="right"
         @update:visible="$emit('update:isOpen', $event)"
         :dismissable="false"
-        :showCloseIcon="false"
+        :show-close-icon="false"
+        block-scroll
+        class="large-drawer"
     >
-        <div class="flex flex-col min-h-full">
-            <div
-                class="cursor-pointer mb-10 w-full aspect-[1/0.75] rounded-xl overflow-hidden relative"
-            >
-                <label
-                    for="image"
-                    class="w-full absolute top-0 right-0 left-0 bottom-0"
-                >
-                    <input
-                        type="file"
-                        id="image"
-                        @change="updateProfilePicture"
-                        accept="image/*"
-                        class="hidden"
-                    />
-                    <img
-                        :src="previewImage || placeholder"
-                        class="w-full object-cover !h-full"
-                    />
-                </label>
-                <div
-                    class="mb-5 absolute z-10 right-2 left-2 bottom-0"
-                    v-if="progress > 0"
-                >
-                    <ProgressBar :value="progress"></ProgressBar>
-                </div>
-            </div>
-
-            <label
-                for="firstname"
-                class="mb-5 text-surface-700 dark:text-surface-0"
-                >{{ $t("firstname") }}</label
-            >
-            <InputText
-                id="firstname"
-                v-model="editedUser.firstname"
-                aria-labelledby="firstname"
-                class="w-full mb-5"
+        <div
+            class="h-full w-full flex items-center justify-center"
+            v-if="loading || loadingImages"
+        >
+            <ProgressBar :value="progress" v-if="progress > 0"></ProgressBar>
+            <ProgressSpinner
+                stroke-width="8"
+                fill="transparent"
+                animation-duration=".5s"
+                aria-label="Custom ProgressSpinner"
             />
+        </div>
+        <Stepper
+            v-model:value="activeStep"
+            :linear="true"
+            v-if="!loading && !loadingImages"
+        >
+            <StepItem :value="1">
+                <Step>{{ $t("products.p_thumbnail") }}</Step>
+                <StepPanel>
+                    <div
+                        class="cursor-pointer mb-5 w-1/2 aspect-[1/1] rounded-xl overflow-hidden relative"
+                    >
+                        <label
+                            for="image"
+                            class="w-full absolute top-0 right-0 left-0 bottom-0"
+                        >
+                            <input
+                                type="file"
+                                id="image"
+                                @change="
+                                    updatePicture(
+                                        $event,
+                                        productThumbnailImageSize,
+                                    )
+                                "
+                                accept="image/*"
+                                class="hidden"
+                            />
+                            <img
+                                :src="previewImage"
+                                class="w-full object-cover !h-full"
+                            />
+                        </label>
+                    </div>
+                    <div
+                        class="text-red-500 mb-5"
+                        v-for="error of imageV$.imageFile.$errors"
+                        :key="error.$uid"
+                    >
+                        <Message severity="error">{{ error.$message }}</Message>
+                    </div>
+                </StepPanel>
+            </StepItem>
 
-            <div
-                class="text-red-500 mb-5"
-                v-for="error of v$.firstname.$errors"
-                :key="error.$uid"
-            >
-                <Message severity="error">{{ error.$message }}</Message>
-            </div>
+            <StepItem :value="2">
+                <Step>{{ $t("products.p_images") }}</Step>
+                <StepPanel>
+                    <ImageInput v-model="edited.images" />
+                    <div
+                        class="text-red-500 mb-5"
+                        v-for="error of imagesV$.images.$errors"
+                        :key="error.$uid"
+                    >
+                        <Message severity="error">{{ error.$message }}</Message>
+                    </div>
+                </StepPanel>
+            </StepItem>
 
-            <label
-                for="lastname"
-                class="mb-5 text-surface-700 dark:text-surface-0"
-                >{{ $t("lastname") }}</label
-            >
-            <InputText
-                id="lastname"
-                v-model="editedUser.lastname"
-                aria-labelledby="lastname"
-                class="w-full mb-5"
-            />
-            <div
-                class="text-red-500 mb-5"
-                v-for="error of v$.lastname.$errors"
-                :key="error.$uid"
-            >
-                <Message severity="error">{{ error.$message }}</Message>
-            </div>
+            <StepItem :value="3">
+                <Step>{{ $t("products.p_info") }}</Step>
+                <StepPanel>
+                    <div class="column-1 md:columns-2 gap-5 mb-5">
+                        <div class="mb-5">
+                            <label for="name" class="mb-5">{{
+                                $t("products.name")
+                            }}</label>
+                            <InputText
+                                id="name"
+                                v-model="edited.name"
+                                aria-labelledby="name"
+                                class="w-full mb-5"
+                            />
 
-            <div slot="footer" class="mt-auto flex justify-evenly">
+                            <div
+                                class="text-red-500"
+                                v-for="error of v$.name.$errors"
+                                :key="error.$uid"
+                            >
+                                <Message severity="error">{{
+                                    error.$message
+                                }}</Message>
+                            </div>
+                        </div>
+
+                        <div class="mb-5">
+                            <label for="status" class="mb-5">{{
+                                $t("products.status")
+                            }}</label>
+
+                            <SelectButton
+                                :allow-empty="false"
+                                id="status"
+                                v-model="edited.status"
+                                aria-labelledby="status"
+                                fluid
+                                :options="statusOptions"
+                                option-label="name"
+                                option-value="value"
+                                class="toggleStatusBtn"
+                            />
+                        </div>
+
+                        <div class="mb-5">
+                            <label for="description" class="mb-5">{{
+                                $t("products.description")
+                            }}</label>
+
+                            <Textarea
+                                id="description"
+                                v-model="edited.description"
+                                rows="4"
+                                fluid
+                                maxlength="255"
+                                class="mb-5"
+                            />
+
+                            <div
+                                class="text-red-500"
+                                v-for="error of v$.description.$errors"
+                                :key="error.$uid"
+                            >
+                                <Message severity="error">{{
+                                    error.$message
+                                }}</Message>
+                            </div>
+                        </div>
+
+                        <div class="mb-5">
+                            <label for="long_description" class="mb-5">{{
+                                $t("products.long_description")
+                            }}</label>
+
+                            <Textarea
+                                id="long_description"
+                                v-model="edited.long_description"
+                                rows="6"
+                                fluid
+                                maxlength="1000"
+                                class="mb-5"
+                            />
+
+                            <div
+                                v-for="error of v$.long_description.$errors"
+                                :key="error.$uid"
+                            >
+                                <Message severity="error">{{
+                                    error.$message
+                                }}</Message>
+                            </div>
+                        </div>
+
+                        <div class="mb-5">
+                            <label for="featured" class="mb-5">{{
+                                $t("products.featured")
+                            }}</label>
+
+                            <SelectButton
+                                :allow-empty="false"
+                                id="featured"
+                                v-model="edited.featured"
+                                aria-labelledby="featured"
+                                fluid
+                                :options="featuredOptions"
+                                option-label="name"
+                                option-value="value"
+                                class="toggleStatusBtn"
+                            />
+                        </div>
+
+                        <div class="mb-5">
+                            <label for="category" class="mb-5">{{
+                                $t("products.category")
+                            }}</label>
+
+                            <Select
+                                v-model="edited.category"
+                                :options="categories"
+                                filter
+                                option-label="name"
+                                :placeholder="$t('products.categoryQuery')"
+                                data-key="id"
+                                fluid
+                                class="mb-5"
+                            >
+                                <template #value="slotProps">
+                                    <div
+                                        v-if="slotProps.value"
+                                        class="flex items-center"
+                                    >
+                                        <div>{{ slotProps.value.name }}</div>
+                                    </div>
+                                </template>
+                                <template #option="slotProps">
+                                    <div class="flex items-center">
+                                        <div>{{ slotProps.option.name }}</div>
+                                    </div>
+                                </template>
+                            </Select>
+
+                            <div
+                                class="text-red-500"
+                                v-for="error of v$.category.$errors"
+                                :key="error.$uid"
+                            >
+                                <Message severity="error">{{
+                                    error.$message
+                                }}</Message>
+                            </div>
+                        </div>
+
+                        <div class="mb-5">
+                            <label for="base_quantity" class="mb-5">{{
+                                $t("products.base_quantity")
+                            }}</label>
+
+                            <InputText
+                                :aria-labelledby="$t('products.base_quantity')"
+                                id="base_quantity"
+                                type="number"
+                                v-model="edited.base_quantity"
+                                fluid
+                                class="mb-5"
+                            />
+
+                            <div
+                                class="text-red-500"
+                                v-for="error of v$.base_quantity.$errors"
+                                :key="error.$uid"
+                            >
+                                <Message severity="error">{{
+                                    error.$message
+                                }}</Message>
+                            </div>
+                        </div>
+
+                        <div class="mb-5">
+                            <label for="base_price" class="mb-5">{{
+                                $t("products.base_price")
+                            }}</label>
+                            <InputText
+                                :aria-labelledby="$t('products.base_price')"
+                                id="base_price"
+                                type="number"
+                                v-model="edited.base_price"
+                                fluid
+                                class="mb-5"
+                            />
+
+                            <div
+                                class="text-red-500"
+                                v-for="error of v$.base_price.$errors"
+                                :key="error.$uid"
+                            >
+                                <Message severity="error">{{
+                                    error.$message
+                                }}</Message>
+                            </div>
+                        </div>
+
+                        <div class="mb-5">
+                            <label for="listing_price" class="mb-5">{{
+                                $t("products.listing_price")
+                            }}</label>
+
+                            <InputText
+                                :aria-labelledby="$t('products.listing_price')"
+                                id="listing_price"
+                                type="number"
+                                v-model="edited.listing_price"
+                                fluid
+                                class="mb-5"
+                            />
+
+                            <div
+                                class="text-red-500"
+                                v-for="error of v$.listing_price.$errors"
+                                :key="error.$uid"
+                            >
+                                <Message severity="error">{{
+                                    error.$message
+                                }}</Message>
+                            </div>
+                        </div>
+                    </div>
+                </StepPanel>
+            </StepItem>
+        </Stepper>
+
+        <template #footer>
+            <div class="flex justify-end gap-5">
                 <Button
-                    label="Cancel"
+                    :label="$t('common.cancel')"
                     icon="pi pi-times"
                     severity="danger"
-                    @click="cancelEdit"
+                    @click="cancelConfirm"
+                    outlined
+                    :disabled="loading"
                 />
                 <Button
-                    label="Save"
+                    :label="$t('common.back')"
+                    severity="secondary"
+                    @click="prevStep"
+                    v-if="activeStep !== 1"
+                />
+
+                <Button
+                    :label="$t('common.next')"
+                    @click="nextStep"
+                    v-if="activeStep !== 3"
+                />
+
+                <Button
+                    v-if="activeStep === 3"
+                    :label="$t('common.save')"
                     icon="pi pi-check"
                     severity="success"
-                    @click="updateItem"
-                    :loading="progress > 0"
-                    :disabled="!isEdited"
+                    @click="createItem"
+                    :loading="loading"
+                    :disabled="loading"
                 />
             </div>
-        </div>
+        </template>
     </Drawer>
 </template>
 

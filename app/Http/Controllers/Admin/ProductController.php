@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Admin\Product\ProductCollection;
 use App\Models\Product;
-use App\Models\ProductVariant;
 use DB;
 use Illuminate\Http\Request;
 use Str;
@@ -79,6 +78,7 @@ class ProductController extends Controller
                 'base_quantity' => $request->base_quantity,
                 'listing_price' => $request->listing_price,
                 'status' => $request->status,
+                'featured' => $request->featured,
                 'category_id' => $request->category_id
             ]);
 

@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed } from "vue";
+import { ref, computed, onMounted } from "vue";
 import { useImageCompression } from "@/utils/useImageCompression";
 import { productImageSize } from "@/constants/imagesSize/Index";
 import { $t } from "@/plugins/i18n";
@@ -63,35 +63,40 @@ const removeImage = (index) => {
     loading.value.splice(index, 1);
     images.value.splice(index, 1);
 };
+
+onMounted(() => {
+    props.modelValue.forEach((image, index) => {
+        previewImages.value[index] = image.url;
+        loading.value[index] = false;
+    });
+});
 </script>
 <template>
-    <div>
-        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            <div
-                class="cursor-pointer mb-5 w-full aspect-[1/1] rounded-xl overflow-hidden relative"
-            >
-                <label class="w-full absolute top-0 right-0 left-0 bottom-0">
-                    <input
-                        type="file"
-                        @change="updatePicture($event, productImageSize)"
-                        accept="image/*"
-                        class="hidden"
-                        multiple
-                    />
-                    <div
-                        class="w-full aspect-[1/1] rounded-xl flex items-center justify-center bg-blue-100"
-                    >
-                        <i class="ti ti-plus text-xl"></i>
-                    </div>
-                </label>
-            </div>
-            <template v-for="(image, index) in previewImages" :key="index">
-                <ProductImage
-                    :image="image"
-                    :loading="loading[index]"
-                    @remove-image="removeImage(index)"
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        <div
+            class="cursor-pointer mb-5 w-full aspect-[1/1] rounded-xl overflow-hidden relative"
+        >
+            <label class="w-full absolute top-0 right-0 left-0 bottom-0">
+                <input
+                    type="file"
+                    @change="updatePicture($event, productImageSize)"
+                    accept="image/*"
+                    class="hidden"
+                    multiple
                 />
-            </template>
+                <div
+                    class="w-full aspect-[1/1] rounded-xl flex items-center justify-center bg-blue-100"
+                >
+                    <i class="ti ti-plus text-xl"></i>
+                </div>
+            </label>
         </div>
+        <template v-for="(image, index) in previewImages" :key="index">
+            <ProductImage
+                :image="image"
+                :loading="loading[index]"
+                @remove-image="removeImage(index)"
+            />
+        </template>
     </div>
 </template>
