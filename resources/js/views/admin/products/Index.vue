@@ -68,7 +68,6 @@ const getProductOptions = async () => {
         axios
             .get("api/admin/product-options/all")
             .then((res) => {
-                console.log(res.data);
                 productOptions.value = res.data;
                 resolve(res.data);
             })
@@ -86,8 +85,6 @@ const getProductImages = async () => {
         axios
             .get(`api/admin/products/${current.value.id}/images`)
             .then((res) => {
-                console.log(res.data);
-
                 current.value.images = res.data.images;
                 resolve(res.data);
             })
@@ -130,7 +127,6 @@ const getProducts = async () => {
                 },
             })
             .then((res) => {
-                console.log(res.data);
                 products.value = res.data.data;
                 total.value = res.data.total;
                 currentPage.value = res.data.current_page;
@@ -260,14 +256,12 @@ const editItem = (val) => {
                 },
             })
             .then((response) => {
-                console.log(response);
-
                 uploadPercentage.value = 0;
                 isEditOpen.value = false;
                 updateItem(response.data.product);
                 emitter.emit("toast", {
-                    summary: $t("status.success.user.update"),
-                    message: $t("update.success_message"),
+                    summary: $t("status.success.title"),
+                    message: $t("status.success.product.update"),
                     severity: "success",
                 });
                 resolve(response);
@@ -299,7 +293,6 @@ const setLoadingState = (userId, isLoading) => {
 const loadingCreate = ref(false);
 
 const createItem = (val) => {
-    console.log(val);
     loadingCreate.value = true;
     return new Promise((resolve, reject) => {
         axios
@@ -311,7 +304,6 @@ const createItem = (val) => {
                 },
             })
             .then((res) => {
-                console.log(res.data);
                 products.value.push(res.data.product);
                 isCreateOpen.value = false;
                 emitter.emit("toast", {
@@ -336,7 +328,6 @@ const getCategories = async () => {
         axios
             .get("api/admin/categories/get-children")
             .then((res) => {
-                console.log(res);
                 categories.value = res.data;
                 resolve(res.data);
             })

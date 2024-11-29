@@ -199,6 +199,19 @@ class ProductController extends Controller
             }
         }
 
+        // log activity 
+        $agent = UA::parse($request->server('HTTP_USER_AGENT'));
+        ActivityHistoryJob::dispatch(
+            data: [
+                'model' => 'products',
+                'action' => 'update',
+                'data' => ['product' =>  $product],
+                'user_id' => $request->user()->id,
+            ],
+            platform: $agent->os->family,
+            browser: $agent->ua->family,
+        );
+
         return response()->json(['message' => 'Product updated successfully.', 'product' => new ProductResource($product)]);
     }
 
@@ -217,6 +230,41 @@ class ProductController extends Controller
         $product = Product::findOrFail($request->id);
         $product->status = $request->status;
         $product->save();
+
+        $agent = UA::parse($request->server('HTTP_USER_AGENT'));
+        ActivityHistoryJob::dispatch(
+            data: [
+                'model' => 'products',
+                'action' => 'change_status',
+                'data' => ['product' =>  $product],
+                'user_id' => $request->user()->id,
+            ],
+            platform: $agent->os->family,
+            browser: $agent->ua->family,
+        );
         return response()->json(['message' => 'Product status updated successfully.', 'status' => $product->status]);
+    }
+
+    public function delete(Request $request, $id)
+    {
+
+        // TODO : check if associated variant count is 0
+        $this->authorize('product_delete');
+        $product = Product::findOrFail($id);
+
+        $product->delete();
+
+        $agent = UA::parse($request->server('HTTP_USER_AGENT'));
+        ActivityHistoryJob::dispatch(
+            data: [
+                'model' => 'products',
+                'action' => 'delete',
+                'data' => ['product' =>  $product],
+                'user_id' => $request->user()->id,
+            ],
+            platform: $agent->os->family,
+            browser: $agent->ua->family,
+        );
+        return response()->json(['message' => 'Product deleted successfully']);
     }
 }

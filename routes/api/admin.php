@@ -77,7 +77,7 @@ Route::middleware(["auth:sanctum"])->group(function () {
         Route::post('/create', 'create');
         Route::post('/update', 'update');
         Route::patch('/change-status', 'changeStatus');
-        // Route::delete('/delete/{id}', 'delete');
+        Route::delete('/delete/{id}', 'delete');
     });
 
     Route::prefix('product-options')->controller(ProductOptionController::class)->group(function () {
