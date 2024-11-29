@@ -210,4 +210,13 @@ class ProductController extends Controller
         $product->load('images');
         return response()->json(['id' => $product->id, 'images' => $product->images]);
     }
+
+    public function changeStatus(Request $request)
+    {
+        $this->authorize('product_update');
+        $product = Product::findOrFail($request->id);
+        $product->status = $request->status;
+        $product->save();
+        return response()->json(['message' => 'Product status updated successfully.', 'status' => $product->status]);
+    }
 }
