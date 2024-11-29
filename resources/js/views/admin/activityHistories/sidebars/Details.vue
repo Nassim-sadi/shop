@@ -43,69 +43,88 @@ const { isOpen, current } = toRefs(props);
 </script>
 
 <template>
-    <PerfectScrollbar :options="{ wheelPropagation: false }">
-        <Drawer :visible="isOpen" :header="$t('activities.details')" position="right" @update:visible="$emit('update:isOpen', $event)" class="!w-full md:!w-[30rem] lg:!w-[25rem]">
-            <div class="mb-4">
-                <p class="font-bold">{{ $t("activities.by") }} :</p>
-                <div class="flex items-center gap-2 mt-2">
-                    <Avatar :image="current.user.image || placeholder" shape="circle" size="large"></Avatar>
-                    {{ current.user.firstname + " " + current.user.lastname }}
-                </div>
-
-                <p class="font-bold mt-2">{{ $t("user.email") }} :</p>
-                {{ current.user.email }}
+    <Drawer
+        :visible="isOpen"
+        :header="$t('activities.details')"
+        position="right"
+        @update:visible="$emit('update:isOpen', $event)"
+        class="!w-full md:!w-[30rem] lg:!w-[25rem]"
+    >
+        <div class="mb-4">
+            <p class="font-bold">{{ $t("activities.by") }} :</p>
+            <div class="flex items-center gap-2 mt-2">
+                <Avatar
+                    :image="current.user.image || placeholder"
+                    shape="circle"
+                    size="large"
+                ></Avatar>
+                {{ current.user.firstname + " " + current.user.lastname }}
             </div>
 
-            <div class="mb-4">
-                <p class="font-bold mb-2">{{ $t("activities.role") }} :</p>
-                <span :style="`background-color: #${current.user.role.color} ; color : #${current.user.role.text_color}`" class="highlight">
-                    {{ current.user.role.name }}
-                </span>
+            <p class="font-bold mt-2">{{ $t("user.email") }} :</p>
+            {{ current.user.email }}
+        </div>
+
+        <div class="mb-4">
+            <p class="font-bold mb-2">{{ $t("activities.role") }} :</p>
+            <span
+                :style="`background-color: #${current.user.role.color} ; color : #${current.user.role.text_color}`"
+                class="highlight"
+            >
+                {{ current.user.role.name }}
+            </span>
+        </div>
+
+        <div class="mb-4">
+            <p class="font-bold">{{ $t("activities.browser") }} :</p>
+            <div class="flex gap-2 items-center mt-2">
+                <Image
+                    :src="browsers[current.browser]"
+                    class="w-8 object-contain block"
+                />
+
+                {{ current.browser }}
             </div>
+        </div>
 
-            <div class="mb-4">
-                <p class="font-bold">{{ $t("activities.browser") }} :</p>
-                <div class="flex gap-2 items-center mt-2">
-                    <Image :src="browsers[current.browser]" class="w-8 object-contain block" />
-
-                    {{ current.browser }}
-                </div>
-            </div>
-
-            <div class="mb-4">
-                <p class="font-bold">{{ $t("activities.os") }} :</p>
-                <div class="flex items-center gap-2 mt-2">
-                    <Image :src="os[
-                        current.platform === 'Other'
-                            ? 'Other'
-                            : current.platform
+        <div class="mb-4">
+            <p class="font-bold">{{ $t("activities.os") }} :</p>
+            <div class="flex items-center gap-2 mt-2">
+                <Image
+                    :src="
+                        os[
+                            current.platform === 'Other'
+                                ? 'Other'
+                                : current.platform
                         ]
-                        " class="w-8 object-contain block" />
-                    {{ current.platform }}
-                </div>
+                    "
+                    class="w-8 object-contain block"
+                />
+                {{ current.platform }}
             </div>
+        </div>
 
-            <div class="mb-4">
-                <p class="font-bold">{{ $t("activities.action_message") }} :</p>
-                {{ current.action }} =>
-                {{
-                    // current.user.id == current.data.user.id
-                    //     ? $t("activities.self")
-                    //     : $t("activities.models." + current.model)
-                    $t("activities.models." + current.model)
-                }}
-            </div>
+        <div class="mb-4">
+            <p class="font-bold">{{ $t("activities.action_message") }} :</p>
+            {{ current.action }} =>
+            {{
+                // current.user.id == current.data.user.id
+                //     ? $t("activities.self")
+                //     : $t("activities.models." + current.model)
+                $t("activities.models." + current.model)
+            }}
+        </div>
 
-            <div class="mb-4">
-                <p class="font-bold">{{ $t("common.time") }} :</p>
-                {{ current.created_at }}
-            </div>
+        <div class="mb-4">
+            <p class="font-bold">{{ $t("common.time") }} :</p>
+            {{ current.created_at }}
+        </div>
 
-            <div class="mb-4">
-                {{ current.data.changes }}
-            </div>
+        <div class="mb-4">
+            {{ current.data.changes }}
+        </div>
 
-            <!-- <div class="mb-4" v-if="changes">
+        <!-- <div class="mb-4" v-if="changes">
                 <p class="font-bold">{{ $t("activities.changes") }} :</p>
                 <div v-for="(change, key, index) in changes" :key="index">
                     <p>{{ $t("common." + key) }}</p>
@@ -125,8 +144,7 @@ const { isOpen, current } = toRefs(props);
                     </p>
                 </div>
             </div> -->
-        </Drawer>
-    </PerfectScrollbar>
+    </Drawer>
 </template>
 
 <style lang="scss" scoped></style>

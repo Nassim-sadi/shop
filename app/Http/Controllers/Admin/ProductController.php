@@ -11,6 +11,7 @@ use Str;
 use App\Helpers\ImageUpload;
 use App\Http\Resources\Admin\Product\ProductResource;
 use App\Jobs\ActivityHistoryJob;
+use Storage;
 use UA;
 
 class ProductController extends Controller
@@ -31,6 +32,7 @@ class ProductController extends Controller
             ->when(isset($request->status) && $request->status !== '', function ($q) use ($request) {
                 $q->where('status', $request->status);
             })
+            ->with('category')
             ->orderBy('created_at', 'DESC')
             // ->when($user->hasRole("Super Admin"), function ($q) use ($request) {
             //     $q->when(isset($request->deleted) && $request->deleted !== '', function ($q) use ($request) {
@@ -115,6 +117,91 @@ class ProductController extends Controller
             return response()->json(['error' => 'Failed to create product: ' . $e->getMessage()], 500);
         }
     }
+
+    public function update(Request $request)
+    {
+        debugbar()->log($request->all());
+        $this->authorize('product_update');
+
+        $request->validate([
+            'id' => 'required|exists:products,id',
+            'name' => 'required',
+            'description' => 'required|string|min:10|max:255',
+            'long_description' => 'required|string|min:10|max:2000',
+            'base_price' => 'required|numeric',
+            'listing_price' => 'required|numeric',
+            'base_quantity' => 'required|numeric',
+            'category_id' => 'required|exists:categories,id',
+            'thumbnail_image_path' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:2048',
+            'status' => 'required|boolean',
+            'featured' => 'required|boolean',
+            'images' => 'required|array|min:1',
+        ]);
+
+        $product = Product::findOrFail($request->id);
+
+        // Update product details
+        $slug = Str::slug($request->name);
+        $product->update([
+            'name' => $request->name,
+            'slug' => $slug,
+            'description' => $request->description,
+            'long_description' => $request->long_description,
+            'base_price' => $request->base_price,
+            'base_quantity' => $request->base_quantity,
+            'listing_price' => $request->listing_price,
+            'status' => $request->status,
+            'featured' => $request->featured,
+            'category_id' => $request->category_id,
+        ]);
+
+        // Handle thumbnail image update
+        if ($request->hasFile('thumbnail_image_path')) {
+            $product->thumbnail_image_path = ImageUpload::uploadImage(
+                $request->file('thumbnail_image_path'),
+                'products/' . $slug
+            );
+            $product->save();
+        }
+        $existingImageIds = collect($request->images)
+            ->filter(fn($image) => isset($image['id'])) // Keep only objects with 'id'
+            ->pluck('id')
+            ->toArray();
+
+        $product->images()
+            ->whereNotIn('id', $existingImageIds)
+            ->get()
+            ->each(function ($image) {
+                $imagePath = public_path($image->url);
+                if (file_exists($imagePath)) {
+                    unlink($imagePath);
+                }
+                $image->delete();
+            });
+
+        // Process new files and update objects
+        foreach ($request->images as $index => $imageData) {
+            // Handle new files
+            if (isset($imageData['file']) && $imageData['file'] instanceof \Illuminate\Http\UploadedFile) {
+                $imagePath = ImageUpload::uploadImage($imageData['file'], 'products/' . $product->slug);
+                $product->images()->create([
+                    'url' => "/storage/images/products/{$product->slug}/$imagePath",
+                    'alt_text' => $imageData['file']->getClientOriginalName() ?? '',
+                ]);
+            } elseif (isset($imageData['id'])) {
+                // Optionally, handle updates for existing images (e.g., alt_text or other metadata)
+                $existingImage = $product->images()->find($imageData['id']);
+                if ($existingImage && isset($imageData['alt_text'])) {
+                    $existingImage->update([
+                        'alt_text' => $imageData['alt_text'],
+                    ]);
+                }
+            }
+        }
+
+        return response()->json(['message' => 'Product updated successfully.', 'product' => new ProductResource($product)]);
+    }
+
 
     public function getImages(Request $request, $id)
     {

@@ -38,15 +38,24 @@ const filterChanges = (data) => {
     });
     return result;
 };
-
-import { PerfectScrollbar } from "vue3-perfect-scrollbar";
 </script>
 
 <template>
-    <Drawer :visible="isOpen" :header="$t('users.details')" position="right" @update:visible="$emit('update:isOpen', $event)" class="!w-full md:!w-[30rem] lg:!w-[25rem] sidebar" blockScroll>
+    <Drawer
+        :visible="isOpen"
+        :header="$t('users.details')"
+        position="right"
+        @update:visible="$emit('update:isOpen', $event)"
+        class="!w-full md:!w-[30rem] lg:!w-[25rem] sidebar"
+        blockScroll
+    >
         <div class="mb-4">
             <div class="flex items-center gap-2 mt-2">
-                <Avatar :image="current.image || placeholder" shape="circle" size="large"></Avatar>
+                <Avatar
+                    :image="current.image || placeholder"
+                    shape="circle"
+                    size="large"
+                ></Avatar>
                 {{ current.firstname + " " + current.lastname }}
             </div>
 

@@ -86,6 +86,8 @@ const getProductImages = async () => {
         axios
             .get(`api/admin/products/${current.value.id}/images`)
             .then((res) => {
+                console.log(res.data);
+
                 current.value.images = res.data.images;
                 resolve(res.data);
             })
@@ -247,6 +249,7 @@ const deleteItem = () => {
 const loadingEdit = ref(false);
 const editItem = (val) => {
     loadingEdit.value = true;
+
     return new Promise((resolve, reject) => {
         axios
             .post("api/admin/products/update", val, {
@@ -257,9 +260,11 @@ const editItem = (val) => {
                 },
             })
             .then((response) => {
+                console.log(response);
+
                 uploadPercentage.value = 0;
                 isEditOpen.value = false;
-                updateItem(response.data.user);
+                updateItem(response.data.product);
                 emitter.emit("toast", {
                     summary: $t("status.success.user.update"),
                     message: $t("update.success_message"),
@@ -292,6 +297,7 @@ const setLoadingState = (userId, isLoading) => {
     loadingStates.value[userId] = isLoading;
 };
 const loadingCreate = ref(false);
+
 const createItem = (val) => {
     console.log(val);
     loadingCreate.value = true;
@@ -693,10 +699,6 @@ onMounted(async () => {
                 </template>
             </div>
         </Popover>
-
-        <pre>
-            {{ products[0] }}
-        </pre>
     </div>
 </template>
 

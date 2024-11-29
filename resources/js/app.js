@@ -9,7 +9,6 @@ import emitter from "@/plugins/emitter";
 import { i18n } from "@/plugins/i18n";
 import { createPinia } from "pinia";
 import piniaPersist from "pinia-plugin-persist";
-import { PerfectScrollbarPlugin } from "vue3-perfect-scrollbar";
 import router from "./router/Index";
 
 import "swiper/css";
@@ -23,7 +22,6 @@ import "@/assets/adminStyles.scss";
 import "@/assets/myStyles.scss";
 import { ability } from "@/plugins/ability";
 import { abilitiesPlugin } from "@casl/vue";
-import "vue3-perfect-scrollbar/style.css";
 const app = createApp(App);
 
 app.provide("emitter", emitter);
@@ -44,7 +42,6 @@ app.use(PrimeVue, {
 
 app.use(abilitiesPlugin, ability);
 app.use(ToastService);
-app.use(PerfectScrollbarPlugin);
 app.use(ConfirmationService);
 app.use(i18n);
 app.use(pinia);

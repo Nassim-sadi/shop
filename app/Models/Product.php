@@ -34,6 +34,11 @@ class Product extends Model
         return $this->belongsToMany(ProductOption::class, 'product_product_option');
     }
 
+    public function category()
+    {
+        return $this->belongsTo(Category::class);
+    }
+
     public function images()
     {
         return $this->morphMany(ProductImage::class, 'imageable');

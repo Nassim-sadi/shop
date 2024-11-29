@@ -30,10 +30,6 @@ const props = defineProps({
         type: Boolean,
         required: false,
     },
-    options: {
-        type: Array,
-        required: true,
-    },
     categories: {
         type: Array,
         required: true,
@@ -50,10 +46,9 @@ const props = defineProps({
     },
 });
 
-const $emit = defineEmits(["update:isOpen", "createItem"]);
+const $emit = defineEmits(["update:isOpen", "editItem"]);
 
-const { isOpen, loading, categories, options, current, loadingImages } =
-    toRefs(props);
+const { isOpen, loading, categories, current, loadingImages } = toRefs(props);
 
 const statusOptions = [
     {
@@ -145,9 +140,8 @@ const imagesRules = computed(() => ({
         minLength: minLength(1),
     },
 }));
-const images = ref([]);
 
-const imagesV$ = useVuelidate(imagesRules, { images: images });
+const imagesV$ = useVuelidate(imagesRules, edited);
 
 let formData = new FormData();
 const updatePicture = async (event, size) => {
@@ -205,16 +199,27 @@ const isEdited = computed(() => {
     );
 });
 
-const createItem = () => {
+const editItem = () => {
     v$.value.$touch();
     if (v$.value.$invalid) return;
-    images.value.forEach((image) => {
-        formData.append("images[]", image);
+    edited.value.images.forEach((image, index) => {
+        if (image instanceof File) {
+            // Add file directly to FormData
+            formData.append(`images[${index}][file]`, image);
+        } else if (typeof image === "object") {
+            // Add object properties to FormData
+            console.log("image", image);
+
+            Object.entries(image).forEach(([key, value]) => {
+                formData.append(`images[${index}][${key}]`, value);
+            });
+        }
     });
+
     if (imageFile.value !== current.value.thumbnail_image_path) {
         formData.append("thumbnail_image_path", imageFile.value);
     }
-
+    formData.append("id", edited.value.id);
     formData.append("name", edited.value.name);
     formData.append("description", edited.value.description);
     formData.append("long_description", edited.value.long_description);
@@ -225,9 +230,7 @@ const createItem = () => {
     formData.append("category_id", edited.value.category.id);
     formData.append("status", edited.value.status);
 
-    $emit("createItem", formData);
-
-    v$.value.$reset();
+    $emit("editItem", formData);
 };
 
 const nextStep = () => {
@@ -249,22 +252,42 @@ const prevStep = () => {
     }
 };
 
+const resetForm = () => {
+    v$.value.$reset();
+    imagesV$.value.$reset();
+    imageV$.value.$reset();
+    edited.value = {
+        name: "",
+        description: "",
+        long_description: "",
+        base_price: "",
+        listing_price: "",
+        base_quantity: "",
+        featured: 0,
+        category: null,
+        status: 0,
+        images: [],
+    };
+    imageFile.value = null;
+    previewImage.value = productPlaceHolder;
+    activeStep.value = 1;
+    formData = null;
+};
+
 watch(
     () => isOpen.value,
     (val) => {
         if (val) {
-            edited.value = JSON.parse(JSON.stringify(current.value));
+            edited.value = { ...current.value };
             edited.value.status = current.value.status ? 1 : 0;
             edited.value.featured = current.value.featured ? 1 : 0;
-
             previewImage.value = current.value.thumbnail_image_path;
             imageFile.value = current.value.thumbnail_image_path;
-            images.value = current.value.images;
+            console.log("done copying");
+            formData = new FormData();
         } else {
-            v$.value.$reset();
-            imagesV$.value.$reset();
-            imageV$.value.$reset();
-            edited.value = {};
+            resetForm();
+            console.log("done resetting");
         }
     },
 );
@@ -272,10 +295,11 @@ watch(
 watch(
     () => loadingImages.value,
     (val) => {
-        if (!val) {
+        if (isOpen.value && !val) {
             edited.value.images = JSON.parse(
                 JSON.stringify(current.value.images),
             );
+            console.log("done copying images");
         }
     },
 );
@@ -292,6 +316,11 @@ watch(
         block-scroll
         class="large-drawer"
     >
+        <pre>
+
+        {{ edited.images }}
+    </pre
+        >
         <div
             class="h-full w-full flex items-center justify-center"
             v-if="loading || loadingImages"
@@ -619,7 +648,7 @@ watch(
                     :label="$t('common.save')"
                     icon="pi pi-check"
                     severity="success"
-                    @click="createItem"
+                    @click="editItem"
                     :loading="loading"
                     :disabled="loading"
                 />

@@ -75,7 +75,7 @@ Route::middleware(["auth:sanctum"])->group(function () {
         Route::get('/', 'get');
         Route::get('/{id}/images', 'getImages');
         Route::post('/create', 'create');
-        // Route::post('/update', 'update');
+        Route::post('/update', 'update');
         // Route::patch('/change-status', 'changeStatus');
         // Route::delete('/delete/{id}', 'delete');
     });

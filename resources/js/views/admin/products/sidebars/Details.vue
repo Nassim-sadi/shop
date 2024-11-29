@@ -72,6 +72,11 @@ const onSwiper = (swiper) => {
         </div>
 
         <div class="mb-4">
+            <p class="font-bold">{{ $t("products.category") }} :</p>
+            {{ current.category.name }}
+        </div>
+
+        <div class="mb-4">
             <p class="font-bold">{{ $t("products.featured") }} :</p>
             {{
                 current.featured
