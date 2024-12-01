@@ -302,12 +302,12 @@ onMounted(async () => {
     <div class="card">
         <Details
             :current="current ? current : {}"
-            v-model:isOpen="isDetailsOpen"
+            v-model:is-open="isDetailsOpen"
         />
 
         <Create
-            v-model:isOpen="isCreateOpen"
-            @createItem="createItem"
+            v-model:is-open="isCreateOpen"
+            @create-item="createItem"
             :options="productOptions"
             :categories="categories"
             :loading="loading"
@@ -315,22 +315,22 @@ onMounted(async () => {
 
         <Edit
             :current="current"
-            v-model:isOpen="isEditOpen"
-            @editItem="editItem"
+            v-model:is-open="isEditOpen"
+            @edit-item="editItem"
         ></Edit>
 
         <DataTable
             :value="products"
-            tableStyle="min-width: 50rem"
+            table-style="min-width: 50rem"
             :loading="loading"
             :rows="per_page"
             :paginator="true"
-            :totalRecords="total"
+            :total-records="total"
             @page="onPageChange"
-            dataKey="id"
+            data-key="id"
             :lazy="true"
-            :rowHover="true"
-            :rowsPerPageOptions="[5, 10, 20, 30]"
+            :row-hover="true"
+            :rows-per-page-options="[5, 10, 20, 30]"
             :row-class="rowClass"
         >
             <template #empty>
@@ -361,7 +361,7 @@ onMounted(async () => {
                     <div class="flex gap-2 items-baseline">
                         <span>{{ $t("common.from") }}</span>
                         <DatePicker
-                            showIcon
+                            show-icon
                             v-model="start_date"
                             date-format="yy-mm-dd"
                             :max-date="
@@ -370,7 +370,7 @@ onMounted(async () => {
                                     : new Date(2025, 0, 1)
                             "
                             :min-date="new Date(2024, 0, 1)"
-                            showButtonBar
+                            show-button-bar
                             @clear-click="() => (start_date = new Date())"
                         />
                     </div>
@@ -378,7 +378,7 @@ onMounted(async () => {
                     <div class="flex gap-2 items-baseline">
                         <span>{{ $t("common.to") }}</span>
                         <DatePicker
-                            showIcon
+                            show-icon
                             v-model="end_date"
                             date-format="yy-mm-dd"
                             :max-date="new Date()"
@@ -387,7 +387,7 @@ onMounted(async () => {
                                     ? new Date(start_date)
                                     : new Date(2024, 0, 1)
                             "
-                            showButtonBar
+                            show-button-bar
                             @clear-click="() => (end_date = new Date())"
                         />
                     </div>
@@ -404,8 +404,8 @@ onMounted(async () => {
                     <Select
                         v-model="status"
                         :options="statusOptions"
-                        optionLabel="label"
-                        optionValue="value"
+                        option-label="label"
+                        option-value="value"
                         :placeholder="$t('user.statusQuery')"
                     />
 

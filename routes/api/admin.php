@@ -89,8 +89,6 @@ Route::middleware(["auth:sanctum"])->group(function () {
         Route::delete('/delete/{id}', 'delete');
     });
 
-
-
     // todo : add email verification
     // Route::controller(EmailVerificationController::class)->group(function () {
     //     Route::get('/email/verify', 'VerificationController@verify')->name('verification.notice');

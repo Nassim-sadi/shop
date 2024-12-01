@@ -316,11 +316,6 @@ watch(
         block-scroll
         class="large-drawer"
     >
-        <pre>
-
-        {{ edited.images }}
-    </pre
-        >
         <div
             class="h-full w-full flex items-center justify-center"
             v-if="loading || loadingImages"

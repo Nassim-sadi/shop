@@ -23,10 +23,6 @@ const props = defineProps({
         type: Boolean,
         required: false,
     },
-    options: {
-        type: Array,
-        required: true,
-    },
     categories: {
         type: Array,
         required: true,
@@ -34,12 +30,13 @@ const props = defineProps({
     progress: {
         type: Number,
         required: false,
+        default: 0,
     },
 });
 
 const $emit = defineEmits(["update:isOpen", "createItem"]);
 
-const { isOpen, loading, options, categories, progress } = toRefs(props);
+const { isOpen, loading, categories, progress } = toRefs(props);
 
 const statusOptions = [
     {
@@ -148,7 +145,7 @@ const isEdited = computed(() => {
             featured: 0,
             category: null,
             status: 0,
-        }) || previewImage !== productPlaceHolder
+        }) || previewImage.value !== productPlaceHolder
     );
 });
 
@@ -178,7 +175,7 @@ watch(
         position="right"
         @update:visible="$emit('update:isOpen', $event)"
         :dismissable="false"
-        :showCloseIcon="false"
+        :show-close-icon="false"
         block-scroll
         class="large-drawer"
     >
@@ -242,8 +239,8 @@ watch(
                 aria-labelledby="status"
                 fluid
                 :options="statusOptions"
-                optionLabel="name"
-                optionValue="value"
+                option-label="name"
+                option-value="value"
                 class="toggleStatusBtn mb-5"
             />
             <div>
@@ -284,8 +281,8 @@ watch(
                 aria-labelledby="featured"
                 fluid
                 :options="featuredOptions"
-                optionLabel="name"
-                optionValue="value"
+                option-label="name"
+                option-value="value"
                 class="toggleStatusBtn mb-5"
             />
 
@@ -297,7 +294,7 @@ watch(
                 v-model="product.category"
                 :options="categories"
                 filter
-                optionLabel="name"
+                option-label="name"
                 :placeholder="$t('products.categoryQuery')"
                 data-key="id"
                 fluid
