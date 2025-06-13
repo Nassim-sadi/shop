@@ -60,7 +60,7 @@ const confirmLogout = () => {
         accept: () => {
             auth.logout();
         },
-        reject: () => { },
+        reject: () => {},
     });
 };
 </script>
@@ -68,7 +68,10 @@ const confirmLogout = () => {
 <template>
     <div class="layout-topbar rounded-bl-2xl rounded-br-2xl">
         <div class="layout-topbar-logo-container">
-            <button class="layout-menu-button layout-topbar-action" @click="onMenuToggle">
+            <button
+                class="layout-menu-button layout-topbar-action"
+                @click="onMenuToggle"
+            >
                 <i class="pi pi-bars"></i>
             </button>
 
@@ -80,21 +83,31 @@ const confirmLogout = () => {
 
         <div class="layout-topbar-actions items-center">
             <div class="layout-config-menu">
-                <button type="button" class="layout-topbar-action" @click="toggleDarkMode">
-                    <i :class="[
-                        'pi',
-                        { 'pi-moon': isDarkTheme, 'pi-sun': !isDarkTheme },
-                    ]"></i>
+                <button
+                    type="button"
+                    class="layout-topbar-action"
+                    @click="toggleDarkMode"
+                >
+                    <i
+                        :class="[
+                            'pi',
+                            { 'pi-moon': isDarkTheme, 'pi-sun': !isDarkTheme },
+                        ]"
+                    ></i>
                 </button>
                 <div class="relative">
-                    <button v-styleclass="{
-                        selector: '@next',
-                        enterFromClass: 'hidden',
-                        enterActiveClass: 'animate-scalein',
-                        leaveToClass: 'hidden',
-                        leaveActiveClass: 'animate-fadeout',
-                        hideOnOutsideClick: true,
-                    }" type="button" class="layout-topbar-action layout-topbar-action-highlight">
+                    <button
+                        v-styleclass="{
+                            selector: '@next',
+                            enterFromClass: 'hidden',
+                            enterActiveClass: 'animate-scalein',
+                            leaveToClass: 'hidden',
+                            leaveActiveClass: 'animate-fadeout',
+                            hideOnOutsideClick: true,
+                        }"
+                        type="button"
+                        class="layout-topbar-action layout-topbar-action-highlight"
+                    >
                         <i class="pi pi-palette"></i>
                     </button>
                     <AppConfigurator />
@@ -141,11 +154,27 @@ const confirmLogout = () => {
                     </button>
                 </div>
             </div> -->
-            <button type="button" @click="toggleProfileMenu" aria-haspopup="true" aria-controls="overlay_menu" style="display: flex">
-                <Avatar :image="user && user.image ? user.image : placeholder" shape="circle" size="large" />
+            <button
+                type="button"
+                @click="toggleProfileMenu"
+                aria-haspopup="true"
+                aria-controls="overlay_menu"
+                style="display: flex"
+            >
+                <Avatar
+                    :image="user && user.image ? user.image : placeholder"
+                    shape="circle"
+                    size="large"
+                />
             </button>
         </div>
-        <Menu :model="items" ref="menu" id="overlay_menu" class="w-full md:w-80 p-2" :popup="true">
+        <Menu
+            :model="items"
+            ref="menu"
+            id="overlay_menu"
+            class="w-full md:w-80 p-2"
+            :popup="true"
+        >
             <template #submenulabel="{ item }">
                 <span class="text-primary font-bold">{{ item.label }}</span>
             </template>
@@ -153,18 +182,33 @@ const confirmLogout = () => {
                 <a v-ripple class="flex items-center" v-bind="props.action">
                     <span :class="item.icon" class="text-xl" />
                     <span>{{ item.label }}</span>
-                    <Badge v-if="item.badge" class="ml-auto" :value="item.badge" />
-                    <span v-if="item.shortcut" class="ml-auto border border-surface rounded bg-emphasis text-muted-color text-xs p-1">{{ item.shortcut }}</span>
+                    <Badge
+                        v-if="item.badge"
+                        class="ml-auto"
+                        :value="item.badge"
+                    />
+                    <span
+                        v-if="item.shortcut"
+                        class="ml-auto border border-surface rounded bg-emphasis text-muted-color text-xs p-1"
+                        >{{ item.shortcut }}</span
+                    >
                 </a>
             </template>
             <template #start>
-                <div class="relative overflow-hidden w-full p-2 rounded-none transition-colors duration-200">
+                <div
+                    class="relative overflow-hidden w-full p-2 rounded-none transition-colors duration-200"
+                >
                     <h2 class="font-bold text-xl mb-4">
                         {{ $t("user.profile") }}
                     </h2>
                     <div class="flex items-center gap-4">
-                        <Avatar :image="user && user.image ? user.image : placeholder
-                            " shape="circle" size="xlarge" />
+                        <Avatar
+                            :image="
+                                user && user.image ? user.image : placeholder
+                            "
+                            shape="circle"
+                            size="xlarge"
+                        />
 
                         <div class="inline-flex flex-col items-start gap-1">
                             <span class="font-bold text-lg capitalize">{{
@@ -173,7 +217,9 @@ const confirmLogout = () => {
                             <span class="text-muted-color text-base">{{
                                 user.roles.name
                             }}</span>
-                            <div class="flex items-center gap-2 text-muted-color">
+                            <div
+                                class="flex items-center gap-2 text-muted-color"
+                            >
                                 <span class="pi pi-envelope"></span>
 
                                 <span class="text-sm"> {{ user.email }}</span>

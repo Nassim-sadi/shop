@@ -24,6 +24,7 @@ declare module 'vue' {
     IconField: typeof import('primevue/iconfield')['default']
     Image: typeof import('primevue/image')['default']
     InputIcon: typeof import('primevue/inputicon')['default']
+    InputNumber: typeof import('primevue/inputnumber')['default']
     InputText: typeof import('primevue/inputtext')['default']
     Menu: typeof import('primevue/menu')['default']
     Message: typeof import('primevue/message')['default']

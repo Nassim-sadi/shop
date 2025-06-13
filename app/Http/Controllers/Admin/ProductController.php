@@ -33,6 +33,7 @@ class ProductController extends Controller
                 $q->where('status', $request->status);
             })
             ->with('category')
+            ->with('options')
             ->orderBy('created_at', 'DESC')
             // ->when($user->hasRole("Super Admin"), function ($q) use ($request) {
             //     $q->when(isset($request->deleted) && $request->deleted !== '', function ($q) use ($request) {
@@ -52,6 +53,13 @@ class ProductController extends Controller
     {
         debugbar()->log($request->all());
         $this->authorize('product_create');
+
+        if ($request->has('options')) {
+            $request->merge([
+                'options' => json_decode($request->input('options'), true)
+            ]);
+        }
+
         $request->validate([
             'name' => 'required',
             'description' => 'required|string|min:10|max:255',
@@ -64,6 +72,8 @@ class ProductController extends Controller
             'status' => 'required|boolean',
             'featured' => 'required|boolean',
             'images' => 'required|array|min:1',
+            'options' => 'nullable|array',
+            'options.*' => 'exists:product_options,id',
         ]);
 
         // Start a transaction to ensure data integrity
@@ -97,6 +107,11 @@ class ProductController extends Controller
                     'alt_text' => $image->getClientOriginalName() ?? '',
                 ]);
             }
+
+            if ($request->filled('options')) {
+                $product->options()->sync($request->input('options'));
+            }
+
             DB::commit();
 
             $agent = UA::parse($request->server('HTTP_USER_AGENT'));
@@ -266,5 +281,18 @@ class ProductController extends Controller
             browser: $agent->ua->family,
         );
         return response()->json(['message' => 'Product deleted successfully']);
+    }
+
+    public function getVariants(Request $request, $id)
+    {
+
+        debugbar()->log($request->all());
+        debugbar()->log('id is ' .  $id);
+
+        $this->authorize('product_view');
+        $product = Product::findOrFail($id);
+        $product->load('variants');
+
+        return response()->json(['variants' => $product->variants]);
     }
 }

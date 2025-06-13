@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\AuthController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\ProductOptionController;
+use App\Http\Controllers\Admin\ProductVariantController;
 use App\Http\Controllers\Admin\ResetPasswordController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\UserController;
@@ -74,10 +75,12 @@ Route::middleware(["auth:sanctum"])->group(function () {
     Route::prefix('products')->controller(ProductController::class)->group(function () {
         Route::get('/', 'get');
         Route::get('/{id}/images', 'getImages');
+        Route::get('/{id}/variants', 'getVariants');
         Route::post('/create', 'create');
         Route::post('/update', 'update');
         Route::patch('/change-status', 'changeStatus');
         Route::delete('/delete/{id}', 'delete');
+        Route::get('{id}/variants', [ProductVariantController::class, 'get']);
     });
 
     Route::prefix('product-options')->controller(ProductOptionController::class)->group(function () {
@@ -88,6 +91,8 @@ Route::middleware(["auth:sanctum"])->group(function () {
         Route::patch('/change-status', 'changeStatus');
         Route::delete('/delete/{id}', 'delete');
     });
+
+
 
     // todo : add email verification
     // Route::controller(EmailVerificationController::class)->group(function () {

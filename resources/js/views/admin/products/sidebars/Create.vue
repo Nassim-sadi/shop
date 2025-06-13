@@ -67,6 +67,8 @@ const featuredOptions = [
     },
 ];
 
+const selectedOptions = ref([]);
+
 const product = ref({
     name: "",
     description: "",
@@ -215,6 +217,14 @@ watch(
     },
 );
 
+const handleSelectedOptions = (options) => {
+    let tempOptions = [];
+    options.forEach((option) => {
+        tempOptions.push(option.id);
+    });
+    return tempOptions;
+};
+
 const createItem = () => {
     v$.value.$touch();
     if (v$.value.$invalid) return;
@@ -231,9 +241,13 @@ const createItem = () => {
     formData.append("featured", product.value.featured);
     formData.append("category_id", product.value.category.id);
     formData.append("status", product.value.status);
-
+    if (selectedOptions.value.length > 0) {
+        formData.append(
+            "options",
+            JSON.stringify(handleSelectedOptions(selectedOptions.value)),
+        );
+    }
     $emit("createItem", formData);
-
     v$.value.$reset();
 };
 
@@ -483,6 +497,22 @@ const prevStep = () => {
                                     error.$message
                                 }}</Message>
                             </div>
+                        </div>
+                        <div class="mb-5">
+                            <label for="options" class="mb-5"
+                                >{{ $t("products.options") }}
+                            </label>
+
+                            <MultiSelect
+                                v-model="selectedOptions"
+                                display="chip"
+                                :options="options"
+                                option-label="name"
+                                placeholder="Select options"
+                                :max-selected-labels="3"
+                                :show-toggle-all="true"
+                                fluid
+                            />
                         </div>
 
                         <div class="mb-5">

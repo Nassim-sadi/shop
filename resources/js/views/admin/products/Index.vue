@@ -11,6 +11,8 @@ import { computed, onMounted, ref } from "vue";
 import Create from "./sidebars/Create.vue";
 import Details from "./sidebars/Details.vue";
 import Edit from "./sidebars/Edit.vue";
+import Variants from "./sidebars/variants/Index.vue";
+
 const Confirm = useConfirm();
 const products = ref([]);
 const loading = ref(false);
@@ -30,6 +32,7 @@ const currentIndex = ref(null);
 const actionsPopover = ref();
 const categories = ref([]);
 const productOptions = ref([]);
+const isVariantsOpen = ref(false);
 const togglePopover = ({ event: event, current: data, index: index }) => {
     current.value = data;
     currentIndex.value = index;
@@ -64,11 +67,14 @@ const statusOptions = [
 const auth = authStore();
 
 const getProductOptions = async () => {
+    console.log("getting product options");
     return new Promise((resolve, reject) => {
         axios
             .get("api/admin/product-options/all")
             .then((res) => {
                 productOptions.value = res.data;
+                console.log(productOptions.value);
+
                 resolve(res.data);
             })
             .catch((err) => {
@@ -128,9 +134,11 @@ const getProducts = async () => {
             })
             .then((res) => {
                 products.value = res.data.data;
+                console.log("🚀 ~ .then ~  products.value:", products.value);
                 total.value = res.data.total;
                 currentPage.value = res.data.current_page;
                 per_page.value = res.data.per_page;
+
                 resolve(res.data);
             })
             .catch((err) => {
@@ -305,6 +313,9 @@ const createItem = (val) => {
             })
             .then((res) => {
                 products.value.push(res.data.product);
+                console.log(products.value);
+                uploadPercentage.value = 0;
+                total.value++;
                 isCreateOpen.value = false;
                 emitter.emit("toast", {
                     summary: $t("status.success.title"),
@@ -342,6 +353,10 @@ const getCategories = async () => {
 //     router.push({ name: "ProductVariants", params: { id: productId } });
 // };
 
+const openVariants = () => {
+    isVariantsOpen.value = true;
+};
+
 onMounted(async () => {
     await getCategories();
     await getProductOptions();
@@ -365,6 +380,13 @@ onMounted(async () => {
             :categories="categories"
             :loading="loadingCreate"
             :progress="uploadPercentage"
+        />
+
+        <Variants
+            :current="current ? current : null"
+            :loading="loadingStates[current.id]"
+            :options="productOptions"
+            v-model:is-open="isVariantsOpen"
         />
 
         <Edit
@@ -579,7 +601,7 @@ onMounted(async () => {
                 <span class="font-bold text-primary">
                     {{ total }}
                 </span>
-                {{ $t("user.title", total) }}.
+                {{ $t("products.title", total) }}.
             </template>
         </DataTable>
 
@@ -591,12 +613,26 @@ onMounted(async () => {
                     size="normal"
                     text
                     :label="$t('common.view_details')"
+                    v-tooltip.bottom="$t('common.view_details')"
                     severity="info"
                     @click="openDetails"
-                    v-tooltip.bottom="$t('common.view_details')"
                     class="action-btn"
                     :loading="loadingStates[current.id]"
                     v-if="ability.can('product', 'view')"
+                />
+
+                <Button
+                    icon="ti ti-box-multiple"
+                    rounded
+                    size="normal"
+                    text
+                    v-tooltip.bottom="$t('products.manage_variants')"
+                    :label="$t('products.manage_variants')"
+                    severity="warn"
+                    @click="openVariants"
+                    class="action-btn"
+                    :loading="loadingStates[current.id]"
+                    v-if="ability.can('product', 'edit')"
                 />
 
                 <Button

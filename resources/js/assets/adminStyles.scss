@@ -109,6 +109,13 @@ body {
     }
 }
 
+.extra-large-drawer{
+    width: 70rem !important;
+    @media screen and (max-width: 576px) {
+        width: 100% !important;
+    }
+}
+
 .toggleStatusBtn {
     width: 100%;
 
@@ -186,3 +193,7 @@ label{
     }
 }
 
+
+.p-message {
+    margin-bottom: 1rem ;
+}

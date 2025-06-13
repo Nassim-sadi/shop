@@ -5,7 +5,6 @@ import { canNavigate } from "@/plugins/canNavigate";
 import { authStore } from "@/store/AuthStore";
 import { createRouter, createWebHistory } from "vue-router";
 import { isUserLoggedIn } from "./utils";
-import navigation from "@/constants/navigation/Index";
 import { $t } from "@/plugins/i18n";
 const router = createRouter({
     history: createWebHistory(),
@@ -59,13 +58,6 @@ const router = createRouter({
                     name: "products",
                     meta: { title: $t("navigation.products") },
                     component: () => import("@/views/admin/products/Index.vue"),
-                },
-                {
-                    path: "products/:id",
-                    name: "ProductVariants",
-                    meta: { title: $t("navigation.products") },
-                    component: () => import("@/views/admin/variants/Index.vue"),
-                    props: true,
                 },
                 {
                     path: "product-options",

@@ -18,10 +18,12 @@ const props = defineProps({
     },
     parent: {
         required: false,
+        type: String,
         default: "not_set",
     },
     progress: {
         type: Number,
+        default: 0,
         required: false,
     },
 });
@@ -159,7 +161,7 @@ watch(
         position="right"
         @update:visible="$emit('update:isOpen', $event)"
         :dismissable="false"
-        :showCloseIcon="false"
+        :show-close-icon="false"
         block-scroll
         class="small-drawer"
     >
@@ -194,8 +196,8 @@ watch(
                 aria-labelledby="status"
                 fluid
                 :options="statusOptions"
-                optionLabel="name"
-                optionValue="value"
+                option-label="name"
+                option-value="value"
                 class="toggleStatusBtn col-span-12"
             />
 
@@ -295,7 +297,3 @@ watch(
         </template>
     </Drawer>
 </template>
-
-<style lang="scss" scoped>
-/* Basic styling */
-</style>

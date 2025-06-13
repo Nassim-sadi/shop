@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources\Admin\Product;
 
+use App\Http\Resources\Admin\Product\Options\ProductOptionsResource;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -31,6 +32,7 @@ class ProductResource extends JsonResource
                 'id' => $this->category->id,
                 'name' => $this->category->name
             ],
+            'options' => ProductOptionsResource::collection($this->options),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];

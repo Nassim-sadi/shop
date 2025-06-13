@@ -270,6 +270,13 @@
                 "update": "Product option update failed",
                 "delete": "Product option deletion failed",
                 "change_status": "Product option status change failed"
+            },
+            "variant": {
+                "create": "Product variant creation failed",
+                "update": "Product variant update failed",
+                "delete": "Product variant deletion failed",
+                "change_status": "Product variant status change failed",
+                "csv_noData": "No data found to export in CSV file"
             }
         },
         "message": {
@@ -357,7 +364,19 @@
         "update_success": "Product updated successfully",
         "delete_success": "Product deleted successfully",
         "images": "Images",
-        "thumbnail_image": "Thumbnail image"
+        "thumbnail_image": "Thumbnail image",
+        "view_variants": "View variants",
+        "manage_variants": "Manage variants",
+        "add_variant": "Add variant",
+        "variant": "Variant",
+        "variant_price": "Variant price",
+        "variant_quantity": "Variant quantity",
+        "variant_images": "Variant images",
+        "variant_thumbnail": "Variant thumbnail",
+        "options": "Options",
+        "variants": {
+            "create": "Create variant"
+        }
     },
     "productOptions": {
         "title": "product option | product options",
@@ -393,6 +412,8 @@
         "settings": "Settings",
         "categories": "Categories",
         "products": "Products",
+        "variants": "Variants",
+        "orders": "Orders",
         "productOptions": "Product Options",
         "not_found": "Page not found",
         "login": "Login",
