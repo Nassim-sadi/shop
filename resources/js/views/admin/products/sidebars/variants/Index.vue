@@ -9,6 +9,7 @@ import { useConfirm } from "primevue/useconfirm";
 import { computed, ref, toRefs, watch } from "vue";
 import VariantInput from "./components/VariantInput.vue";
 import emitter from "@/plugins/emitter";
+import axios from "@/plugins/axios";
 
 const confirm = useConfirm();
 const props = defineProps({
@@ -164,10 +165,26 @@ watch(
             // Reset variant component if needed
             // v$.value.$reset();
         } else {
+            getVariants();
             productOptions.value = getProductOptionsInfo();
         }
     },
 );
+
+const getVariants = () => {
+    return new Promise((resolve, reject) => {
+        axios
+            .get(`api/admin/products/${current.value.id}/variants`)
+            .then((res) => {
+                console.log(res.data);
+                resolve(res.data);
+            })
+            .catch((err) => {
+                console.log(err);
+                reject(err);
+            });
+    });
+};
 </script>
 
 <template>

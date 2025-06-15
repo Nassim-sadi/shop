@@ -382,7 +382,7 @@ const exportCSV = () => {
         </div>
 
         <div v-else class="text-gray-500 text-center py-6">
-            No variants added.
+            {{ $t("products.variants.noVariants") }}
         </div>
     </div>
 </template>

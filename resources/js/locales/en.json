@@ -375,7 +375,15 @@
         "variant_thumbnail": "Variant thumbnail",
         "options": "Options",
         "variants": {
-            "create": "Create variant"
+            "create": "Create variant",
+            "edit": "Edit variant",
+            "update": "Update variant",
+            "delete": "Delete variant",
+            "details": "Variant details",
+            "create_success": "Variant created successfully",
+            "update_success": "Variant updated successfully",
+            "delete_success": "Variant deleted successfully",
+            "noVariants": "No variants for this product"
         }
     },
     "productOptions": {
