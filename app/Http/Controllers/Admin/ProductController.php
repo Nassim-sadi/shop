@@ -71,6 +71,7 @@ class ProductController extends Controller
             'thumbnail_image_path' => 'required|image|mimes:jpeg,png,jpg,gif,svg,webp|max:2048',
             'status' => 'required|boolean',
             'featured' => 'required|boolean',
+            'weight' => 'nullable|numeric',
             'images' => 'required|array|min:1',
             'options' => 'nullable|array',
             'options.*' => 'exists:product_options,id',
@@ -80,7 +81,17 @@ class ProductController extends Controller
         DB::beginTransaction();
         try {
             // Create the main product
-            $slug = Str::slug($request->name);
+            // Generate unique slug
+            $baseSlug = Str::slug($request->name);
+            $slug = $baseSlug;
+            $counter = 1;
+
+            // Check if slug exists (no need to exclude ID since we're creating new)
+            while (Product::where('slug', $slug)->exists()) {
+                $slug = $baseSlug . '-' . $counter;
+                $counter++;
+            }
+
             $product = Product::create([
                 'name' => $request->name,
                 'slug' => $slug,
@@ -90,6 +101,7 @@ class ProductController extends Controller
                 'base_quantity' => $request->base_quantity,
                 'listing_price' => $request->listing_price,
                 'status' => $request->status,
+                'weight' => $request->weight,
                 'featured' => $request->featured,
                 'category_id' => $request->category_id
             ]);
@@ -149,6 +161,7 @@ class ProductController extends Controller
             'category_id' => 'required|exists:categories,id',
             'thumbnail_image_path' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:2048',
             'status' => 'required|boolean',
+            'weight' => 'nullable|numeric',
             'featured' => 'required|boolean',
             'images' => 'required|array|min:1',
         ]);
@@ -156,7 +169,16 @@ class ProductController extends Controller
         $product = Product::findOrFail($request->id);
 
         // Update product details
-        $slug = Str::slug($request->name);
+        $baseSlug = Str::slug($request->name);
+        $slug = $baseSlug;
+        $counter = 1;
+
+        // Check if slug exists (excluding current product)
+        while (Product::where('slug', $slug)->where('id', '!=', $request->id)->exists()) {
+            $slug = $baseSlug . '-' . $counter;
+            $counter++;
+        }
+
         $product->update([
             'name' => $request->name,
             'slug' => $slug,
@@ -166,6 +188,7 @@ class ProductController extends Controller
             'base_quantity' => $request->base_quantity,
             'listing_price' => $request->listing_price,
             'status' => $request->status,
+            'weight' => $request->weight,
             'featured' => $request->featured,
             'category_id' => $request->category_id,
         ]);
@@ -281,18 +304,5 @@ class ProductController extends Controller
             browser: $agent->ua->family,
         );
         return response()->json(['message' => 'Product deleted successfully']);
-    }
-
-    public function getVariants(Request $request, $id)
-    {
-
-        debugbar()->log($request->all());
-        debugbar()->log('id is ' .  $id);
-
-        $this->authorize('product_view');
-        $product = Product::findOrFail($id);
-        $product->load('variants');
-
-        return response()->json(['variants' => $product->variants]);
     }
 }

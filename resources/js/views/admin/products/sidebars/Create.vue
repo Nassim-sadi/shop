@@ -1,7 +1,13 @@
 <script setup>
 import { $t } from "@/plugins/i18n";
 import useVuelidate from "@vuelidate/core";
-import { maxLength, required, numeric, minLength } from "@vuelidate/validators";
+import {
+    maxLength,
+    required,
+    numeric,
+    minLength,
+    requiredIf,
+} from "@vuelidate/validators";
 import {
     alphaSpace,
     validateDecimalFormat,
@@ -76,6 +82,7 @@ const product = ref({
     base_price: "",
     listing_price: "",
     base_quantity: "",
+    weight: null,
     featured: 0,
     category: null,
     status: 0,
@@ -113,6 +120,15 @@ const rules = computed(() => ({
     base_quantity: {
         numeric,
         required,
+    },
+    status: {
+        required,
+    },
+    featured: {
+        required,
+    },
+    weight: {
+        numeric: requiredIf((value) => value !== null && value !== ""),
     },
     category: {
         required,
@@ -190,6 +206,7 @@ const isEdited = computed(() => {
             base_price: "",
             listing_price: "",
             base_quantity: "",
+            weight: null,
             featured: 0,
             category: null,
             status: 0,
@@ -209,6 +226,7 @@ watch(
                 base_price: "",
                 listing_price: "",
                 base_quantity: "",
+                weight: null,
                 featured: 0,
                 category: null,
                 status: 0,
@@ -238,6 +256,13 @@ const createItem = () => {
     formData.append("base_price", product.value.base_price);
     formData.append("listing_price", product.value.listing_price);
     formData.append("base_quantity", product.value.base_quantity);
+    if (
+        product.value.weight !== null &&
+        product.value.weight !== "" &&
+        product.value.weight !== undefined
+    ) {
+        formData.append("weight", product.value.weight);
+    }
     formData.append("featured", product.value.featured);
     formData.append("category_id", product.value.category.id);
     formData.append("status", product.value.status);
@@ -532,6 +557,31 @@ const prevStep = () => {
                             <div
                                 class="text-red-500"
                                 v-for="error of v$.base_quantity.$errors"
+                                :key="error.$uid"
+                            >
+                                <Message severity="error">{{
+                                    error.$message
+                                }}</Message>
+                            </div>
+                        </div>
+
+                        <div class="mb-5">
+                            <label for="weight" class="mb-5">{{
+                                $t("products.weight")
+                            }}</label>
+
+                            <InputText
+                                :aria-labelledby="$t('products.weight')"
+                                id="weight"
+                                type="number"
+                                v-model="product.weight"
+                                fluid
+                                class="mb-5"
+                            />
+
+                            <div
+                                class="text-red-500"
+                                v-for="error of v$.weight.$errors"
                                 :key="error.$uid"
                             >
                                 <Message severity="error">{{

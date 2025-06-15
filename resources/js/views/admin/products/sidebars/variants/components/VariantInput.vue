@@ -14,18 +14,88 @@ const props = defineProps({
         type: Array,
         default: () => [],
     },
+    loading: {
+        type: Boolean,
+        default: false,
+    },
 });
 
 const variants = ref([]);
+const deletedVariantIds = ref([]); // Track IDs of deleted existing variants
+
+// Transform backend data to component format
+const transformVariantFromBackend = (backendVariant) => {
+    const options = {};
+
+    // Convert optionValues array to options object format
+    if (
+        backendVariant.option_values &&
+        backendVariant.option_values.length > 0
+    ) {
+        backendVariant.option_values.forEach((optionValue) => {
+            if (optionValue.product_option_id) {
+                options[optionValue.product_option_id] = optionValue.id;
+            }
+        });
+    }
+
+    return {
+        id: backendVariant.id, // Keep original DB ID
+        options: options,
+        price: parseFloat(backendVariant.price) || 0,
+        quantity: parseInt(backendVariant.quantity) || 0,
+        status: backendVariant.status,
+        isExisting: true, // Flag to identify existing variants
+        originalData: { ...backendVariant }, // Keep original data for comparison
+    };
+};
+
+// Check if variant data has been modified
+const isVariantModified = (variant) => {
+    if (!variant.isExisting || !variant.originalData) {
+        return false; // New variants are always considered "modified"
+    }
+
+    const original = variant.originalData;
+
+    // Check if basic fields changed
+    if (
+        parseFloat(variant.price) !== parseFloat(original.price) ||
+        parseInt(variant.quantity) !== parseInt(original.quantity) ||
+        variant.status !== original.status
+    ) {
+        return true;
+    }
+
+    // Check if option values changed
+    const originalOptions = {};
+    if (original.option_values && original.option_values.length > 0) {
+        original.option_values.forEach((optionValue) => {
+            if (optionValue.product_option_id) {
+                originalOptions[optionValue.product_option_id] = optionValue.id;
+            }
+        });
+    }
+
+    for (const optionId of Object.keys(variant.options)) {
+        if (variant.options[optionId] !== originalOptions[optionId]) {
+            return true;
+        }
+    }
+
+    return false;
+};
 
 // Initialize variants with existing data or empty array
 const initializeVariants = () => {
     if (props.initialVariants && props.initialVariants.length > 0) {
-        // Load existing variants (they already have real DB IDs)
-        variants.value = [...props.initialVariants];
+        // Transform existing variants from backend format
+        variants.value = props.initialVariants.map(transformVariantFromBackend);
     } else {
         variants.value = [];
     }
+    // Reset deleted variants when initializing
+    deletedVariantIds.value = [];
 };
 
 // Initialize when component mounts
@@ -127,10 +197,13 @@ const addVariant = async () => {
 
     // Create new variant
     const variant = {
-        id: generateTempId(), // More unique temp ID
+        id: generateTempId(), // Temp ID for new variants
         options: {},
         price: null,
         quantity: null,
+        status: 1, // Default to active status
+        isExisting: false, // Flag for new variants
+        originalData: null, // No original data for new variants
     };
 
     for (const option of props.options) {
@@ -190,17 +263,41 @@ watch(
 );
 
 const removeVariant = (index) => {
+    const variant = variants.value[index];
+
+    // If it's an existing variant (from database), track its ID for deletion
+    if (variant.isExisting && variant.id > 0) {
+        deletedVariantIds.value.push(variant.id);
+
+        emitter.emit("toast", {
+            summary: $t("status.info.title"),
+            message: "Variant marked for deletion. Save to confirm.",
+            severity: "info",
+        });
+    }
+
+    // Remove from variants array
     variants.value.splice(index, 1);
+};
+
+// Toggle variant status
+const toggleVariantStatus = (index) => {
+    variants.value[index].status = variants.value[index].status ? 0 : 1;
 };
 
 // Computed property to check if save button should be enabled
 const canSave = computed(() => {
-    // Must have at least one variant
-    if (variants.value.length === 0) {
+    // Must have at least one variant OR have deleted variants to process
+    if (variants.value.length === 0 && deletedVariantIds.value.length === 0) {
         return false;
     }
 
-    // All variants must be complete
+    // If we only have deleted variants, we can save
+    if (variants.value.length === 0 && deletedVariantIds.value.length > 0) {
+        return true;
+    }
+
+    // All remaining variants must be complete
     const allVariantsComplete = variants.value.every((variant) =>
         isVariantComplete(variant),
     );
@@ -213,15 +310,70 @@ const canSave = computed(() => {
         isDuplicateCombination(variant, index),
     );
 
-    return !hasDuplicates;
+    if (hasDuplicates) {
+        return false;
+    }
+
+    // Check if there are any changes to save
+    const hasNewVariants = variants.value.some(
+        (variant) => !variant.isExisting,
+    );
+    const hasModifiedVariants = variants.value.some(
+        (variant) => variant.isExisting && isVariantModified(variant),
+    );
+    const hasDeletedVariants = deletedVariantIds.value.length > 0;
+
+    return hasNewVariants || hasModifiedVariants || hasDeletedVariants;
 });
 
-// Expose to parent
+// Computed properties to separate new and updated variants
+const newVariants = computed(() => {
+    return variants.value
+        .filter((variant) => !variant.isExisting)
+        .map((variant) => ({
+            options: variant.options,
+            price: parseFloat(variant.price),
+            quantity: parseInt(variant.quantity),
+            status: variant.status,
+        }));
+});
+
+const updatedVariants = computed(() => {
+    return variants.value
+        .filter((variant) => variant.isExisting && isVariantModified(variant))
+        .map((variant) => ({
+            id: variant.id,
+            options: variant.options,
+            price: parseFloat(variant.price),
+            quantity: parseInt(variant.quantity),
+            status: variant.status,
+        }));
+});
+
+const deletedVariants = computed(() => {
+    return deletedVariantIds.value;
+});
+
+// Computed property for variants that have changes
+const hasUnsavedChanges = computed(() => {
+    return (
+        variants.value.some(
+            (variant) => !variant.isExisting || isVariantModified(variant),
+        ) || deletedVariantIds.value.length > 0
+    );
+});
+
+// Expose to parent with separated data
 defineExpose({
     selects: variants,
+    newVariants,
+    updatedVariants,
+    deletedVariants,
     canSave,
+    hasUnsavedChanges,
     isVariantComplete,
     isDuplicateCombination,
+    isVariantModified,
 });
 
 const isOptionInvalid = (i, optionId) => {
@@ -260,19 +412,42 @@ const exportCSV = () => {
         return;
     }
 
-    const headers = [...props.options.map((o) => o.name), "Price", "Quantity"];
+    const headers = [
+        "ID",
+        "Type",
+        ...props.options.map((o) => o.name),
+        "Price",
+        "Quantity",
+        "Status",
+        "Modified",
+    ];
 
     const rows = variants.value.map((variant) => {
         const row = [];
 
+        // Add ID and type
+        row.push(variant.isExisting ? variant.id : "NEW");
+        row.push(variant.isExisting ? "Existing" : "New");
+
+        // Add option values
         for (const option of props.options) {
             const valId = variant.options[option.id];
             const name = computedOptionMap.value[option.id]?.[valId] ?? "";
             row.push(name);
         }
 
+        // Add other fields
         row.push(variant.price ?? "");
         row.push(variant.quantity ?? "");
+        row.push(variant.status ? "Active" : "Inactive");
+        row.push(
+            variant.isExisting
+                ? isVariantModified(variant)
+                    ? "Yes"
+                    : "No"
+                : "New",
+        );
+
         return row;
     });
 
@@ -294,29 +469,62 @@ const exportCSV = () => {
 
 <template>
     <div class="flex flex-col gap-4">
-        <div class="flex justify-end">
-            <Button
-                icon="pi pi-plus"
-                label="Add Variant"
-                severity="success"
-                @click="addVariant"
-                :disabled="options.length === 0"
-            />
+        <!-- Header with action buttons -->
+        <div class="flex justify-between items-center">
+            <div class="text-sm text-gray-600">
+                <span
+                    v-if="variants.length > 0 || deletedVariantIds.length > 0"
+                >
+                    Total: {{ variants.length }} variants
+                    <span v-if="newVariants.length > 0" class="text-green-600">
+                        ({{ newVariants.length }} new)
+                    </span>
+                    <span
+                        v-if="updatedVariants.length > 0"
+                        class="text-blue-600"
+                    >
+                        ({{ updatedVariants.length }} modified)
+                    </span>
+                    <span
+                        v-if="deletedVariantIds.length > 0"
+                        class="text-red-600"
+                    >
+                        ({{ deletedVariantIds.length }} to delete)
+                    </span>
+                </span>
+            </div>
 
-            <Button
-                icon="pi pi-download"
-                label="Export CSV"
-                class="ml-2"
-                severity="info"
-                @click="exportCSV"
-                :disabled="variants.length === 0"
-            />
+            <div class="flex gap-2">
+                <Button
+                    icon="pi pi-plus"
+                    label="Add Variant"
+                    severity="success"
+                    @click="addVariant"
+                    :disabled="options.length === 0 || loading"
+                />
+
+                <Button
+                    icon="pi pi-download"
+                    label="Export CSV"
+                    severity="info"
+                    @click="exportCSV"
+                    :disabled="variants.length === 0 || loading"
+                />
+            </div>
         </div>
 
-        <div v-if="variants.length > 0" class="overflow-auto">
+        <!-- Loading state -->
+        <div v-if="loading" class="text-center py-6">
+            <ProgressSpinner style="width: 50px; height: 50px" />
+            <p class="mt-2 text-gray-600">Loading variants...</p>
+        </div>
+
+        <!-- Variants table -->
+        <div v-else-if="variants.length > 0" class="overflow-auto">
             <table class="w-full border text-sm">
                 <thead>
                     <tr class="bg-gray-100 text-left">
+                        <th class="px-3 py-2 border">Type</th>
                         <th
                             v-for="option in options"
                             :key="option.id"
@@ -326,6 +534,7 @@ const exportCSV = () => {
                         </th>
                         <th class="px-3 py-2 border">Price</th>
                         <th class="px-3 py-2 border">Quantity</th>
+                        <th class="px-3 py-2 border">Status</th>
                         <th class="px-3 py-2 border">Actions</th>
                     </tr>
                 </thead>
@@ -334,7 +543,39 @@ const exportCSV = () => {
                         v-for="(variant, i) in variants"
                         :key="variant.id"
                         class="hover:bg-gray-50"
+                        :class="{
+                            'bg-blue-50':
+                                variant.isExisting &&
+                                !isVariantModified(variant),
+                            'bg-green-50': !variant.isExisting,
+                            'bg-yellow-50':
+                                variant.isExisting &&
+                                isVariantModified(variant),
+                        }"
                     >
+                        <!-- Type indicator -->
+                        <td class="px-3 py-2 border">
+                            <span
+                                v-if="!variant.isExisting"
+                                class="px-2 py-1 bg-green-100 text-green-800 rounded text-xs"
+                            >
+                                New
+                            </span>
+                            <span
+                                v-else-if="isVariantModified(variant)"
+                                class="px-2 py-1 bg-yellow-100 text-yellow-800 rounded text-xs"
+                            >
+                                Modified
+                            </span>
+                            <span
+                                v-else
+                                class="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs"
+                            >
+                                Existing
+                            </span>
+                        </td>
+
+                        <!-- Option columns -->
                         <td
                             v-for="option in options"
                             :key="option.id"
@@ -350,30 +591,65 @@ const exportCSV = () => {
                                 :class="{
                                     'p-invalid': isOptionInvalid(i, option.id),
                                 }"
+                                :disabled="loading"
                             />
                         </td>
+
+                        <!-- Price -->
                         <td class="px-3 py-2 border">
                             <InputText
                                 v-model="variant.price"
                                 type="number"
+                                step="0.01"
+                                min="0"
                                 class="w-full"
                                 :class="{ 'p-invalid': isPriceInvalid(i) }"
+                                :disabled="loading"
                             />
                         </td>
+
+                        <!-- Quantity -->
                         <td class="px-3 py-2 border">
                             <InputText
                                 v-model="variant.quantity"
                                 type="number"
+                                min="0"
                                 class="w-full"
                                 :class="{ 'p-invalid': isQuantityInvalid(i) }"
+                                :disabled="loading"
                             />
                         </td>
+
+                        <!-- Status -->
+                        <td class="px-3 py-2 border text-center">
+                            <Button
+                                :icon="
+                                    variant.status
+                                        ? 'pi pi-eye'
+                                        : 'pi pi-eye-slash'
+                                "
+                                :severity="
+                                    variant.status ? 'success' : 'secondary'
+                                "
+                                :label="
+                                    variant.status
+                                        ? $t('common.active')
+                                        : $t('common.inactive')
+                                "
+                                size="small"
+                                @click="toggleVariantStatus(i)"
+                                :disabled="loading"
+                            />
+                        </td>
+
+                        <!-- Actions -->
                         <td class="px-3 py-2 border text-center">
                             <Button
                                 icon="pi pi-trash"
                                 severity="danger"
                                 text
                                 @click="removeVariant(i)"
+                                :disabled="loading"
                             />
                         </td>
                     </tr>
@@ -381,6 +657,7 @@ const exportCSV = () => {
             </table>
         </div>
 
+        <!-- Empty state -->
         <div v-else class="text-gray-500 text-center py-6">
             {{ $t("products.variants.noVariants") }}
         </div>

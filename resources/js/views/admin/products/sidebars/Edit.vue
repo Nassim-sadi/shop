@@ -1,7 +1,13 @@
 <script setup>
 import { $t } from "@/plugins/i18n";
 import useVuelidate from "@vuelidate/core";
-import { maxLength, required, numeric, minLength } from "@vuelidate/validators";
+import {
+    maxLength,
+    required,
+    numeric,
+    minLength,
+    requiredIf,
+} from "@vuelidate/validators";
 import {
     alphaSpace,
     validateDecimalFormat,
@@ -80,6 +86,7 @@ const edited = ref({
     listing_price: "",
     base_quantity: "",
     featured: 0,
+    weight: null,
     category: null,
     status: 0,
 });
@@ -116,6 +123,9 @@ const rules = computed(() => ({
     base_quantity: {
         numeric,
         required,
+    },
+    weight: {
+        numeric: requiredIf((value) => value !== null && value !== ""),
     },
     category: {
         required,
@@ -194,6 +204,7 @@ const isEdited = computed(() => {
             base_quantity: "",
             featured: 0,
             category: null,
+            weight: null,
             status: 0,
         }) || previewImage.value !== productPlaceHolder
     );
@@ -227,6 +238,7 @@ const editItem = () => {
     formData.append("listing_price", edited.value.listing_price);
     formData.append("base_quantity", edited.value.base_quantity);
     formData.append("featured", edited.value.featured);
+    formData.append("weight", edited.value.weight);
     formData.append("category_id", edited.value.category.id);
     formData.append("status", edited.value.status);
 
@@ -265,6 +277,7 @@ const resetForm = () => {
         base_quantity: "",
         featured: 0,
         category: null,
+        weight: null,
         status: 0,
         images: [],
     };
@@ -554,6 +567,31 @@ watch(
                             <div
                                 class="text-red-500"
                                 v-for="error of v$.base_quantity.$errors"
+                                :key="error.$uid"
+                            >
+                                <Message severity="error">{{
+                                    error.$message
+                                }}</Message>
+                            </div>
+                        </div>
+
+                        <div class="mb-5">
+                            <label for="weight" class="mb-5">{{
+                                $t("products.weight")
+                            }}</label>
+
+                            <InputText
+                                :aria-labelledby="$t('products.weight')"
+                                id="weight"
+                                type="number"
+                                v-model="edited.weight"
+                                fluid
+                                class="mb-5"
+                            />
+
+                            <div
+                                class="text-red-500"
+                                v-for="error of v$.weight.$errors"
                                 :key="error.$uid"
                             >
                                 <Message severity="error">{{

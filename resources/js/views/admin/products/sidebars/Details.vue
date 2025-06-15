@@ -34,7 +34,7 @@ const onSwiper = (swiper) => {
         :header="$t('products.details')"
         position="right"
         @update:visible="$emit('update:isOpen', $event)"
-        class="small-drawer"
+        class="medium-drawer"
         block-scroll
     >
         <div class="mb-4">
@@ -58,12 +58,16 @@ const onSwiper = (swiper) => {
 
         <div class="mb-4">
             <p class="font-bold">{{ $t("products.description") }} :</p>
-            {{ current.description }}
+            <p>
+                {{ current.description }}
+            </p>
         </div>
 
         <div class="mb-4">
             <p class="font-bold">{{ $t("products.long_description") }} :</p>
-            {{ current.long_description }}
+            <p>
+                {{ current.long_description }}
+            </p>
         </div>
 
         <div class="mb-4">
@@ -88,6 +92,11 @@ const onSwiper = (swiper) => {
         <div class="mb-4">
             <p class="font-bold">{{ $t("products.base_quantity") }} :</p>
             {{ current.base_quantity }}
+        </div>
+
+        <div class="mb-4" v-if="current.weight">
+            <p class="font-bold">{{ $t("products.weight") }} :</p>
+            {{ current.weight }}
         </div>
 
         <div class="mb-4">

@@ -21,6 +21,7 @@ class Product extends Model
         'base_quantity',
         'status',
         'featured',
+        'weight',
         'thumbnail_image_path',
     ];
 

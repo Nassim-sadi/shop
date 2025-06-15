@@ -374,6 +374,7 @@
         "variant_images": "Variant images",
         "variant_thumbnail": "Variant thumbnail",
         "options": "Options",
+        "weight": "Weight",
         "variants": {
             "create": "Create variant",
             "edit": "Edit variant",

@@ -348,10 +348,6 @@ const getCategories = async () => {
             });
     });
 };
-// import router from "@/router/Index";
-// const goToProductVariants = (productId) => {
-//     router.push({ name: "ProductVariants", params: { id: productId } });
-// };
 
 const openVariants = () => {
     isVariantsOpen.value = true;

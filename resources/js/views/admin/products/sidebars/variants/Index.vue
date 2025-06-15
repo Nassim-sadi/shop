@@ -1,10 +1,5 @@
 <script setup>
 import { $t } from "@/plugins/i18n";
-import { maxLength, required, numeric, minLength } from "@vuelidate/validators";
-import {
-    alphaSpace,
-    validateDecimalFormat,
-} from "@/validators/CustomValidators";
 import { useConfirm } from "primevue/useconfirm";
 import { computed, ref, toRefs, watch } from "vue";
 import VariantInput from "./components/VariantInput.vue";
@@ -29,20 +24,13 @@ const props = defineProps({
         required: true,
         type: Object,
     },
-    existingVariants: {
-        type: Array,
-        default: () => [],
-    },
-    isEditing: {
-        type: Boolean,
-        default: false,
-    },
 });
 
-const $emit = defineEmits(["update:isOpen", "createItem"]);
+const $emit = defineEmits(["update:isOpen", "updateItem"]);
 
-const { isOpen, loading, current, options, existingVariants, isEditing } =
-    toRefs(props);
+const initialVariants = ref([]);
+const { isOpen, loading, current, options } = toRefs(props);
+const isLoading = ref(false);
 
 const variantRef = ref(null);
 
@@ -51,7 +39,28 @@ const canSave = computed(() => {
     return variantRef.value?.canSave || false;
 });
 
-const createItem = () => {
+const separateVariants = () => {
+    const selectedVariants = variantRef.value?.selects || [];
+    const deletedVariants = variantRef.value?.deletedVariants || [];
+    console.log("selectedVariants:", selectedVariants);
+    console.log("deletedVariants:", deletedVariants);
+
+    // Separate new variants (negative IDs) from existing ones (positive IDs)
+    const newVariants = selectedVariants.filter((v) => v.id < 0);
+    const updatedVariants = selectedVariants.filter((v) => v.id > 0);
+
+    // Clean temp IDs from new variants
+    const cleanNewVariants = newVariants.map(({ id, ...variant }) => variant);
+
+    return {
+        newVariants: cleanNewVariants,
+        updatedVariants: updatedVariants,
+        deletedVariants: deletedVariants,
+        selectedVariants,
+    };
+};
+
+const updateItem = async () => {
     if (!canSave.value) {
         emitter.emit("toast", {
             summary: $t("status.error.title"),
@@ -61,63 +70,65 @@ const createItem = () => {
         return;
     }
 
-    const selectedVariants = variantRef.value?.selects || [];
-    console.log("selectedVariants:", selectedVariants);
+    const { newVariants, updatedVariants, deletedVariants } =
+        separateVariants();
 
-    // Separate new variants (negative IDs) from existing ones (positive IDs)
-    const newVariants = selectedVariants.filter((v) => v.id < 0);
-    const updatedVariants = selectedVariants.filter((v) => v.id > 0);
+    try {
+        isLoading.value = true;
 
-    // Clean temp IDs from new variants
-    const cleanNewVariants = newVariants.map(({ id, ...variant }) => variant);
+        // Call the update API endpoint
+        const response = await updateVariants({
+            newVariants,
+            updatedVariants,
+            deletedVariants,
+        });
 
-    // Emit to parent with separated data
-    $emit("createItem", {
-        newVariants: cleanNewVariants,
-        updatedVariants: updatedVariants,
-        isEditing: isEditing.value,
-    });
+        emitter.emit("toast", {
+            summary: $t("status.success.title"),
+            message: `Variants updated successfully. Created: ${response.created_count}, Updated: ${response.updated_count}, Deleted: ${response.deleted_count || 0}`,
+            severity: "success",
+        });
+
+        // Emit to parent to refresh data or handle success
+        $emit("updateItem", response);
+
+        // Close the drawer
+        $emit("update:isOpen", false);
+
+        // Refresh variants data
+        await getVariants();
+    } catch (error) {
+        console.error("Error updating variants:", error);
+
+        const errorMessage =
+            error.response?.data?.message ||
+            error.response?.data?.errors ||
+            "An error occurred while updating variants";
+
+        emitter.emit("toast", {
+            summary: $t("status.error.title"),
+            message: errorMessage,
+            severity: "error",
+        });
+    } finally {
+        isLoading.value = false;
+    }
 };
 
-const rules = computed(() => ({
-    name: {
-        required,
-        alphaSpace,
-        maxLength: maxLength(255),
-        minLength: minLength(3),
-    },
-    description: {
-        alphaSpace,
-        required,
-        maxLength: maxLength(255),
-        minLength: minLength(10),
-    },
-    long_description: {
-        required,
-        alphaSpace,
-        maxLength: maxLength(2000),
-        minLength: minLength(10),
-    },
-    base_price: {
-        required,
-        numeric,
-        validateDecimalFormat,
-    },
-    listing_price: {
-        required,
-        numeric,
-        validateDecimalFormat,
-    },
-    base_quantity: {
-        numeric,
-        required,
-    },
-    category: {
-        required,
-    },
-}));
-
-// const v$ = useVuelidate(rules, product);
+const updateVariants = (data) => {
+    return new Promise((resolve, reject) => {
+        axios
+            .put(`api/admin/products/${current.value.id}/variants`, data)
+            .then((res) => {
+                console.log("Update response:", res.data);
+                resolve(res.data);
+            })
+            .catch((err) => {
+                console.error("Update error:", err);
+                reject(err);
+            });
+    });
+};
 
 const cancelConfirm = () => {
     if (isEdited.value) {
@@ -162,8 +173,9 @@ watch(
     () => isOpen.value,
     (val) => {
         if (!val) {
-            // Reset variant component if needed
-            // v$.value.$reset();
+            // Reset component state when closing
+            initialVariants.value = [];
+            isLoading.value = false;
         } else {
             getVariants();
             productOptions.value = getProductOptionsInfo();
@@ -171,26 +183,32 @@ watch(
     },
 );
 
-const getVariants = () => {
-    return new Promise((resolve, reject) => {
-        axios
-            .get(`api/admin/products/${current.value.id}/variants`)
-            .then((res) => {
-                console.log(res.data);
-                resolve(res.data);
-            })
-            .catch((err) => {
-                console.log(err);
-                reject(err);
-            });
-    });
+const getVariants = async () => {
+    try {
+        isLoading.value = true;
+        const response = await axios.get(
+            `api/admin/products/${current.value.id}/variants`,
+        );
+        console.log("Fetched variants:", response.data);
+        initialVariants.value = response.data.variants || [];
+    } catch (error) {
+        console.error("Error fetching variants:", error);
+        emitter.emit("toast", {
+            summary: $t("status.error.title"),
+            message: "Failed to load variants",
+            severity: "error",
+        });
+        initialVariants.value = [];
+    } finally {
+        isLoading.value = false;
+    }
 };
 </script>
 
 <template>
     <Drawer
         :visible="isOpen"
-        :header="$t('products.variants.create')"
+        :header="$t('products.variants.manage')"
         position="right"
         @update:visible="$emit('update:isOpen', $event)"
         :dismissable="false"
@@ -208,7 +226,8 @@ const getVariants = () => {
             <div class="mt-4">
                 <VariantInput
                     :options="productOptions"
-                    :initial-variants="existingVariants"
+                    :initial-variants="initialVariants"
+                    :loading="isLoading"
                     ref="variantRef"
                 />
             </div>
@@ -222,16 +241,16 @@ const getVariants = () => {
                     severity="danger"
                     @click="cancelConfirm"
                     outlined
-                    :disabled="loading"
+                    :disabled="loading || isLoading"
                 />
 
                 <Button
                     :label="$t('common.save')"
                     icon="pi pi-check"
                     severity="success"
-                    @click="createItem"
-                    :loading="loading"
-                    :disabled="loading || !canSave"
+                    @click="updateItem"
+                    :loading="loading || isLoading"
+                    :disabled="loading || isLoading || !canSave"
                 />
             </div>
         </template>

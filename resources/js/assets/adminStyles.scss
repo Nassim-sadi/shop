@@ -1,3 +1,7 @@
+@use "tailwindcss/base";
+@use "tailwindcss/components";
+@use "tailwindcss/utilities";
+
 html,
 body {
     height: 100%;
@@ -5,7 +9,12 @@ body {
 }
 
 
-
+@layer base {
+    p {
+      @apply break-words overflow-x-auto max-w-full;
+    }
+  }
+  
 // custom action buttons
 .action-btn {
     @apply m-2;
