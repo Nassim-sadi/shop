@@ -376,6 +376,7 @@
         "options": "Options",
         "weight": "Weight",
         "variants": {
+            "title": "variant | variants",
             "create": "Create variant",
             "edit": "Edit variant",
             "update": "Update variant",
@@ -384,7 +385,9 @@
             "create_success": "Variant created successfully",
             "update_success": "Variant updated successfully",
             "delete_success": "Variant deleted successfully",
-            "noVariants": "No variants for this product"
+            "noVariants": "No variants for this product",
+            "manage": "Manage variants",
+            "to_delete": "to delete"
         }
     },
     "productOptions": {
@@ -430,5 +433,11 @@
         "reset_password": "Reset password",
         "access_denied": "Access denied",
         "error": "Error"
+    },
+    "menu": {
+        "store": "Store",
+        "categories": "Categories",
+        "about": "About",
+        "contact": "Contact"
     }
 }

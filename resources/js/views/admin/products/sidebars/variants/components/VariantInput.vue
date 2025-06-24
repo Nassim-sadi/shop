@@ -475,7 +475,12 @@ const exportCSV = () => {
                 <span
                     v-if="variants.length > 0 || deletedVariantIds.length > 0"
                 >
-                    Total: {{ variants.length }} variants
+                    {{ $t("common.total") }}:
+                    {{
+                        variants.length +
+                        " " +
+                        $t("products.variants.title", variants.length)
+                    }}
                     <span v-if="newVariants.length > 0" class="text-green-600">
                         ({{ newVariants.length }} new)
                     </span>
@@ -489,7 +494,15 @@ const exportCSV = () => {
                         v-if="deletedVariantIds.length > 0"
                         class="text-red-600"
                     >
-                        ({{ deletedVariantIds.length }} to delete)
+                        ({{
+                            deletedVariantIds.length +
+                            " " +
+                            $t(
+                                "products.variants.to_delete",
+                                deletedVariantIds.length,
+                            )
+                        }}
+                        )
                     </span>
                 </span>
             </div>

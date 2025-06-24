@@ -81,7 +81,7 @@ Route::middleware(["auth:sanctum"])->group(function () {
         Route::patch('/change-status', 'changeStatus');
         Route::delete('/delete/{id}', 'delete');
         Route::get('{id}/variants', [ProductVariantController::class, 'get']);
-        Route::post('{id}/variants', [ProductVariantController::class, 'create']);
+        // Route::post('{id}/variants', [ProductVariantController::class, 'create']);
         Route::put('{id}/variants', [ProductVariantController::class, 'update']);
     });
 

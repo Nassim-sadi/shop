@@ -83,6 +83,8 @@ const confirmLogout = () => {
 
         <div class="layout-topbar-actions items-center">
             <div class="layout-config-menu">
+                <a href="/">WebSite</a>
+
                 <button
                     type="button"
                     class="layout-topbar-action"

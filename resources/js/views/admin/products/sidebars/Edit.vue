@@ -238,7 +238,13 @@ const editItem = () => {
     formData.append("listing_price", edited.value.listing_price);
     formData.append("base_quantity", edited.value.base_quantity);
     formData.append("featured", edited.value.featured);
-    formData.append("weight", edited.value.weight);
+    if (
+        edited.value.weight !== null &&
+        edited.value.weight !== "" &&
+        edited.value.weight !== undefined
+    ) {
+        formData.append("weight", edited.value.weight);
+    }
     formData.append("category_id", edited.value.category.id);
     formData.append("status", edited.value.status);
 
