@@ -154,11 +154,7 @@ const handleLogout = () => {
             <div class="mobile-categories-section">
                 <h3>{{ $t("categories", "Categories") }}</h3>
                 <div class="mobile-panel-menu-container">
-                    <PanelMenu
-                        :model="categories"
-                        multiple
-                        class="mobile-panel-menu"
-                    >
+                    <PanelMenu :model="categories" class="mobile-panel-menu">
                         <template #item="{ item }">
                             <div
                                 class="mobile-category-item"

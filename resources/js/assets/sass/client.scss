@@ -1,19 +1,33 @@
 :root {
-    --black-clr: #191919;
+    --black-clr: #171717;
     --white-clr: #fff;
-    --primary-clr: #007bff;
-    --accent-clr: #b9b9b9;
+    --primary-clr: #223040;
+    --primary-bright-clr: #4479b6;
+    --accent-clr: #fe9901;
+    --accent-bright-clr: #ffcc00;
     --success-clr: #28a745;
     --danger-clr: #dc3545;
     --warning-clr: #ffc107;
     --info-clr: #17a2b8;
     --light-clr: #f8f9fa;
-    --dark-clr: #343a40;
-    --primary-contrast-clr: #fff;
-
+    --darkest-clr: #282828;
+    --darker-clr: #323232;
+    --dark-clr: #414141;
+    --primary-contrast-clr: #c7c7c7;
     --text-clr: var(--black-clr);
-}
 
+    --border-radius: 8px;
+
+    // Alpha versions for outlined buttons
+    --primary-clr-alpha-10: rgba(34, 48, 64, 0.1);
+    --primary-clr-alpha-15: rgba(34, 48, 64, 0.15);
+    --primary-bright-clr-alpha-10: rgba(68, 121, 182, 0.1);
+    --primary-bright-clr-alpha-15: rgba(68, 121, 182, 0.15);
+    --accent-clr-alpha-10: rgba(254, 153, 1, 0.1);
+    --accent-clr-alpha-15: rgba(254, 153, 1, 0.4);
+    --accent-bright-clr-alpha-10: rgba(255, 204, 0, 0.1);
+    --accent-bright-clr-alpha-15: rgba(255, 204, 0, 0.15);
+}
 .client {
     h1,
     h2,
@@ -69,34 +83,58 @@
     a:hover {
         text-decoration: none;
     }
+
+    .p-button {
+        --p-button-primary-background: var(--primary-clr);
+        --p-button-primary-border-color: var(--primary-clr);
+        --p-button-primary-hover-border-color: var(--primary-bright-clr);
+        --p-button-primary-hover-background: var(--primary-bright-clr);
+        --p-button-primary-active-background: var(--primary-bright-clr);
+        --p-button-primary-shadow: 0px 0px 8px rgba(34, 48, 64, 0.6);
+        --p-button-secondary-background: var(--accent-clr);
+        --p-button-secondary-active-background: var(--accent-bright-clr);
+        --p-button-secondary-border-color: var(--accent-clr);
+        --p-button-secondary-hover-border-color: var(--accent-bright-clr);
+        --p-button-secondary-hover-background: var(--accent-bright-clr);
+        --p-button-secondary-shadow: 0px 0px 8px rgba(254, 153, 1, 0.6);
+
+        // Outlined button styles
+        --p-button-outlined-primary-background: transparent;
+        --p-button-outlined-primary-color: var(--primary-clr);
+
+        --p-button-outlined-primary-border-color: var(--primary-clr);
+        --p-button-outlined-primary-hover-border-color: var(
+            --primary-bright-clr
+        );
+        --p-button-outlined-primary-hover-background: var(
+            --primary-clr-alpha-10
+        );
+        --p-button-outlined-primary-active-background: var(
+            --primary-clr-alpha-15
+        );
+
+        --p-button-outlined-primary-shadow: 0px 0px 8px rgba(34, 48, 64, 0.6);
+
+        --p-button-outlined-secondary-background: transparent;
+        --p-button-outlined-secondary-color: var(--accent-clr);
+        --p-button-outlined-secondary-active-background: var(
+            --accent-clr-alpha-15
+        );
+        --p-button-outlined-secondary-border-color: var(--accent-clr);
+        --p-button-outlined-secondary-hover-border-color: var(
+            --accent-bright-clr
+        );
+        --p-button-outlined-secondary-hover-background: var(
+            --accent-clr-alpha-10
+        );
+        --p-button-outlined-secondary-shadow: 0px 0px 8px rgba(254, 153, 1, 0.6);
+    }
+
+    .p-button:not(.p-button-outlined):not(.p-button-text):not(.p-button-link) {
+        box-shadow: none;
+    }
 }
-// /* Direct style overrides for PrimeVue Select - using data attributes */
-// li[data-pc-section="option"].p-select-option.p-select-option-selected {
-//     background: #6c757d !important;
-//     color: red !important;
-// }
 
-// li[data-pc-section="option"].p-select-option.p-select-option-selected:hover {
-//     background: #6c757d !important;
-//     color: red !important;
-// }
-
-// li[data-pc-section="option"].p-select-option[data-p-selected="true"] {
-//     background: #6c757d !important;
-//     color: red !important;
-// }
-
-// /* Also target by ID pattern in case classes don't work */
-// li[id^="pv_id_"].p-select-option-selected {
-//     background: #6c757d !important;
-//     color: red !important;
-// }
-
-// /* Fallback with highest specificity */
-// .p-select-option.p-select-option-selected[data-p-selected="true"][data-pc-section="option"] {
-//     background: #6c757d !important;
-//     color: red !important;
-// }
 .navbar-search-select-overlay {
     --p-select-background: var(--white-clr);
     --p-select-color: var(--black-clr);
@@ -108,4 +146,8 @@
     --p-select-option-focus-color: var(--black-clr);
     --p-select-option-selected-color: var(--text-clr);
     --p-select-option-selected-focus-color: var(--black-clr);
+}
+
+.search-select:not(.p-disabled).p-focus {
+    border-color: var(--accent-clr) !important;
 }
