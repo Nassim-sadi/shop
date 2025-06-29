@@ -1,11 +1,11 @@
-import { computed, reactive, readonly } from 'vue';
+import { computed, reactive, readonly } from "vue";
 
 const layoutConfig = reactive({
-    preset: 'Aura',
-    primary: 'emerald',
+    preset: "Aura",
+    primary: "amber",
     surface: null,
     darkTheme: false,
-    menuMode: 'static'
+    menuMode: "static",
 });
 
 const layoutState = reactive({
@@ -15,7 +15,7 @@ const layoutState = reactive({
     configSidebarVisible: false,
     staticMenuMobileActive: false,
     menuHoverActive: false,
-    activeMenuItem: null
+    activeMenuItem: null,
 });
 
 export function useLayout() {
@@ -49,19 +49,21 @@ export function useLayout() {
 
     const executeDarkModeToggle = () => {
         layoutConfig.darkTheme = !layoutConfig.darkTheme;
-        localStorage.setItem('darkTheme', layoutConfig.darkTheme);
-        document.documentElement.classList.toggle('app-dark');
+        localStorage.setItem("darkTheme", layoutConfig.darkTheme);
+        document.documentElement.classList.toggle("app-dark");
     };
 
     const onMenuToggle = () => {
-        if (layoutConfig.menuMode === 'overlay') {
+        if (layoutConfig.menuMode === "overlay") {
             layoutState.overlayMenuActive = !layoutState.overlayMenuActive;
         }
 
         if (window.innerWidth > 991) {
-            layoutState.staticMenuDesktopInactive = !layoutState.staticMenuDesktopInactive;
+            layoutState.staticMenuDesktopInactive =
+                !layoutState.staticMenuDesktopInactive;
         } else {
-            layoutState.staticMenuMobileActive = !layoutState.staticMenuMobileActive;
+            layoutState.staticMenuMobileActive =
+                !layoutState.staticMenuMobileActive;
         }
     };
 
@@ -71,7 +73,10 @@ export function useLayout() {
         layoutState.menuHoverActive = false;
     };
 
-    const isSidebarActive = computed(() => layoutState.overlayMenuActive || layoutState.staticMenuMobileActive);
+    const isSidebarActive = computed(
+        () =>
+            layoutState.overlayMenuActive || layoutState.staticMenuMobileActive,
+    );
 
     const isDarkTheme = computed(() => layoutConfig.darkTheme);
 
@@ -79,21 +84,37 @@ export function useLayout() {
 
     const getSurface = computed(() => layoutConfig.surface);
 
-
-    if (localStorage.getItem('darkTheme') && localStorage.getItem('darkTheme') === 'true') {
+    if (
+        localStorage.getItem("darkTheme") &&
+        localStorage.getItem("darkTheme") === "true"
+    ) {
         layoutConfig.darkTheme = true;
     } else {
         layoutConfig.darkTheme = false;
     }
 
-    if (localStorage.getItem('primary')) {
-        layoutConfig.primary = JSON.parse(localStorage.getItem('primary')).name
+    if (localStorage.getItem("primary")) {
+        layoutConfig.primary = JSON.parse(localStorage.getItem("primary")).name;
     }
 
-    if (localStorage.getItem('surface')) {
-        layoutConfig.surface = JSON.parse(localStorage.getItem('surface')).name
+    if (localStorage.getItem("surface")) {
+        layoutConfig.surface = JSON.parse(localStorage.getItem("surface")).name;
     }
 
-    return { layoutConfig: readonly(layoutConfig), layoutState: readonly(layoutState), onMenuToggle, isSidebarActive, isDarkTheme, getPrimary, getSurface, setActiveMenuItem, toggleDarkMode, setPrimary, setSurface, setPreset, resetMenu, setMenuMode };
-
+    return {
+        layoutConfig: readonly(layoutConfig),
+        layoutState: readonly(layoutState),
+        onMenuToggle,
+        isSidebarActive,
+        isDarkTheme,
+        getPrimary,
+        getSurface,
+        setActiveMenuItem,
+        toggleDarkMode,
+        setPrimary,
+        setSurface,
+        setPreset,
+        resetMenu,
+        setMenuMode,
+    };
 }

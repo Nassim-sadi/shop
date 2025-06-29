@@ -1,0 +1,111 @@
+:root {
+    --black-clr: #191919;
+    --white-clr: #fff;
+    --primary-clr: #007bff;
+    --accent-clr: #b9b9b9;
+    --success-clr: #28a745;
+    --danger-clr: #dc3545;
+    --warning-clr: #ffc107;
+    --info-clr: #17a2b8;
+    --light-clr: #f8f9fa;
+    --dark-clr: #343a40;
+    --primary-contrast-clr: #fff;
+
+    --text-clr: var(--black-clr);
+}
+
+.client {
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+        margin: 1.5rem 0 1rem 0;
+        font-family: inherit;
+        font-weight: 700;
+        line-height: 1.5;
+    }
+
+    h1 {
+        font-size: 2.5rem;
+    }
+
+    h2 {
+        font-size: 2rem;
+    }
+
+    h3 {
+        font-size: 1.75rem;
+    }
+
+    h4 {
+        font-size: 1.5rem;
+    }
+
+    h5 {
+        font-size: 1.25rem;
+    }
+
+    h6 {
+        font-size: 1rem;
+    }
+
+    p {
+        margin: 0 0 1rem 0;
+    }
+
+    ul,
+    ol {
+        margin: 0;
+        padding: 0;
+        list-style-type: none;
+    }
+
+    a {
+        text-decoration: none;
+    }
+
+    a:hover {
+        text-decoration: none;
+    }
+}
+// /* Direct style overrides for PrimeVue Select - using data attributes */
+// li[data-pc-section="option"].p-select-option.p-select-option-selected {
+//     background: #6c757d !important;
+//     color: red !important;
+// }
+
+// li[data-pc-section="option"].p-select-option.p-select-option-selected:hover {
+//     background: #6c757d !important;
+//     color: red !important;
+// }
+
+// li[data-pc-section="option"].p-select-option[data-p-selected="true"] {
+//     background: #6c757d !important;
+//     color: red !important;
+// }
+
+// /* Also target by ID pattern in case classes don't work */
+// li[id^="pv_id_"].p-select-option-selected {
+//     background: #6c757d !important;
+//     color: red !important;
+// }
+
+// /* Fallback with highest specificity */
+// .p-select-option.p-select-option-selected[data-p-selected="true"][data-pc-section="option"] {
+//     background: #6c757d !important;
+//     color: red !important;
+// }
+.navbar-search-select-overlay {
+    --p-select-background: var(--white-clr);
+    --p-select-color: var(--black-clr);
+    --p-select-list-header-padding: 0.75rem;
+    --p-select-option-focus-background: var(--light-clr);
+    --p-select-option-selected-background: var(--accent-clr);
+    --p-select-option-selected-focus-background: var(--accent-clr);
+    --p-select-option-color: var(--black-clr);
+    --p-select-option-focus-color: var(--black-clr);
+    --p-select-option-selected-color: var(--text-clr);
+    --p-select-option-selected-focus-color: var(--black-clr);
+}

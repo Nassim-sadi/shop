@@ -140,22 +140,10 @@ const handleMobileNavigation = (to) => {
     }
 };
 
-// Add this method to your existing methods in the parent component
-const handleMobileSearch = (query) => {
-    if (query.trim()) {
-        router.push({
-            name: "search",
-            query: { q: query.trim() },
-        });
-    }
-};
-
-// Watchers
 watch(route, () => {
     closeMobileMenu();
 });
 
-// Lifecycle
 onMounted(() => {
     getCategories();
 });
@@ -193,6 +181,7 @@ onMounted(() => {
                     :placeholder="$t('select_category', 'All')"
                     size="small"
                     class="select"
+                    overlay-class="navbar-search-select-overlay"
                 />
 
                 <!-- Search input -->
@@ -416,18 +405,14 @@ onMounted(() => {
     left: 0;
     top: 0;
     width: 100%;
-    padding: 0 2rem;
-    background: linear-gradient(
-        135deg,
-        var(--primary-color),
-        var(--primary-color-dark)
-    );
+    padding: 0 1rem;
+    background: var(--dark-clr);
     backdrop-filter: blur(10px);
     border-bottom: 1px solid var(--surface-border);
     transition: all var(--layout-section-transition-duration);
     display: flex;
     align-items: center;
-    gap: 2rem;
+    gap: 0.5rem;
     box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
 
     .navbar-left {
@@ -445,8 +430,8 @@ onMounted(() => {
         text-decoration: none;
 
         .logo {
-            width: 3rem;
-            height: 3rem;
+            width: 2rem;
+            height: 2rem;
             object-fit: contain;
         }
 
@@ -499,9 +484,9 @@ onMounted(() => {
         display: flex;
         align-items: center;
         gap: 0.5rem;
-        min-width: 20rem;
+        min-width: 10rem;
         width: 100%;
-
+        --p-inputtext-focus-border-color: var(--accent-clr);
         .select {
             flex: 0 0 auto;
             width: auto;
@@ -514,12 +499,20 @@ onMounted(() => {
             width: 100%;
         }
 
-        .search-input {
-            width: 100%;
+        /* Direct style overrides for PrimeVue Select */
+        .p-select-option.p-select-option-selected {
+            background: var(--accent-clr) !important;
+            color: red !important;
         }
 
-        .search-button {
-            flex-shrink: 0;
+        .p-select-option.p-select-option-selected.p-focus {
+            background: var(--accent-clr) !important;
+            color: red !important;
+        }
+
+        .p-select-option.p-select-option-selected:hover {
+            background: var(--accent-clr) !important;
+            color: red !important;
         }
     }
 
@@ -585,268 +578,5 @@ onMounted(() => {
             background: rgba(255, 255, 255, 0.2);
         }
     }
-}
-
-.categories-menu {
-    .menu-item-link {
-        display: flex;
-        align-items: center;
-        width: 100%;
-        padding: 0.75rem;
-        text-decoration: none;
-        color: var(--text-color);
-        transition: background-color 0.2s ease;
-
-        &:hover {
-            background: var(--surface-hover);
-        }
-
-        .menu-item-label {
-            flex: 1;
-        }
-    }
-}
-
-// Mobile Menu Styles
-.mobile-menu-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100vh;
-    background: rgba(0, 0, 0, 0.6);
-    z-index: 999;
-    backdrop-filter: blur(8px);
-
-    .mobile-menu {
-        position: absolute;
-        top: 6rem;
-        right: 0;
-        width: 22rem;
-        max-width: 85vw;
-        background: var(--surface-card);
-        border-radius: var(--border-radius) 0 0 var(--border-radius);
-        box-shadow: 0 12px 48px rgba(0, 0, 0, 0.25);
-        max-height: calc(100vh - 6rem);
-        overflow-y: auto;
-        border: 1px solid var(--surface-border);
-
-        .mobile-menu-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 1.25rem;
-            background: linear-gradient(
-                135deg,
-                var(--primary-color),
-                var(--primary-color-dark)
-            );
-            color: var(--primary-color-text);
-            position: sticky;
-            top: 0;
-            z-index: 1;
-
-            h2 {
-                margin: 0;
-                font-size: 1.25rem;
-                font-weight: 700;
-            }
-
-            .close-button {
-                color: var(--primary-color-text);
-            }
-        }
-
-        .mobile-menu-content {
-            padding: 0.75rem 0;
-
-            .mobile-search-section {
-                padding: 0.75rem 1rem;
-                background: var(--surface-ground);
-                margin-bottom: 0.5rem;
-                display: flex;
-                gap: 0.5rem;
-                align-items: center;
-
-                .mobile-search-input {
-                    flex: 1;
-                }
-
-                .mobile-search-button {
-                    flex-shrink: 0;
-                }
-            }
-
-            .mobile-auth-section {
-                padding: 0.75rem;
-                background: var(--surface-ground);
-                margin-bottom: 0.5rem;
-                display: flex;
-                gap: 0.5rem;
-
-                .auth-item {
-                    flex: 1;
-                    justify-content: center;
-                    font-weight: 600;
-                    border-radius: var(--border-radius);
-
-                    &.login {
-                        background: var(--surface-hover);
-                    }
-
-                    &.register {
-                        background: var(--primary-color);
-                        color: var(--primary-color-text);
-                    }
-                }
-            }
-
-            .mobile-user-section {
-                padding: 0.75rem;
-                background: var(--surface-ground);
-                margin-bottom: 0.5rem;
-                border-radius: var(--border-radius);
-
-                .mobile-user-info {
-                    display: flex;
-                    align-items: center;
-                    gap: 0.75rem;
-                    padding: 0.75rem;
-                    font-weight: 600;
-                    color: var(--primary-color);
-                    border-bottom: 1px solid var(--surface-border);
-                    margin-bottom: 0.5rem;
-
-                    i {
-                        font-size: 1.5rem;
-                    }
-                }
-
-                .logout-item {
-                    color: var(--red-500);
-
-                    &:hover {
-                        background: var(--red-50);
-                        color: var(--red-600);
-                    }
-                }
-            }
-
-            .mobile-nav-section {
-                margin-bottom: 0.5rem;
-            }
-
-            .mobile-menu-item {
-                display: flex;
-                align-items: center;
-                gap: 0.875rem;
-                padding: 1rem 1.25rem;
-                text-decoration: none;
-                color: var(--text-color);
-                transition: all 0.2s ease;
-                font-weight: 500;
-                width: 100%;
-                text-align: left;
-                border: none;
-                background: none;
-                cursor: pointer;
-
-                &:hover {
-                    background: var(--surface-hover);
-                    padding-left: 1.5rem;
-                }
-
-                &.active {
-                    background: var(--primary-color-light);
-                    color: var(--primary-color);
-                    font-weight: 600;
-                    border-left: 3px solid var(--primary-color);
-                }
-
-                i {
-                    width: 1.25rem;
-                    text-align: center;
-                }
-            }
-
-            .mobile-categories-section {
-                margin-top: 1rem;
-                padding-top: 1rem;
-                border-top: 2px solid var(--surface-border);
-
-                h3 {
-                    padding: 0.75rem 1.25rem 0.5rem;
-                    margin: 0 0 0.5rem 0;
-                    font-size: 0.85rem;
-                    font-weight: 700;
-                    color: var(--text-color-secondary);
-                    text-transform: uppercase;
-                    letter-spacing: 1px;
-                }
-
-                .mobile-panel-menu-container {
-                    padding: 0 1rem;
-
-                    .mobile-panel-menu {
-                        border: none;
-                        box-shadow: none;
-
-                        :deep(.p-panelmenu-panel) {
-                            border: none;
-                            margin-bottom: 0.25rem;
-                        }
-
-                        :deep(.p-panelmenu-header) {
-                            background: var(--surface-ground);
-                            border: 1px solid var(--surface-border);
-                            border-radius: var(--border-radius);
-
-                            .p-panelmenu-header-content {
-                                padding: 0.75rem 1rem;
-                                font-weight: 500;
-                            }
-                        }
-
-                        :deep(.p-panelmenu-content) {
-                            border: 1px solid var(--surface-border);
-                            border-top: none;
-                            border-radius: 0 0 var(--border-radius)
-                                var(--border-radius);
-                            background: var(--surface-card);
-                        }
-
-                        .mobile-category-item {
-                            display: flex;
-                            align-items: center;
-                            justify-content: space-between;
-                            padding: 0.75rem 1rem;
-                            cursor: pointer;
-                            transition: background-color 0.2s ease;
-
-                            &.has-link {
-                                color: var(--primary-color);
-                                font-weight: 500;
-
-                                &:hover {
-                                    background: var(--primary-color-light);
-                                }
-                            }
-
-                            .category-label {
-                                flex: 1;
-                            }
-
-                            .category-badge {
-                                margin-left: 0.5rem;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-
-@media (max-width: 768px) {
 }
 </style>

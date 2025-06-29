@@ -16,10 +16,9 @@ import "swiper/scss";
 import "swiper/scss/navigation";
 import "swiper/scss/pagination";
 
+import "@/assets/sass/admin.scss";
+import "@/assets/sass/client.scss";
 import "@/assets/styles.scss";
-import "@/assets/tailwind.css";
-import "@/assets/adminStyles.scss";
-import "@/assets/myStyles.scss";
 import { ability } from "@/plugins/ability";
 import { abilitiesPlugin } from "@casl/vue";
 const app = createApp(App);

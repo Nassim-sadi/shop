@@ -2,12 +2,12 @@
 @use "tailwindcss/components";
 @use "tailwindcss/utilities";
 
+
 html,
 body {
     height: 100%;
     margin: 0;
 }
-
 
 @layer base {
     p {
