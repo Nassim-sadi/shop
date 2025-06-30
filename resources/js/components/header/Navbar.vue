@@ -277,50 +277,12 @@ onMounted(() => {
                         </router-link>
                     </template> -->
                     <!-- Authenticated User -->
-                    <div v-if="auth.user" class="user-menu">
-                        <Button
-                            class="user-button"
-                            :label="userDisplayName"
-                            icon="pi pi-user"
-                            outlined
-                            @click="$refs.userMenu.toggle($event)"
-                            aria-haspopup="true"
-                            aria-controls="user-menu"
-                        />
-                        <Menu
-                            ref="userMenu"
-                            id="user-menu"
-                            :model="[
-                                {
-                                    label: $t('dashboard'),
-                                    icon: 'pi pi-home',
-                                    command: () =>
-                                        router.push({ name: 'dashboard' }),
-                                },
-                                {
-                                    label: $t('profile'),
-                                    icon: 'pi pi-user',
-                                    command: () =>
-                                        router.push({ name: 'profile' }),
-                                },
-                                {
-                                    label: $t('orders'),
-                                    icon: 'pi pi-shopping-cart',
-                                    command: () =>
-                                        router.push({ name: 'orders' }),
-                                },
-                                { separator: true },
-                                {
-                                    label: $t('logout'),
-                                    icon: 'pi pi-sign-out',
-                                    command: handleLogout,
-                                },
-                            ]"
-                            :popup="true"
-                        />
-                    </div>
+                    <Button class="cart-button" severity="secondary">
+                        <i class="pi pi-shopping-cart" aria-hidden="true"></i>
+                        Cart
+                    </Button>
                     <!-- Guest User -->
-                    <div v-else class="auth-buttons">
+                    <!-- <div v-else class="auth-buttons">
                         <router-link
                             :to="{ name: 'login' }"
                             class="navbar-item auth-link"
@@ -337,21 +299,42 @@ onMounted(() => {
                             <i class="pi pi-user-plus" aria-hidden="true"></i>
                             {{ $t("register") }}
                         </router-link>
-                    </div>
+                    </div> -->
                 </template>
+                <!-- Mobile menu toggle - switches between hamburger and avatar based on auth status -->
+                <Button
+                    v-if="!auth.user"
+                    class="mobile-menu-toggle mobile-only"
+                    :icon="isMobileMenuOpen ? 'pi pi-times' : 'pi pi-bars'"
+                    @click="toggleMobileMenu"
+                    :aria-expanded="isMobileMenuOpen"
+                    aria-controls="mobile-menu"
+                    :aria-label="$t('toggle_mobile_menu', 'Toggle mobile menu')"
+                    text
+                    severity="secondary"
+                />
+
+                <!-- Avatar button when logged in -->
+                <Button
+                    v-else
+                    class="mobile-avatar-toggle"
+                    @click="toggleMobileMenu"
+                    :aria-expanded="isMobileMenuOpen"
+                    aria-controls="mobile-menu"
+                    :aria-label="$t('toggle_user_menu', 'Toggle user menu')"
+                    size="xlarge"
+                >
+                    <Avatar
+                        :image="auth.user?.image"
+                        :label="auth.user?.name || user?.email"
+                        class="avatar-small"
+                        shape="square"
+                        size="large"
+                    />
+                </Button>
             </div>
             <!-- Mobile Menu Button -->
-            <Button
-                class="mobile-menu-toggle mobile-only"
-                :icon="isMobileMenuOpen ? 'pi pi-times' : 'pi pi-bars'"
-                @click="toggleMobileMenu"
-                :aria-expanded="isMobileMenuOpen"
-                aria-controls="mobile-menu"
-                :aria-label="$t('toggle_mobile_menu', 'Toggle mobile menu')"
-                text
-                severity="secondary"
-                v-if="isMobile"
-            />
+
             <!-- Categories Dropdown Menu (Desktop) -->
             <TieredMenu
                 ref="categoriesMenu"
@@ -422,24 +405,24 @@ onMounted(() => {
 
 <style lang="scss" scoped>
 .navbar {
-    position: fixed;
+    position: relative;
     height: auto;
     z-index: 997;
     left: 0;
     top: 0;
-    width: 100vw;
+    width: 100%;
     background: var(--darkest-clr);
     backdrop-filter: blur(10px);
     border-bottom: 1px solid var(--surface-border);
     transition: all var(--layout-section-transition-duration);
+    padding: 0 1rem;
 
     .nav-container {
         display: flex;
         align-items: center;
         width: 100%;
-        padding: 1rem;
         gap: 1rem;
-
+        padding: 1rem 0;
         .navbar-left {
             display: flex;
             align-items: center;
@@ -455,7 +438,7 @@ onMounted(() => {
             text-decoration: none;
 
             .logo {
-                width: 2rem;
+                width: 2.75rem;
                 height: auto;
                 aspect-ratio: 1 / 1;
                 object-fit: contain;
@@ -470,7 +453,7 @@ onMounted(() => {
         .navbar-right {
             display: flex;
             align-items: center;
-            gap: 1.5rem;
+            gap: 1rem;
             flex: 1;
             height: 100%;
 
@@ -532,18 +515,6 @@ onMounted(() => {
             align-items: center;
             gap: 1rem;
 
-            .user-menu {
-                .user-button {
-                    background: rgba(255, 255, 255, 0.1);
-                    border-color: rgba(255, 255, 255, 0.2);
-                    color: var(--primary-color-text);
-
-                    &:hover {
-                        background: rgba(255, 255, 255, 0.2);
-                    }
-                }
-            }
-
             .auth-buttons {
                 display: flex;
                 gap: 0.5rem;
@@ -594,5 +565,10 @@ onMounted(() => {
             height: 2rem !important;
         }
     }
+}
+
+.mobile-avatar-toggle {
+    padding: 0rem;
+    border-radius: 50%;
 }
 </style>
