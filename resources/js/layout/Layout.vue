@@ -5,9 +5,9 @@ import Navbar from "@/components/header/Navbar.vue";
 
 <template>
     <div class="layout-wrapper client">
-        <div class="layout-main-container">
+        <div class="layout-main-container-client">
             <Navbar />
-            <div class="layout-main">
+            <div class="layout-main-client">
                 <router-view></router-view>
             </div>
         </div>
@@ -23,14 +23,18 @@ import Navbar from "@/components/header/Navbar.vue";
     flex-direction: column;
     min-height: 100vh;
 }
-.layout-main-container {
+.layout-main-container-client {
     min-height: auto;
     flex-grow: 1;
 }
 
+.layout-main-client {
+    padding: 1rem;
+}
+
 @media (max-width: 960px) {
-    .layout-main-container {
-        padding: 6rem 1rem 0 1rem;
+    .layout-main-client {
+        padding: 1rem;
     }
 }
 </style>
