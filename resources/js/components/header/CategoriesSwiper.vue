@@ -63,7 +63,7 @@ const swiperOptions = {
     height: auto;
     .swiper-container {
         width: 100%;
-        padding: 1rem 0;
+        padding: 0 0 1rem 0;
     }
 
     .slide-auto {

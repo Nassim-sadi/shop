@@ -29,6 +29,7 @@
     --accent-bright-clr-alpha-15: rgba(255, 204, 0, 0.15);
 }
 .client {
+    background-color: var(--white-clr);
     h1,
     h2,
     h3,
@@ -39,6 +40,7 @@
         font-family: inherit;
         font-weight: 700;
         line-height: 1.5;
+        color: var(--text-clr);
     }
 
     h1 {
@@ -67,6 +69,11 @@
 
     p {
         margin: 0 0 1rem 0;
+        color: var(--text-clr);
+    }
+
+    span {
+        color: var(--text-clr);
     }
 
     ul,
@@ -84,6 +91,28 @@
         text-decoration: none;
     }
 
+    // override components
+    .p-inputtext,
+    .p-select-dropdown,
+    .p-select-label,
+    .p-select {
+        background: var(--white-clr);
+        color: var(--text-clr);
+    }
+
+    .p-select {
+        border-left: none;
+    }
+
+    .p-select-dropdown {
+        border-top-right-radius: 0;
+        border-bottom-right-radius: 0;
+    }
+
+    .search-input {
+        border-right: none;
+    }
+
     .p-button {
         --p-button-primary-background: var(--primary-clr);
         --p-button-primary-border-color: var(--primary-clr);
@@ -97,7 +126,6 @@
         --p-button-secondary-hover-border-color: var(--accent-bright-clr);
         --p-button-secondary-hover-background: var(--accent-bright-clr);
         --p-button-secondary-shadow: 0px 0px 8px rgba(254, 153, 1, 0.6);
-
         // Outlined button styles
         --p-button-outlined-primary-background: transparent;
         --p-button-outlined-primary-color: var(--primary-clr);
@@ -150,4 +178,15 @@
 
 .search-select:not(.p-disabled).p-focus {
     border-color: var(--accent-clr) !important;
+}
+
+.cart-button {
+    background-color: transparent !important;
+    color: var(--text-clr) !important;
+    border: none !important;
+
+    .p-button-icon {
+        color: var(--white-clr) !important;
+        font-size: 24px !important;
+    }
 }

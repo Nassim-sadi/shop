@@ -22,6 +22,7 @@ class Product extends Model
         'status',
         'featured',
         'weight',
+        'weight_unit',
         'thumbnail_image_path',
     ];
 
@@ -45,8 +46,8 @@ class Product extends Model
         return $this->morphMany(ProductImage::class, 'imageable');
     }
 
-    public function getThumbnailImagePAthAttribute($value)
+    public function getThumbnailImagePathAttribute($value)
     {
-        return asset("storage/images/products/{$this->slug}/$value");
+        return asset($value);
     }
 }

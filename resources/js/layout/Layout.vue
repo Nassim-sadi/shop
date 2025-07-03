@@ -4,7 +4,7 @@ import Navbar from "@/components/header/Navbar.vue";
 </script>
 
 <template>
-    <div class="layout-wrapper client">
+    <div class="layout-wrapper-client client">
         <div class="layout-main-container-client">
             <Navbar />
             <div class="layout-main-client">
@@ -23,9 +23,11 @@ import Navbar from "@/components/header/Navbar.vue";
     flex-direction: column;
     min-height: 100vh;
 }
+
 .layout-main-container-client {
-    min-height: auto;
-    flex-grow: 1;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
 }
 
 .layout-main-client {

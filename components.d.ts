@@ -33,6 +33,7 @@ declare module 'vue' {
     Message: typeof import('primevue/message')['default']
     MultiSelect: typeof import('primevue/multiselect')['default']
     OrderList: typeof import('primevue/orderlist')['default']
+    OverlayBadge: typeof import('primevue/overlaybadge')['default']
     PanelMenu: typeof import('primevue/panelmenu')['default']
     Password: typeof import('primevue/password')['default']
     Popover: typeof import('primevue/popover')['default']

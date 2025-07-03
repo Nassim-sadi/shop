@@ -1,12 +1,3 @@
-<template>
-    <router-view v-slot="{ Component, route }">
-        <Toast position="top-right"> </Toast>
-        <div :key="route.name">
-            <Component :is="Component" />
-        </div>
-    </router-view>
-</template>
-
 <script setup>
 import axios from "@/plugins/axios";
 import { authStore } from "@/store/AuthStore";
@@ -49,4 +40,12 @@ const refresh = async () => {
 };
 </script>
 
+<template>
+    <router-view v-slot="{ Component, route }">
+        <Toast position="top-right"> </Toast>
+        <div :key="route.name">
+            <Component :is="Component" />
+        </div>
+    </router-view>
+</template>
 <style lang="scss" scoped></style>

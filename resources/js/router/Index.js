@@ -17,12 +17,12 @@ const router = createRouter({
                 {
                     path: "",
                     name: "home",
-                    component: () => import("@/views/Home.vue"),
+                    component: () => import("@/views/home/Index.vue"),
                 },
                 {
-                    path: "Categories",
-                    name: "categories",
-                    component: () => import("@/views/Categories.vue"),
+                    path: "/:categorySlug/:page?",
+                    name: "category",
+                    component: () => import("@/views/Category.vue"),
                 },
                 {
                     path: "about",

@@ -86,7 +86,13 @@ const product = ref({
     featured: 0,
     category: null,
     status: 0,
+    weight_unit: "g",
 });
+
+const weightOptions = [
+    { name: "Grams", value: "g" },
+    { name: "Kilograms", value: "kg" },
+];
 
 const rules = computed(() => ({
     name: {
@@ -129,6 +135,11 @@ const rules = computed(() => ({
     },
     weight: {
         numeric: requiredIf((value) => value !== null && value !== ""),
+    },
+    weight_unit: {
+        requiredIf: requiredIf((_, vm) => {
+            return vm.weight !== null && vm.weight !== "";
+        }),
     },
     category: {
         required,
@@ -209,6 +220,7 @@ const isEdited = computed(() => {
             weight: null,
             featured: 0,
             category: null,
+            weight_unit: "g",
             status: 0,
         }) || previewImage.value !== productPlaceHolder
     );
@@ -229,6 +241,7 @@ watch(
                 weight: null,
                 featured: 0,
                 category: null,
+                weight_unit: "g",
                 status: 0,
             };
         }
@@ -262,6 +275,7 @@ const createItem = () => {
         product.value.weight !== undefined
     ) {
         formData.append("weight", product.value.weight);
+        formData.append("weight_unit", product.value.weight_unit);
     }
     formData.append("featured", product.value.featured);
     formData.append("category_id", product.value.category.id);
@@ -569,19 +583,39 @@ const prevStep = () => {
                             <label for="weight" class="mb-5">{{
                                 $t("products.weight")
                             }}</label>
+                            <InputGroup>
+                                <InputText
+                                    :aria-labelledby="$t('products.weight')"
+                                    id="weight"
+                                    type="number"
+                                    v-model="product.weight"
+                                    fluid
+                                    class="mb-5"
+                                />
 
-                            <InputText
-                                :aria-labelledby="$t('products.weight')"
-                                id="weight"
-                                type="number"
-                                v-model="product.weight"
-                                fluid
-                                class="mb-5"
-                            />
+                                <Select
+                                    :options="weightOptions"
+                                    v-model="product.weight_unit"
+                                    option-label="name"
+                                    option-value="value"
+                                    placeholder="Select weight unit"
+                                    class="mb-5"
+                                ></Select>
+                            </InputGroup>
 
                             <div
                                 class="text-red-500"
                                 v-for="error of v$.weight.$errors"
+                                :key="error.$uid"
+                            >
+                                <Message severity="error">{{
+                                    error.$message
+                                }}</Message>
+                            </div>
+
+                            <div
+                                class="text-red-500"
+                                v-for="error of v$.weight_unit.$errors"
                                 :key="error.$uid"
                             >
                                 <Message severity="error">{{

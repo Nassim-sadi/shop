@@ -1,6 +1,6 @@
 <script setup></script>
 <template>
-    <div class="layout-footer shop-footer">Footer</div>
+    <div class="shop-footer">Footer</div>
 </template>
 
 <style lang="scss" scoped>

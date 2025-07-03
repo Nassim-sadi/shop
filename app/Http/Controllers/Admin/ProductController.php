@@ -72,6 +72,7 @@ class ProductController extends Controller
             'status' => 'required|boolean',
             'featured' => 'required|boolean',
             'weight' => 'nullable|numeric',
+            'weight_unit' => 'nullable|string|required_with:weight',
             'images' => 'required|array|min:1',
             'options' => 'nullable|array',
             'options.*' => 'exists:product_options,id',
@@ -102,23 +103,25 @@ class ProductController extends Controller
                 'listing_price' => $request->listing_price,
                 'status' => $request->status,
                 'weight' => $request->weight,
+                'weight_unit' => $request->weight_unit,
                 'featured' => $request->featured,
                 'category_id' => $request->category_id
             ]);
 
             // Upload the thumbnail image
 
-            $product->thumbnail_image_path = ImageUpload::uploadImage($request->file('thumbnail_image_path'), 'products/' . $slug);
+            $thumbnailFilename = ImageUpload::uploadImage($request->file('thumbnail_image_path'), 'products/' . $slug);
+            $product->thumbnail_image_path = "/storage/images/products/{$slug}/{$thumbnailFilename}";
             $product->save();
 
-
             foreach ($request->file('images') as $image) {
-                $imagePath = ImageUpload::uploadImage($image, 'products/' . $product->slug);
+                $imageFilename = ImageUpload::uploadImage($image, 'products/' . $product->slug);
                 $product->images()->create([
-                    'url' => "/storage/images/products/{$product->slug}/$imagePath",
+                    'url' => "/storage/images/products/{$product->slug}/{$imageFilename}",
                     'alt_text' => $image->getClientOriginalName() ?? '',
                 ]);
             }
+
 
             if ($request->filled('options')) {
                 $product->options()->sync($request->input('options'));
@@ -162,6 +165,7 @@ class ProductController extends Controller
             'thumbnail_image_path' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:2048',
             'status' => 'required|boolean',
             'weight' => 'nullable|numeric',
+            'weight_unit' => 'nullable|string|required_with:weight',
             'featured' => 'required|boolean',
             'images' => 'required|array|min:1',
         ]);
@@ -189,6 +193,7 @@ class ProductController extends Controller
             'listing_price' => $request->listing_price,
             'status' => $request->status,
             'weight' => $request->weight,
+            'weight_unit' => $request->weight_unit,
             'featured' => $request->featured,
             'category_id' => $request->category_id,
         ]);
@@ -285,24 +290,61 @@ class ProductController extends Controller
 
     public function delete(Request $request, $id)
     {
-
-        // TODO : check if associated variant count is 0
         $this->authorize('product_delete');
-        $product = Product::findOrFail($id);
 
-        $product->delete();
+        $product = Product::with(['images', 'variants'])->findOrFail($id);
 
-        $agent = UA::parse($request->server('HTTP_USER_AGENT'));
-        ActivityHistoryJob::dispatch(
-            data: [
-                'model' => 'products',
-                'action' => 'delete',
-                'data' => ['product' =>  $product],
-                'user_id' => $request->user()->id,
-            ],
-            platform: $agent->os->family,
-            browser: $agent->ua->family,
-        );
-        return response()->json(['message' => 'Product deleted successfully']);
+        DB::beginTransaction();
+
+        try {
+            // 🧹 Detach product options (pivot table)
+            $product->options()->detach();
+
+            // 🧹 Delete product images (related records + files)
+            foreach ($product->images as $image) {
+                $imagePath = public_path($image->url); // assuming image->url is "/storage/images/products/..."
+                if (file_exists($imagePath)) {
+                    unlink($imagePath);
+                }
+            }
+            $product->images()->delete();
+
+            // 🧹 Delete thumbnail image
+            if ($product->thumbnail_image_path) {
+                $thumbnailPath = public_path($product->thumbnail_image_path);
+                if (file_exists($thumbnailPath)) {
+                    unlink($thumbnailPath);
+                }
+            }
+
+            // 🧹 Check and handle variants (optional: delete or prevent deletion)
+            if ($product->variants()->exists()) {
+                return response()->json(['error' => 'Cannot delete product with variants.'], 400);
+                // Or: $product->variants()->delete(); if you want to delete them
+            }
+
+            // 🧹 Finally delete the product
+            $product->delete();
+
+            DB::commit();
+
+            // Log activity
+            $agent = UA::parse($request->server('HTTP_USER_AGENT'));
+            ActivityHistoryJob::dispatch(
+                data: [
+                    'model' => 'products',
+                    'action' => 'delete',
+                    'data' => ['product' => $product],
+                    'user_id' => $request->user()->id,
+                ],
+                platform: $agent->os->family,
+                browser: $agent->ua->family,
+            );
+
+            return response()->json(['message' => 'Product deleted successfully']);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json(['error' => 'Failed to delete product: ' . $e->getMessage()], 500);
+        }
     }
 }

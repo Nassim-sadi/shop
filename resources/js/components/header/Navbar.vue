@@ -78,11 +78,6 @@ const navItems = computed(() => [
     },
 ]);
 
-const userDisplayName = computed(() => {
-    if (!auth.user) return "";
-    return auth.user.firstname || auth.user.name || auth.user.email;
-});
-
 // Methods
 const getCategories = async () => {
     if (loading.value) return; // Prevent duplicate requests
@@ -123,12 +118,6 @@ const formatCategories = (categories) => {
     };
 
     return categories.map(recursiveFormat).filter(Boolean);
-};
-
-const toggleCategoriesMenu = (event) => {
-    if (categoriesMenu.value) {
-        categoriesMenu.value.toggle(event);
-    }
 };
 
 const handleSearch = () => {
@@ -209,7 +198,7 @@ onMounted(() => {
                         "
                         @keyup="handleSearchKeyup"
                         :aria-label="$t('search_aria_label', 'Search products')"
-                        class="pl-10 w-full"
+                        class="search-input"
                         :disabled="loading"
                         :loading="loading"
                     />
@@ -277,10 +266,16 @@ onMounted(() => {
                         </router-link>
                     </template> -->
                     <!-- Authenticated User -->
-                    <Button class="cart-button" severity="secondary">
-                        <i class="pi pi-shopping-cart" aria-hidden="true"></i>
-                        Cart
-                    </Button>
+
+                    <OverlayBadge value="4" severity="danger">
+                        <Button
+                            class="cart-button"
+                            severity="secondary"
+                            icon="ti ti-shopping-cart"
+                            variant="text"
+                        />
+                    </OverlayBadge>
+
                     <!-- Guest User -->
                     <!-- <div v-else class="auth-buttons">
                         <router-link

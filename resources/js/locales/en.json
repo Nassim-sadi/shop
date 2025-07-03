@@ -388,6 +388,10 @@
             "noVariants": "No variants for this product",
             "manage": "Manage variants",
             "to_delete": "to delete"
+        },
+        "weights": {
+            "grams": "grams",
+            "kg": "kg"
         }
     },
     "productOptions": {
@@ -439,5 +443,12 @@
         "categories": "Categories",
         "about": "About",
         "contact": "Contact"
+    },
+    "home": {
+        "sections": {
+            "by_category": "Shop by category",
+            "shop_now": "Shop now",
+            "new_arrival": "New arrival"
+        }
     }
 }

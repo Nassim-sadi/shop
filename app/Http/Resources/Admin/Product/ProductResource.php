@@ -33,6 +33,7 @@ class ProductResource extends JsonResource
                 'name' => $this->category->name
             ],
             "weight" => $this->weight,
+            "weight_unit" => $this->weight_unit,
             'options' => ProductOptionsResource::collection($this->options),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
