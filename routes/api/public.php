@@ -12,3 +12,7 @@ Route::prefix('categories')->controller(CategoryController::class)->group(functi
     ->where('categorySlug', '[a-zA-Z0-9\-_]+');
   Route::get('/{categorySlug}/products', [ProductController::class, 'getProductsByCategory']);
 });
+
+Route::prefix('products')->controller(ProductController::class)->group(function () {
+  Route::get('/{productSlug}', 'getProductBySlug');
+});

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Resources\Product\ProductCollection;
+use App\Http\Resources\Product\ProductResource;
 use App\Models\Category;
 use App\Models\Product;
 use Illuminate\Http\Request;
@@ -47,5 +48,14 @@ class ProductController extends Controller
     ]);
 
     return $breadcrumbs;
+  }
+
+  public function getProductBySlug(Request $request, $productSlug)
+  {
+    $product = Product::where('slug', $productSlug)->firstOrFail();
+    return response()->json([
+      'product' => ProductResource::make($product)->resolve(),
+      'breadcrumbs' => $this->getBreadcrumbs($product->category),
+    ]);
   }
 }

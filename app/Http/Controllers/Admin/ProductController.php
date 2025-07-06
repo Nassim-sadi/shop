@@ -34,6 +34,7 @@ class ProductController extends Controller
             })
             ->with('category')
             ->with('options')
+            ->withCount('variants')
             ->orderBy('created_at', 'DESC')
             // ->when($user->hasRole("Super Admin"), function ($q) use ($request) {
             //     $q->when(isset($request->deleted) && $request->deleted !== '', function ($q) use ($request) {
@@ -153,11 +154,31 @@ class ProductController extends Controller
         debugbar()->log($request->all());
         $this->authorize('product_update');
 
+        // Handle options JSON decoding (same as create method)
+        if ($request->has('options')) {
+            $request->merge([
+                'options' => json_decode($request->input('options'), true)
+            ]);
+        }
+
         $request->validate([
             'id' => 'required|exists:products,id',
             'name' => 'required',
             'description' => 'required|string|min:10|max:255',
-            'long_description' => 'required|string|min:10|max:2000',
+            'long_description' => [
+                'required',
+                'string',
+                'min:10',
+                'max:65535', // Raw HTML storage limit
+                function ($attribute, $value, $fail) {
+                    if ($value) {
+                        $textOnly = strip_tags($value);
+                        if (strlen($textOnly) > 10000) { // Adjust this limit as needed
+                            $fail('The ' . $attribute . ' text content cannot exceed 10,000 characters.');
+                        }
+                    }
+                },
+            ],
             'base_price' => 'required|numeric',
             'listing_price' => 'required|numeric',
             'base_quantity' => 'required|numeric',
@@ -168,96 +189,124 @@ class ProductController extends Controller
             'weight_unit' => 'nullable|string|required_with:weight',
             'featured' => 'required|boolean',
             'images' => 'required|array|min:1',
+            'options' => 'sometimes|array',
+            'options.*' => 'exists:product_options,id',
         ]);
 
-        $product = Product::findOrFail($request->id);
+        // Start a transaction to ensure data integrity
+        DB::beginTransaction();
+        try {
+            $product = Product::findOrFail($request->id);
 
-        // Update product details
-        $baseSlug = Str::slug($request->name);
-        $slug = $baseSlug;
-        $counter = 1;
+            // Update product details
+            $baseSlug = Str::slug($request->name);
+            $slug = $baseSlug;
+            $counter = 1;
 
-        // Check if slug exists (excluding current product)
-        while (Product::where('slug', $slug)->where('id', '!=', $request->id)->exists()) {
-            $slug = $baseSlug . '-' . $counter;
-            $counter++;
-        }
+            // Check if slug exists (excluding current product)
+            while (Product::where('slug', $slug)->where('id', '!=', $request->id)->exists()) {
+                $slug = $baseSlug . '-' . $counter;
+                $counter++;
+            }
 
-        $product->update([
-            'name' => $request->name,
-            'slug' => $slug,
-            'description' => $request->description,
-            'long_description' => $request->long_description,
-            'base_price' => $request->base_price,
-            'base_quantity' => $request->base_quantity,
-            'listing_price' => $request->listing_price,
-            'status' => $request->status,
-            'weight' => $request->weight,
-            'weight_unit' => $request->weight_unit,
-            'featured' => $request->featured,
-            'category_id' => $request->category_id,
-        ]);
+            $product->update([
+                'name' => $request->name,
+                'slug' => $slug,
+                'description' => $request->description,
+                'long_description' => $request->long_description,
+                'base_price' => $request->base_price,
+                'base_quantity' => $request->base_quantity,
+                'listing_price' => $request->listing_price,
+                'status' => $request->status,
+                'weight' => $request->weight,
+                'weight_unit' => $request->weight_unit,
+                'featured' => $request->featured,
+                'category_id' => $request->category_id,
+            ]);
 
-        // Handle thumbnail image update
-        if ($request->hasFile('thumbnail_image_path')) {
-            $product->thumbnail_image_path = ImageUpload::uploadImage(
-                $request->file('thumbnail_image_path'),
-                'products/' . $slug
-            );
-            $product->save();
-        }
-        $existingImageIds = collect($request->images)
-            ->filter(fn($image) => isset($image['id'])) // Keep only objects with 'id'
-            ->pluck('id')
-            ->toArray();
+            // Handle thumbnail image update
+            if ($request->hasFile('thumbnail_image_path')) {
+                $product->thumbnail_image_path = ImageUpload::uploadImage(
+                    $request->file('thumbnail_image_path'),
+                    'products/' . $slug
+                );
+                $product->save();
+            }
 
-        $product->images()
-            ->whereNotIn('id', $existingImageIds)
-            ->get()
-            ->each(function ($image) {
-                $imagePath = public_path($image->url);
-                if (file_exists($imagePath)) {
-                    unlink($imagePath);
-                }
-                $image->delete();
-            });
+            $existingImageIds = collect($request->images)
+                ->filter(fn($image) => isset($image['id'])) // Keep only objects with 'id'
+                ->pluck('id')
+                ->toArray();
 
-        // Process new files and update objects
-        foreach ($request->images as $index => $imageData) {
-            // Handle new files
-            if (isset($imageData['file']) && $imageData['file'] instanceof \Illuminate\Http\UploadedFile) {
-                $imagePath = ImageUpload::uploadImage($imageData['file'], 'products/' . $product->slug);
-                $product->images()->create([
-                    'url' => "/storage/images/products/{$product->slug}/$imagePath",
-                    'alt_text' => $imageData['file']->getClientOriginalName() ?? '',
-                ]);
-            } elseif (isset($imageData['id'])) {
-                // Optionally, handle updates for existing images (e.g., alt_text or other metadata)
-                $existingImage = $product->images()->find($imageData['id']);
-                if ($existingImage && isset($imageData['alt_text'])) {
-                    $existingImage->update([
-                        'alt_text' => $imageData['alt_text'],
+            $product->images()
+                ->whereNotIn('id', $existingImageIds)
+                ->get()
+                ->each(function ($image) {
+                    $imagePath = public_path($image->url);
+                    if (file_exists($imagePath)) {
+                        unlink($imagePath);
+                    }
+                    $image->delete();
+                });
+
+            // Process new files and update objects
+            foreach ($request->images as $index => $imageData) {
+                // Handle new files
+                if (isset($imageData['file']) && $imageData['file'] instanceof \Illuminate\Http\UploadedFile) {
+                    $imagePath = ImageUpload::uploadImage($imageData['file'], 'products/' . $product->slug);
+                    $product->images()->create([
+                        'url' => "/storage/images/products/{$product->slug}/$imagePath",
+                        'alt_text' => $imageData['file']->getClientOriginalName() ?? '',
                     ]);
+                } elseif (isset($imageData['id'])) {
+                    // Optionally, handle updates for existing images (e.g., alt_text or other metadata)
+                    $existingImage = $product->images()->find($imageData['id']);
+                    if ($existingImage && isset($imageData['alt_text'])) {
+                        $existingImage->update([
+                            'alt_text' => $imageData['alt_text'],
+                        ]);
+                    }
                 }
             }
+
+            // Handle options sync
+            if ($request->has('options')) {
+                if ($product->variants()->exists()) {
+                    return response()->json([
+                        'error' => 'Cannot modify options when product has variants. Delete variants first.'
+                    ], 422);
+                }
+
+                if ($request->filled('options')) {
+                    $product->options()->sync($request->input('options'));
+                } else {
+                    $product->options()->sync([]);
+                }
+            }
+
+            DB::commit();
+            //get product variant count 
+            $product->variants_count = $product->variants()->count();
+            // log activity 
+            $agent = UA::parse($request->server('HTTP_USER_AGENT'));
+            ActivityHistoryJob::dispatch(
+                data: [
+                    'model' => 'products',
+                    'action' => 'update',
+                    'data' => ['product' =>  $product],
+                    'user_id' => $request->user()->id,
+                ],
+                platform: $agent->os->family,
+                browser: $agent->ua->family,
+            );
+
+            return response()->json(['message' => 'Product updated successfully.', 'product' => new ProductResource($product)]);
+        } catch (\Exception $e) {
+            // Rollback transaction on any error
+            DB::rollback();
+            return response()->json(['error' => 'Failed to update product: ' . $e->getMessage()], 500);
         }
-
-        // log activity 
-        $agent = UA::parse($request->server('HTTP_USER_AGENT'));
-        ActivityHistoryJob::dispatch(
-            data: [
-                'model' => 'products',
-                'action' => 'update',
-                'data' => ['product' =>  $product],
-                'user_id' => $request->user()->id,
-            ],
-            platform: $agent->os->family,
-            browser: $agent->ua->family,
-        );
-
-        return response()->json(['message' => 'Product updated successfully.', 'product' => new ProductResource($product)]);
     }
-
 
     public function getImages(Request $request, $id)
     {

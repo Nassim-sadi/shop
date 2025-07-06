@@ -27,147 +27,230 @@ const onSwiper = (swiper) => {
     currentIndex.value = swiper.activeIndex;
 };
 </script>
-
 <template>
     <Drawer
         :visible="isOpen"
         :header="$t('products.details')"
         position="right"
         @update:visible="$emit('update:isOpen', $event)"
-        class="medium-drawer"
+        class="enhanced-drawer medium-drawer"
         block-scroll
     >
-        <div class="mb-4">
-            <p class="font-bold">{{ $t("products.thumbnail_image") }}</p>
-            <div
-                class="flex items-center gap-2 mt-2 rounded-xl overflow-hidden"
-            >
-                <img
-                    :src="current.thumbnail_image_path"
-                    shape="circle"
-                    size="large"
-                    class="w-full object-cover"
-                />
-            </div>
-        </div>
-
-        <div class="mb-4">
-            <p class="font-bold">{{ $t("products.name") }} :</p>
-            {{ current.name }}
-        </div>
-
-        <div class="mb-4">
-            <p class="font-bold">{{ $t("products.description") }} :</p>
-            <p>
-                {{ current.description }}
-            </p>
-        </div>
-
-        <div class="mb-4">
-            <p class="font-bold">{{ $t("products.long_description") }} :</p>
-            <p>
-                {{ current.long_description }}
-            </p>
-        </div>
-
-        <div class="mb-4">
-            <p class="font-bold">{{ $t("products.status") }} :</p>
-            {{ current.status ? $t("common.active") : $t("common.inactive") }}
-        </div>
-
-        <div class="mb-4">
-            <p class="font-bold">{{ $t("products.category") }} :</p>
-            {{ current.category.name }}
-        </div>
-
-        <div class="mb-4">
-            <p class="font-bold">{{ $t("products.featured") }} :</p>
-            {{
-                current.featured
-                    ? $t("products.featured")
-                    : $t("products.not_featured")
-            }}
-        </div>
-
-        <div class="mb-4">
-            <p class="font-bold">{{ $t("products.base_quantity") }} :</p>
-            {{ current.base_quantity }}
-        </div>
-
-        <div class="mb-4" v-if="current.weight">
-            <p class="font-bold">{{ $t("products.weight") }} :</p>
-            {{ current.weight }}
-        </div>
-
-        <div class="mb-4">
-            <p class="font-bold">{{ $t("products.base_price") }} :</p>
-            {{ current.base_price }}
-        </div>
-
-        <div class="mb-4">
-            <p class="font-bold">{{ $t("products.listing_price") }} :</p>
-            {{ current.listing_price }}
-        </div>
-
-        <div class="mb-4">
-            <p class="font-bold">{{ $t("products.featured") }} :</p>
-            {{
-                current.featured
-                    ? $t("products.featured")
-                    : $t("products.not_featured")
-            }}
-        </div>
-        <div class="mb-4">
-            <p class="font-bold">{{ $t("common.created_at") }} :</p>
-            {{ current.created_at }}
-        </div>
-
-        <div class="mb-4">
-            <p class="font-bold">{{ $t("common.updated_at") }} :</p>
-            {{ current.updated_at }}
-        </div>
-
-        <div class="mb-4">
-            <p class="font-bold">{{ $t("products.images") }}</p>
-            <Swiper
-                :slides-per-view="1"
-                :space-between="10"
-                @swiper="onSwiper"
-                :modules="[Navigation, Pagination]"
-                :pagination="{
-                    el: '.swiper-pagination',
-                    clickable: true,
-                    type: 'bullets',
-                    bulletActiveClass: 'swiper-pagination-bullet-active',
-                }"
-                :navigation="{
-                    nextEl: '.swiper-button-next',
-                    prevEl: '.swiper-button-prev',
-                    clickable: true,
-                }"
-                class="mySwiper"
-            >
-                <SwiperSlide v-for="item in current.images" :key="item.id">
-                    <img
-                        :src="item.url"
-                        class="w-full aspect-square bg-cover"
-                    />
-                </SwiperSlide>
-                <div class="swiper-controller">
-                    <Button
-                        class="swiper-button-prev"
-                        icon="ti ti-chevron-left"
-                        rounded
-                    ></Button>
-                    <div class="swiper-pagination"></div>
-
-                    <Button
-                        class="swiper-button-next"
-                        icon="ti ti-chevron-right"
-                        rounded
-                    ></Button>
+        <div class="drawer-content">
+            <!-- Media Section -->
+            <div class="media-section">
+                <div class="section-header">
+                    <h3 class="section-title">
+                        {{ $t("products.thumbnail_image") }}
+                    </h3>
                 </div>
-            </Swiper>
+                <div class="media-container">
+                    <img
+                        :src="current.thumbnail_image_path"
+                        alt="Thumbnail"
+                        class="media-image"
+                    />
+                    <div class="media-overlay"></div>
+                </div>
+            </div>
+
+            <!-- Basic Info Section -->
+            <div class="info-section">
+                <div class="section-header">
+                    <h3 class="section-title">Product Information</h3>
+                </div>
+                <div class="info-grid">
+                    <div class="info-card">
+                        <div class="info-label">
+                            {{ $t("products.name") }}
+                        </div>
+                        <div class="info-value">{{ current.name }}</div>
+                    </div>
+
+                    <div class="info-card">
+                        <div class="info-label">
+                            {{ $t("products.description") }}
+                        </div>
+                        <div class="info-value">{{ current.description }}</div>
+                    </div>
+
+                    <div class="info-card full-width">
+                        <div class="info-label">
+                            {{ $t("products.long_description") }}
+                        </div>
+                        <div
+                            v-html="current.long_description"
+                            class="info-value prose"
+                        />
+                    </div>
+
+                    <div class="info-card">
+                        <div class="info-label">
+                            {{ $t("products.status") }}
+                        </div>
+                        <div class="info-value">
+                            <span
+                                :class="[
+                                    'status-badge',
+                                    current.status ? 'success' : 'danger',
+                                ]"
+                            >
+                                {{
+                                    current.status
+                                        ? $t("common.active")
+                                        : $t("common.inactive")
+                                }}
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="info-card">
+                        <div class="info-label">
+                            {{ $t("products.category") }}
+                        </div>
+                        <div class="info-value category-tag">
+                            {{ current.category.name }}
+                        </div>
+                    </div>
+
+                    <div class="info-card">
+                        <div class="info-label">
+                            {{ $t("products.featured") }}
+                        </div>
+                        <div class="info-value">
+                            <span
+                                :class="[
+                                    'info-badge',
+                                    current.featured ? 'warning' : 'success',
+                                ]"
+                            >
+                                {{
+                                    current.featured
+                                        ? $t("products.featured")
+                                        : $t("products.not_featured")
+                                }}
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="info-card">
+                        <div class="info-label">
+                            {{ $t("products.base_quantity") }}
+                        </div>
+                        <div class="info-value">
+                            {{ current.base_quantity }}
+                        </div>
+                    </div>
+
+                    <div v-if="current.weight" class="info-card">
+                        <div class="info-label">
+                            {{ $t("products.weight") }}
+                        </div>
+                        <div class="info-value">
+                            {{ current.weight }}
+                            <span>
+                                {{ current.weight_unit }}
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="info-card">
+                        <div class="info-label">
+                            {{ $t("products.base_price") }}
+                        </div>
+                        <div class="info-value success-value">
+                            {{ current.base_price }}
+                        </div>
+                    </div>
+
+                    <div class="info-card">
+                        <div class="info-label">
+                            {{ $t("products.listing_price") }}
+                        </div>
+                        <div class="info-value primary-value large">
+                            {{ current.listing_price }}
+                        </div>
+                    </div>
+
+                    <div class="info-card">
+                        <div class="info-label">
+                            {{ $t("products.variants_count") }}
+                        </div>
+                        <div class="info-value primary-value large">
+                            {{ current.variants_count }}
+                        </div>
+                    </div>
+
+                    <div class="info-card">
+                        <div class="info-label">
+                            {{ $t("common.created_at") }}
+                        </div>
+                        <div class="info-value secondary-value">
+                            {{ current.created_at }}
+                        </div>
+                    </div>
+
+                    <div class="info-card">
+                        <div class="info-label">
+                            {{ $t("common.updated_at") }}
+                        </div>
+                        <div class="info-value secondary-value">
+                            {{ current.updated_at }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Product Images Gallery -->
+            <div class="gallery-section">
+                <div class="section-header">
+                    <h3 class="section-title">
+                        {{ $t("products.images") }}
+                    </h3>
+                </div>
+                <div class="gallery-container">
+                    <Swiper
+                        :slides-per-view="1"
+                        :space-between="10"
+                        @swiper="onSwiper"
+                        :modules="[Navigation, Pagination]"
+                        :pagination="{
+                            el: '.swiper-pagination',
+                            clickable: true,
+                            type: 'bullets',
+                            bulletActiveClass:
+                                'swiper-pagination-bullet-active',
+                        }"
+                        :navigation="{
+                            nextEl: '.swiper-button-next',
+                            prevEl: '.swiper-button-prev',
+                            clickable: true,
+                        }"
+                        class="mySwiper"
+                    >
+                        <Swiper-slide
+                            v-for="item in current.images"
+                            :key="item.id"
+                        >
+                            <img :src="item.url" class="swiper-img" />
+                        </Swiper-slide>
+                        <div class="swiper-controller">
+                            <Button
+                                class="swiper-button-prev"
+                                icon="ti ti-chevron-left"
+                                rounded
+                            ></Button>
+                            <div class="swiper-pagination"></div>
+
+                            <Button
+                                class="swiper-button-next"
+                                icon="ti ti-chevron-right"
+                                rounded
+                            ></Button>
+                        </div>
+                    </Swiper>
+                </div>
+            </div>
         </div>
     </Drawer>
 </template>
@@ -177,6 +260,12 @@ const onSwiper = (swiper) => {
     aspect-ratio: 1;
     width: 100%;
     border-radius: 1rem;
+
+    .swiper-img {
+        width: 100%;
+        aspect-ratio: 1/1;
+        object-fit: contain;
+    }
 }
 .swiper-controller {
     position: relative;

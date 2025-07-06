@@ -1,17 +1,26 @@
 <script setup>
 import { computed, onMounted, ref, watch } from "vue";
-import { useRoute, useRouter } from "vue-router";
+import { useRoute } from "vue-router";
+import router from "@/router/Index";
 import axios from "@/plugins/axios";
+import Product from "@/components/Product.vue";
 
 const route = useRoute();
-const router = useRouter();
 const category = ref(null);
 const products = ref([]);
 const loading = ref(false);
-
 const categorySlug = computed(() => route.params.categorySlug);
 const page = 1;
 
+const goToProduct = (product) => {
+    router.push({
+        name: "product",
+        params: {
+            categorySlug: categorySlug.value, // You need this
+            productSlug: product.slug, // And this
+        },
+    });
+};
 const getCategoryData = async () => {
     return new Promise((resolve, reject) => {
         axios
@@ -80,23 +89,9 @@ watch(
             <h2>Products in {{ category.name }}</h2>
 
             <div v-if="products.length > 0" class="products-grid">
-                <div
-                    v-for="product in products"
-                    :key="product.id"
-                    class="product-card"
-                >
-                    <img
-                        :src="product.thumbnail_image_path"
-                        :alt="product.thumbnail_image_path"
-                        class="product-image"
-                    />
-                    <h3>{{ product.name }}</h3>
-                    <p class="price">${{ product.listing_price }}</p>
-                    <p class="weight" v-if="product.weight">
-                        {{ product.weight }} {{ product.weight_unit }}
-                    </p>
-                    <button class="add-to-cart-btn">Add to Cart</button>
-                </div>
+                <template v-for="product in products" :key="product.id">
+                    <Product :product="product" @click="goToProduct(product)" />
+                </template>
             </div>
 
             <div v-else class="no-products">
@@ -146,7 +141,6 @@ watch(
     margin-top: 20px;
 }
 
-/* Products Section Styles */
 .products-section h2 {
     font-size: 2rem;
     margin-bottom: 30px;
@@ -157,72 +151,5 @@ watch(
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     gap: 24px;
-}
-
-.product-card {
-    border: 1px solid #e5e7eb;
-    border-radius: 12px;
-    padding: 20px;
-    text-align: center;
-    transition: all 0.3s ease;
-    background: white;
-}
-
-.product-card:hover {
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-    transform: translateY(-2px);
-}
-
-.product-image {
-    width: 100%;
-    height: 200px;
-    object-fit: cover;
-    border-radius: 8px;
-    margin-bottom: 16px;
-}
-
-.product-card h3 {
-    font-size: 1.2rem;
-    margin-bottom: 12px;
-    color: #1f2937;
-}
-
-.price {
-    font-size: 1.4rem;
-    font-weight: bold;
-    color: #2563eb;
-    margin: 12px 0;
-}
-
-.add-to-cart-btn {
-    background-color: #10b981;
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 1rem;
-    transition: background-color 0.2s ease;
-}
-
-.add-to-cart-btn:hover {
-    background-color: #059669;
-}
-
-.no-products {
-    text-align: center;
-    padding: 60px 20px;
-    color: #6b7280;
-}
-
-.loading,
-.error {
-    text-align: center;
-    padding: 60px 20px;
-    font-size: 1.1rem;
-}
-
-.error {
-    color: #ef4444;
 }
 </style>

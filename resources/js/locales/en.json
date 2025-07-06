@@ -375,6 +375,10 @@
         "variant_thumbnail": "Variant thumbnail",
         "options": "Options",
         "weight": "Weight",
+        "variants_count": "Variants count",
+        "variants_count_tooltip": "Number of variants for this product",
+        "no_variants": "No variants for this product",
+        "variants_count_warning": "  Options cannot be changed when variants exist for this product, Delete variants first to modify options.",
         "variants": {
             "title": "variant | variants",
             "create": "Create variant",

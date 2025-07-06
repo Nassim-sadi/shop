@@ -11,6 +11,7 @@ import {
 import {
     alphaSpace,
     validateDecimalFormat,
+    textContentMaxLength,
 } from "@/validators/CustomValidators";
 import ImageInput from "@/components/admin/products/imagesInput/Index.vue";
 import isEqual from "lodash.isequal";
@@ -19,6 +20,15 @@ import { computed, ref, toRefs, watch } from "vue";
 import { useImageCompression } from "@/utils/useImageCompression";
 import productPlaceHolder from "@/assets/images/placeholder.webp";
 import { productThumbnailImageSize } from "@/constants/imagesSize/Index";
+
+const optionsChanged = computed(() => {
+    const currentOptionIds = current.value.options
+        .map((option) => option.id)
+        .sort();
+    const editedOptionIds = [...edited.value.options].sort();
+
+    return !isEqual(currentOptionIds, editedOptionIds);
+});
 
 const activeStep = ref(1);
 const previewImage = ref(productPlaceHolder);
@@ -37,6 +47,10 @@ const props = defineProps({
         required: false,
     },
     categories: {
+        type: Array,
+        required: true,
+    },
+    options: {
         type: Array,
         required: true,
     },
@@ -118,8 +132,7 @@ const rules = computed(() => ({
     },
     long_description: {
         required,
-        alphaSpace,
-        maxLength: maxLength(2000),
+        textContentLimit: textContentMaxLength(10000),
         minLength: minLength(10),
     },
     base_price: {
@@ -255,7 +268,6 @@ const editItem = () => {
     formData.append("base_price", edited.value.base_price);
     formData.append("listing_price", edited.value.listing_price);
     formData.append("base_quantity", edited.value.base_quantity);
-    formData.append("featured", edited.value.featured);
     if (
         edited.value.weight !== null &&
         edited.value.weight !== "" &&
@@ -264,6 +276,13 @@ const editItem = () => {
         formData.append("weight", edited.value.weight);
         formData.append("weight_unit", edited.value.weight_unit);
     }
+    formData.append("featured", edited.value.featured);
+    console.log("option changed", optionsChanged.value);
+
+    if (optionsChanged.value) {
+        formData.append("options", JSON.stringify(edited.value.options));
+    }
+
     formData.append("category_id", edited.value.category.id);
     formData.append("status", edited.value.status);
 
@@ -316,9 +335,22 @@ watch(
     () => isOpen.value,
     (val) => {
         if (val) {
-            edited.value = { ...current.value };
+            // edited.value = { ...current.value };
+            edited.value.id = current.value.id;
+            edited.value.name = current.value.name;
+            edited.value.description = current.value.description;
+            edited.value.long_description = current.value.long_description;
+            edited.value.base_price = current.value.base_price;
+            edited.value.listing_price = current.value.listing_price;
+            edited.value.base_quantity = current.value.base_quantity;
+            edited.value.weight = current.value.weight;
+            edited.value.weight_unit = current.value.weight_unit;
+            edited.value.category = current.value.category;
             edited.value.status = current.value.status ? 1 : 0;
             edited.value.featured = current.value.featured ? 1 : 0;
+            edited.value.options = current.value.options.map(
+                (option) => option.id,
+            );
             previewImage.value = current.value.thumbnail_image_path;
             imageFile.value = current.value.thumbnail_image_path;
             console.log("done copying");
@@ -346,13 +378,13 @@ watch(
 <template>
     <Drawer
         :visible="isOpen"
-        :header="$t('products.create')"
+        :header="$t('products.edit')"
         position="right"
         @update:visible="$emit('update:isOpen', $event)"
         :dismissable="false"
         :show-close-icon="false"
         block-scroll
-        class="large-drawer"
+        class="extra-large-drawer"
     >
         <div
             class="h-full w-full flex items-center justify-center"
@@ -395,7 +427,7 @@ watch(
                             />
                             <img
                                 :src="previewImage"
-                                class="w-full object-cover !h-full"
+                                class="w-full object-contain !h-full"
                             />
                         </label>
                     </div>
@@ -491,31 +523,69 @@ watch(
                                 }}</Message>
                             </div>
                         </div>
+                    </div>
 
-                        <div class="mb-5">
-                            <label for="long_description" class="mb-5">{{
-                                $t("products.long_description")
-                            }}</label>
+                    <div class="mb-5">
+                        <label for="long_description" class="mb-5">{{
+                            $t("products.long_description")
+                        }}</label>
 
-                            <Textarea
-                                id="long_description"
-                                v-model="edited.long_description"
-                                rows="6"
-                                fluid
-                                maxlength="1000"
-                                class="mb-5"
-                            />
+                        <Editor
+                            id="long_description"
+                            v-model="edited.long_description"
+                            fluid
+                            class="mb-5"
+                        >
+                            <template #toolbar>
+                                <span class="ql-formats">
+                                    <select class="ql-header"></select>
+                                </span>
+                                <span class="ql-formats">
+                                    <button class="ql-bold"></button>
+                                    <button class="ql-italic"></button>
+                                    <button class="ql-underline"></button>
+                                </span>
+                                <span class="ql-formats">
+                                    <select class="ql-color"></select>
+                                    <select class="ql-background"></select>
+                                </span>
+                                <span class="ql-formats">
+                                    <button
+                                        class="ql-list"
+                                        value="ordered"
+                                    ></button>
+                                    <button
+                                        class="ql-list"
+                                        value="bullet"
+                                    ></button>
+                                    <button
+                                        class="ql-list"
+                                        value="check"
+                                    ></button>
+                                </span>
+                                <span class="ql-formats">
+                                    <button
+                                        class="ql-link"
+                                        value="ordered"
+                                    ></button>
+                                </span>
+                                <span class="ql-formats">
+                                    <button class="ql-clean"></button>
+                                </span>
+                            </template>
+                        </Editor>
 
-                            <div
-                                v-for="error of v$.long_description.$errors"
-                                :key="error.$uid"
-                            >
-                                <Message severity="error">{{
-                                    error.$message
-                                }}</Message>
-                            </div>
+                        <div
+                            v-for="error of v$.long_description.$errors"
+                            :key="error.$uid"
+                        >
+                            <Message severity="error">{{
+                                error.$message
+                            }}</Message>
                         </div>
+                    </div>
 
+                    <div class="column-1 md:columns-2 gap-5 mb-5">
                         <div class="mb-5">
                             <label for="featured" class="mb-5">{{
                                 $t("products.featured")
@@ -576,6 +646,41 @@ watch(
                         </div>
 
                         <div class="mb-5">
+                            <label for="options" class="mb-5"
+                                >{{ $t("products.options") }}
+                            </label>
+
+                            <MultiSelect
+                                v-model="edited.options"
+                                display="chip"
+                                :options="options"
+                                option-label="name"
+                                placeholder="Select options"
+                                option-value="id"
+                                :max-selected-labels="3"
+                                :show-toggle-all="true"
+                                fluid
+                                :disabled="current.variants_count > 0"
+                            />
+
+                            <div
+                                v-if="current.variants_count > 0"
+                                class="mt-2 p-2 bg-blue-100 border border-blue-300 rounded"
+                            >
+                                <p class="text-sm text-blue-700">
+                                    <i class="pi pi-info-circle mr-1"></i>
+                                    {{ $t("products.variants_count_warning") }}
+                                    {{
+                                        $t(
+                                            "products.variants.title",
+                                            current.variants_count,
+                                        )
+                                    }}
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="mb-5">
                             <label for="base_quantity" class="mb-5">{{
                                 $t("products.base_quantity")
                             }}</label>
@@ -625,7 +730,6 @@ watch(
                                     clear-icon="pi pi-times"
                                 ></Select>
                             </InputGroup>
-                            {{ edited.weight_unit }}
 
                             <div
                                 class="text-red-500"

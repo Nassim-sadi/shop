@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('name');
             $table->string('slug')->unique();
             $table->string('description', 255);
-            $table->text('long_description', 2000);
+            $table->text('long_description');
             $table->boolean('status')->default(false);
             $table->decimal('base_price', 8, 2);
             $table->integer('base_quantity')->default(0);

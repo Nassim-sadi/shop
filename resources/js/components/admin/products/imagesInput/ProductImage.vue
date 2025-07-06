@@ -36,7 +36,7 @@ const removeImage = () => {
         <img
             v-else-if="image"
             :src="image"
-            class="w-full aspect-[1/1] object-cover rounded-xl"
+            class="w-full aspect-[1/1] object-contain rounded-xl"
         />
 
         <Button

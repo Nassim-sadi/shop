@@ -37,6 +37,7 @@ class ProductResource extends JsonResource
             'options' => ProductOptionsResource::collection($this->options),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
+            "variants_count" => $this->variants_count,
         ];
     }
 }

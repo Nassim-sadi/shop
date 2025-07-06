@@ -10,6 +10,7 @@ import {
 } from "@vuelidate/validators";
 import {
     alphaSpace,
+    textContentMaxLength,
     validateDecimalFormat,
 } from "@/validators/CustomValidators";
 import ImageInput from "@/components/admin/products/imagesInput/Index.vue";
@@ -109,8 +110,7 @@ const rules = computed(() => ({
     },
     long_description: {
         required,
-        alphaSpace,
-        maxLength: maxLength(2000),
+        textContentLimit: textContentMaxLength(10000),
         minLength: minLength(10),
     },
     base_price: {
@@ -248,14 +248,6 @@ watch(
     },
 );
 
-const handleSelectedOptions = (options) => {
-    let tempOptions = [];
-    options.forEach((option) => {
-        tempOptions.push(option.id);
-    });
-    return tempOptions;
-};
-
 const createItem = () => {
     v$.value.$touch();
     if (v$.value.$invalid) return;
@@ -281,10 +273,7 @@ const createItem = () => {
     formData.append("category_id", product.value.category.id);
     formData.append("status", product.value.status);
     if (selectedOptions.value.length > 0) {
-        formData.append(
-            "options",
-            JSON.stringify(handleSelectedOptions(selectedOptions.value)),
-        );
+        formData.append("options", JSON.stringify(selectedOptions.value));
     }
     $emit("createItem", formData);
     v$.value.$reset();
@@ -319,7 +308,7 @@ const prevStep = () => {
         :dismissable="false"
         :show-close-icon="false"
         block-scroll
-        class="large-drawer"
+        class="extra-large-drawer"
     >
         <div
             class="h-full w-full flex items-center justify-center"
@@ -358,7 +347,7 @@ const prevStep = () => {
                             />
                             <img
                                 :src="previewImage || productPlaceHolder"
-                                class="w-full object-cover !h-full"
+                                class="w-full object-contain !h-full"
                             />
                         </label>
                     </div>
@@ -454,31 +443,67 @@ const prevStep = () => {
                                 }}</Message>
                             </div>
                         </div>
+                    </div>
+                    <div class="mb-5">
+                        <label for="long_description" class="mb-5">{{
+                            $t("products.long_description")
+                        }}</label>
 
-                        <div class="mb-5">
-                            <label for="long_description" class="mb-5">{{
-                                $t("products.long_description")
-                            }}</label>
+                        <Editor
+                            id="long_description"
+                            v-model="product.long_description"
+                            fluid
+                            class="mb-5"
+                        >
+                            <template #toolbar>
+                                <span class="ql-formats">
+                                    <select class="ql-header"></select>
+                                </span>
+                                <span class="ql-formats">
+                                    <button class="ql-bold"></button>
+                                    <button class="ql-italic"></button>
+                                    <button class="ql-underline"></button>
+                                </span>
+                                <span class="ql-formats">
+                                    <select class="ql-color"></select>
+                                    <select class="ql-background"></select>
+                                </span>
+                                <span class="ql-formats">
+                                    <button
+                                        class="ql-list"
+                                        value="ordered"
+                                    ></button>
+                                    <button
+                                        class="ql-list"
+                                        value="bullet"
+                                    ></button>
+                                    <button
+                                        class="ql-list"
+                                        value="check"
+                                    ></button>
+                                </span>
+                                <span class="ql-formats">
+                                    <button
+                                        class="ql-link"
+                                        value="ordered"
+                                    ></button>
+                                </span>
+                                <span class="ql-formats">
+                                    <button class="ql-clean"></button>
+                                </span>
+                            </template>
+                        </Editor>
 
-                            <Textarea
-                                id="long_description"
-                                v-model="product.long_description"
-                                rows="6"
-                                fluid
-                                maxlength="1000"
-                                class="mb-5"
-                            />
-
-                            <div
-                                v-for="error of v$.long_description.$errors"
-                                :key="error.$uid"
-                            >
-                                <Message severity="error">{{
-                                    error.$message
-                                }}</Message>
-                            </div>
+                        <div
+                            v-for="error of v$.long_description.$errors"
+                            :key="error.$uid"
+                        >
+                            <Message severity="error">{{
+                                error.$message
+                            }}</Message>
                         </div>
-
+                    </div>
+                    <div class="column-1 md:columns-2 gap-5 mb-5">
                         <div class="mb-5">
                             <label for="featured" class="mb-5">{{
                                 $t("products.featured")
@@ -537,6 +562,7 @@ const prevStep = () => {
                                 }}</Message>
                             </div>
                         </div>
+
                         <div class="mb-5">
                             <label for="options" class="mb-5"
                                 >{{ $t("products.options") }}
@@ -548,6 +574,7 @@ const prevStep = () => {
                                 :options="options"
                                 option-label="name"
                                 placeholder="Select options"
+                                option-value="id"
                                 :max-selected-labels="3"
                                 :show-toggle-all="true"
                                 fluid

@@ -1,3 +1,4 @@
+import "quill/dist/quill.snow.css";
 import Aura from "@primevue/themes/aura";
 import PrimeVue from "primevue/config";
 import ConfirmationService from "primevue/confirmationservice";
@@ -38,7 +39,6 @@ app.use(PrimeVue, {
         },
     },
 });
-
 app.use(abilitiesPlugin, ability);
 app.use(ToastService);
 app.use(ConfirmationService);

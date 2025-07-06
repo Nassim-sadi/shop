@@ -22,7 +22,12 @@ const router = createRouter({
                 {
                     path: "/:categorySlug/:page?",
                     name: "category",
-                    component: () => import("@/views/Category.vue"),
+                    component: () => import("@/views/Category/Index.vue"),
+                },
+                {
+                    path: "/:categorySlug/:productSlug",
+                    name: "product",
+                    component: () => import("@/views/Product/Index.vue"),
                 },
                 {
                     path: "about",

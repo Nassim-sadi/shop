@@ -746,5 +746,6 @@ onMounted(async () => {
     height: auto;
     aspect-ratio: 1/1;
     border-radius: 0.25rem;
+    object-fit: contain;
 }
 </style>

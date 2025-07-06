@@ -38,6 +38,21 @@ const Color = {
     hexColor,
 };
 
+const textContentMaxLength = (maxLen) =>
+    helpers.withMessage(
+        `Text content cannot exceed ${maxLen} characters`,
+        (value) => {
+            if (!value) return true;
+
+            // Create temporary element to strip HTML tags
+            const temp = document.createElement("div");
+            temp.innerHTML = value;
+            const textOnly = temp.textContent || temp.innerText || "";
+
+            return textOnly.length <= maxLen;
+        },
+    );
+
 export {
     alphaSpace,
     Color,
@@ -45,4 +60,5 @@ export {
     hexColor,
     lastname,
     validateDecimalFormat,
+    textContentMaxLength,
 };
