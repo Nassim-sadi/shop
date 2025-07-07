@@ -25,6 +25,7 @@ class ProductResource extends JsonResource
             'status' => $this->status,
             'featured' => $this->featured,
             'base_price' => $this->base_price,
+            'currency' => $this->currency,
             'base_quantity' => $this->base_quantity,
             'listing_price' => $this->listing_price,
             'thumbnail_image_path' => $this->thumbnail_image_path,

@@ -64,11 +64,16 @@ const props = defineProps({
         required: false,
         default: false,
     },
+    currencies: {
+        type: Array,
+        required: true,
+    },
 });
 
 const $emit = defineEmits(["update:isOpen", "editItem"]);
 
-const { isOpen, loading, categories, current, loadingImages } = toRefs(props);
+const { isOpen, loading, categories, current, loadingImages, currencies } =
+    toRefs(props);
 
 const statusOptions = [
     {
@@ -267,7 +272,11 @@ const editItem = () => {
     formData.append("long_description", edited.value.long_description);
     formData.append("base_price", edited.value.base_price);
     formData.append("listing_price", edited.value.listing_price);
-    formData.append("base_quantity", edited.value.base_quantity);
+    formData.append("currency_id", edited.value.currency.id);
+    if (!haveVariants.value) {
+        formData.append("base_quantity", edited.value.base_quantity);
+    }
+
     if (
         edited.value.weight !== null &&
         edited.value.weight !== "" &&
@@ -335,12 +344,15 @@ watch(
     () => isOpen.value,
     (val) => {
         if (val) {
+            console.log(current.value);
+
             // edited.value = { ...current.value };
             edited.value.id = current.value.id;
             edited.value.name = current.value.name;
             edited.value.description = current.value.description;
             edited.value.long_description = current.value.long_description;
             edited.value.base_price = current.value.base_price;
+            edited.value.currency = current.value.currency;
             edited.value.listing_price = current.value.listing_price;
             edited.value.base_quantity = current.value.base_quantity;
             edited.value.weight = current.value.weight;
@@ -373,6 +385,13 @@ watch(
         }
     },
 );
+
+const haveVariants = computed(() => {
+    return (
+        current.value.variants_count !== null &&
+        current.value.variants_count > 0
+    );
+});
 </script>
 
 <template>
@@ -660,27 +679,29 @@ watch(
                                 :max-selected-labels="3"
                                 :show-toggle-all="true"
                                 fluid
-                                :disabled="current.variants_count > 0"
+                                :disabled="haveVariants"
                             />
 
                             <div
-                                v-if="current.variants_count > 0"
-                                class="mt-2 p-2 bg-blue-100 border border-blue-300 rounded"
+                                v-if="haveVariants"
+                                class="mt-3 p-3 bg-amber-50 border border-amber-200 rounded-lg"
                             >
-                                <p class="text-sm text-blue-700">
-                                    <i class="pi pi-info-circle mr-1"></i>
-                                    {{ $t("products.variants_count_warning") }}
-                                    {{
+                                <p
+                                    class="text-sm text-amber-800 flex items-start"
+                                >
+                                    <i
+                                        class="pi pi-exclamation-triangle mr-2 mt-0.5 text-amber-500"
+                                    ></i>
+                                    <span>{{
                                         $t(
-                                            "products.variants.title",
-                                            current.variants_count,
+                                            "products.variants_count_options_warning",
                                         )
-                                    }}
+                                    }}</span>
                                 </p>
                             </div>
                         </div>
 
-                        <div class="mb-5">
+                        <div class="mb-5 break-inside-avoid">
                             <label for="base_quantity" class="mb-5">{{
                                 $t("products.base_quantity")
                             }}</label>
@@ -691,8 +712,28 @@ watch(
                                 type="number"
                                 v-model="edited.base_quantity"
                                 fluid
-                                class="mb-5"
+                                :disabled="haveVariants"
                             />
+
+                            <div
+                                v-if="haveVariants"
+                                class="mt-3 p-3 bg-blue-100 border border-blue-300 rounded"
+                            >
+                                <p class="text-sm text-blue-700">
+                                    <i class="pi pi-info-circle mr-1"></i>
+                                    {{
+                                        $t(
+                                            "products.variants_count_quantity_warning",
+                                        )
+                                    }}
+                                    {{
+                                        $t(
+                                            "products.variants.title",
+                                            current.variants_count,
+                                        )
+                                    }}
+                                </p>
+                            </div>
 
                             <div
                                 class="text-red-500"
@@ -790,6 +831,30 @@ watch(
                                 }}</Message>
                             </div>
                         </div>
+
+                        <div class="currency-input">
+                            <label for="currency" class="mb-5">
+                                {{ $t("products.currency") }}
+                            </label>
+                            <Select
+                                id="currency"
+                                :options="currencies"
+                                v-model="edited.currency"
+                                :placeholder="$t('products.select_currency')"
+                                option-label="code"
+                                class="mb-5"
+                            >
+                                <template #option="slotProps">
+                                    {{ slotProps.option.code }} -
+                                    {{ slotProps.option.name }}
+                                </template>
+
+                                <template #value="slotProps">
+                                    {{ slotProps.value.code }} -
+                                    {{ slotProps.value.name }}
+                                </template>
+                            </Select>
+                        </div>
                     </div>
                 </StepPanel>
             </StepItem>
@@ -811,7 +876,7 @@ watch(
                     @click="prevStep"
                     v-if="activeStep !== 1"
                 />
-
+                {{ haveVariants }}
                 <Button
                     :label="$t('common.next')"
                     @click="nextStep"

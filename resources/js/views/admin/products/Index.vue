@@ -284,7 +284,6 @@ const editItem = (val) => {
             });
     });
 };
-
 const updateItem = (data) => {
     products.value[currentIndex.value] = data;
 };
@@ -299,6 +298,22 @@ const setLoadingState = (userId, isLoading) => {
     loadingStates.value[userId] = isLoading;
 };
 const loadingCreate = ref(false);
+const currencies = ref([]);
+
+const getCurrencies = async () => {
+    return new Promise((resolve, reject) => {
+        axios
+            .get("api/admin/currencies")
+            .then((res) => {
+                currencies.value = res.data;
+                resolve(res.data);
+            })
+            .catch((err) => {
+                console.log(err);
+                reject(err);
+            });
+    });
+};
 
 const createItem = (val) => {
     loadingCreate.value = true;
@@ -317,6 +332,7 @@ const createItem = (val) => {
                 uploadPercentage.value = 0;
                 total.value++;
                 isCreateOpen.value = false;
+
                 emitter.emit("toast", {
                     summary: $t("status.success.title"),
                     message: $t("status.success.product.create"),
@@ -356,6 +372,9 @@ const openVariants = () => {
 onMounted(async () => {
     await getCategories();
     await getProductOptions();
+    await getCurrencies();
+    console.log(currencies.value);
+
     start_date.value.setDate(start_date.value.getDate() - 17);
     await getProducts();
 });
@@ -376,6 +395,7 @@ onMounted(async () => {
             :categories="categories"
             :loading="loadingCreate"
             :progress="uploadPercentage"
+            :currencies="currencies"
         />
 
         <Variants
@@ -383,6 +403,7 @@ onMounted(async () => {
             :loading="loadingStates[current.id]"
             :options="productOptions"
             v-model:is-open="isVariantsOpen"
+            @update-item="updateItem"
         />
 
         <Edit
@@ -394,6 +415,7 @@ onMounted(async () => {
             :loading="loadingEdit"
             :loading-images="loadingStates[current.id]"
             :progress="uploadPercentage"
+            :currencies="currencies"
         ></Edit>
 
         <DataTable

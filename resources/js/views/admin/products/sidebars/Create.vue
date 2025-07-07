@@ -46,11 +46,15 @@ const props = defineProps({
         required: false,
         default: 0,
     },
+    currencies: {
+        type: Array,
+        required: true,
+    },
 });
 
 const $emit = defineEmits(["update:isOpen", "createItem"]);
 
-const { isOpen, loading, categories } = toRefs(props);
+const { isOpen, loading, categories, currencies } = toRefs(props);
 
 const statusOptions = [
     {
@@ -244,6 +248,15 @@ watch(
                 weight_unit: "g",
                 status: 0,
             };
+            //reset image
+            imageFile.value = null;
+            previewImage.value = productPlaceHolder;
+            activeStep.value = 1;
+            formData = null;
+        } else {
+            product.value.currency = currencies.value.find(
+                (currency) => currency.code === "DZD",
+            );
         }
     },
 );
@@ -261,6 +274,7 @@ const createItem = () => {
     formData.append("base_price", product.value.base_price);
     formData.append("listing_price", product.value.listing_price);
     formData.append("base_quantity", product.value.base_quantity);
+    formData.append("currency_id", product.value.currency.id);
     if (
         product.value.weight !== null &&
         product.value.weight !== "" &&
@@ -655,6 +669,7 @@ const prevStep = () => {
                             <label for="base_price" class="mb-5">{{
                                 $t("products.base_price")
                             }}</label>
+
                             <InputText
                                 :aria-labelledby="$t('products.base_price')"
                                 id="base_price"
@@ -698,6 +713,31 @@ const prevStep = () => {
                                     error.$message
                                 }}</Message>
                             </div>
+                        </div>
+
+                        <div class="currency-input">
+                            <label for="currency" class="mb-5">
+                                {{ $t("products.currency") }}
+                            </label>
+                            {{ product.currency }}
+                            <Select
+                                id="currency"
+                                :options="currencies"
+                                v-model="product.currency"
+                                option-label="code"
+                                :placeholder="$t('products.select_currency')"
+                                class="mb-5"
+                            >
+                                <template #option="slotProps">
+                                    {{ slotProps.option.code }} -
+                                    {{ slotProps.option.name }}
+                                </template>
+
+                                <template #value="slotProps">
+                                    {{ slotProps.value.code }} -
+                                    {{ slotProps.value.name }}
+                                </template>
+                            </Select>
                         </div>
                     </div>
                 </StepPanel>

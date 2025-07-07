@@ -160,6 +160,10 @@ const onSwiper = (swiper) => {
                         </div>
                         <div class="info-value success-value">
                             {{ current.base_price }}
+
+                            <span class="currency">
+                                {{ current.currency.code }}
+                            </span>
                         </div>
                     </div>
 
@@ -169,6 +173,7 @@ const onSwiper = (swiper) => {
                         </div>
                         <div class="info-value primary-value large">
                             {{ current.listing_price }}
+                            {{ current.currency.code }}
                         </div>
                     </div>
 

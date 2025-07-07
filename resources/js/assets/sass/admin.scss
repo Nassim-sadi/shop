@@ -668,3 +668,14 @@ label {
     background: var(--surface-800, #1e293b);
     border-color: var(--surface-700, #334155);
 }
+
+.currency {
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.currency-input {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}

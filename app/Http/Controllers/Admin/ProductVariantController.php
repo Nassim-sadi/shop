@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use App\Helpers\SKUGenerator;
+use App\Http\Resources\Admin\Product\ProductResource;
 use App\Jobs\ActivityHistoryJob;
 use UA;
 
@@ -21,63 +22,6 @@ class ProductVariantController extends Controller
     return response()->json(['variants' => $product->variants]);
   }
 
-
-  // public function create(Request $request, $id)
-  // {
-  //   $this->authorize('product_create');
-  //   debugbar()->log($request->all());
-
-  //   // Validate the product exists
-  //   $product = Product::findOrFail($id);
-
-  //   // Validate the request data
-  //   $request->validate([
-  //     'newVariants' => 'required|array',
-  //     'newVariants.*.price' => 'required|numeric|min:0',
-  //     'newVariants.*.quantity' => 'required|integer|min:0',
-  //     'newVariants.*.status' => 'required|boolean',
-  //     'newVariants.*.options' => 'required|array', // Add this validation
-  //   ]);
-
-  //   // Process variants separately - don't modify $request directly
-  //   $processedVariants = [];
-
-  //   foreach ($request->newVariants as $variantData) {
-  //     // Generate SKU for each variant
-  //     $processedVariant = [
-  //       'product_id' => $product->id,
-  //       // 'sku' => SKUGenerator::generateUniqueSKU($product->id),
-  //       'price' => $variantData['price'],
-  //       'quantity' => $variantData['quantity'],
-  //       'status' => $variantData['status'],
-  //     ];
-
-  //     $processedVariants[] = $processedVariant;
-  //   }
-
-  //   // Create variants
-  //   $createdVariants = $product->variants()->createMany($processedVariants);
-
-  //   // Handle option values for each variant
-  //   foreach ($createdVariants as $index => $variant) {
-  //     $optionValues = $request->newVariants[$index]['options'] ?? [];
-  //     if (!empty($optionValues)) {
-  //       // Convert the options array to the correct format
-  //       $optionValueIds = array_values($optionValues);
-  //       $variant->optionValues()->sync($optionValueIds);
-  //     }
-  //   }
-
-  //   return response()->json([
-  //     'message' => 'Variants created successfully',
-  //     'variants' => $product->variants()->with('optionValues')->get([
-  //       'id',
-  //       'price',
-  //       'quantity',
-  //       'status',
-  //     ])
-  //   ]);
-  // }
 
   public function update(Request $request, $id)
   {
@@ -173,6 +117,13 @@ class ProductVariantController extends Controller
       }
     }
 
+    // Calculate and update base_quantity
+    $baseQuantity = $product->variants()->sum('quantity');
+    $product->update(['base_quantity' => $baseQuantity]);
+
+    //get product details
+    $variantCount = $product->variants()->count();
+
     // log activity 
     $agent = UA::parse($request->server('HTTP_USER_AGENT'));
     ActivityHistoryJob::dispatch(
@@ -192,6 +143,8 @@ class ProductVariantController extends Controller
       'created_count' => count($createdVariants),
       'updated_count' => count($updatedVariants),
       'deleted_count' => $deletedCount,
+      'base_quantity' => $baseQuantity,
+      'product' => new ProductResource($product),
       'variants' => $product->variants()->with('optionValues')->get([
         'id',
         'price',

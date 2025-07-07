@@ -12,6 +12,7 @@ class Product extends Model
 
     protected $fillable = [
         'category_id',
+        'currency_id',
         'name',
         'slug',
         'description',
@@ -19,6 +20,7 @@ class Product extends Model
         'base_price',
         'listing_price',
         'base_quantity',
+        "currency",
         'status',
         'featured',
         'weight',
@@ -49,5 +51,10 @@ class Product extends Model
     public function getThumbnailImagePathAttribute($value)
     {
         return asset($value);
+    }
+
+    public function currency()
+    {
+        return $this->belongsTo(Currency::class);
     }
 }

@@ -64,10 +64,24 @@ class ProductController extends Controller
         $request->validate([
             'name' => 'required',
             'description' => 'required|string|min:10|max:255',
-            'long_description' => 'required|string|min:10|max:2000',
+            'long_description' => [
+                'required',
+                'string',
+                'min:10',
+                'max:65535', // Raw HTML storage limit
+                function ($attribute, $value, $fail) {
+                    if ($value) {
+                        $textOnly = strip_tags($value);
+                        if (strlen($textOnly) > 10000) { // Adjust this limit as needed
+                            $fail('The ' . $attribute . ' text content cannot exceed 10,000 characters.');
+                        }
+                    }
+                },
+            ],
             'base_price' => 'required|numeric',
             'listing_price' => 'required|numeric',
             'base_quantity' => 'required|numeric',
+            "currency_id" => 'required|exists:currencies,id',
             'category_id' => 'required|exists:categories,id',
             'thumbnail_image_path' => 'required|image|mimes:jpeg,png,jpg,gif,svg,webp|max:2048',
             'status' => 'required|boolean',
@@ -102,6 +116,7 @@ class ProductController extends Controller
                 'base_price' => $request->base_price,
                 'base_quantity' => $request->base_quantity,
                 'listing_price' => $request->listing_price,
+                'currency_id' => $request->currency_id,
                 'status' => $request->status,
                 'weight' => $request->weight,
                 'weight_unit' => $request->weight_unit,
@@ -161,7 +176,12 @@ class ProductController extends Controller
             ]);
         }
 
-        $request->validate([
+        // Get the product to check if it has variants
+        $product = Product::findOrFail($request->id);
+        $hasVariants = $product->variants()->exists();
+
+        // Base validation rules
+        $rules = [
             'id' => 'required|exists:products,id',
             'name' => 'required',
             'description' => 'required|string|min:10|max:255',
@@ -180,8 +200,8 @@ class ProductController extends Controller
                 },
             ],
             'base_price' => 'required|numeric',
+            "currency_id" => 'required|exists:currencies,id',
             'listing_price' => 'required|numeric',
-            'base_quantity' => 'required|numeric',
             'category_id' => 'required|exists:categories,id',
             'thumbnail_image_path' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:2048',
             'status' => 'required|boolean',
@@ -191,13 +211,18 @@ class ProductController extends Controller
             'images' => 'required|array|min:1',
             'options' => 'sometimes|array',
             'options.*' => 'exists:product_options,id',
-        ]);
+        ];
+
+        // Conditionally add base_quantity validation only if no variants exist
+        if (!$hasVariants) {
+            $rules['base_quantity'] = 'required|numeric';
+        }
+
+        $request->validate($rules);
 
         // Start a transaction to ensure data integrity
         DB::beginTransaction();
         try {
-            $product = Product::findOrFail($request->id);
-
             // Update product details
             $baseSlug = Str::slug($request->name);
             $slug = $baseSlug;
@@ -209,20 +234,29 @@ class ProductController extends Controller
                 $counter++;
             }
 
-            $product->update([
+            // Prepare update data
+            $updateData = [
                 'name' => $request->name,
                 'slug' => $slug,
                 'description' => $request->description,
                 'long_description' => $request->long_description,
                 'base_price' => $request->base_price,
-                'base_quantity' => $request->base_quantity,
                 'listing_price' => $request->listing_price,
+                'currency_id' => $request->currency_id,
                 'status' => $request->status,
                 'weight' => $request->weight,
                 'weight_unit' => $request->weight_unit,
                 'featured' => $request->featured,
                 'category_id' => $request->category_id,
-            ]);
+            ];
+
+            // Only update base_quantity if no variants exist
+            if (!$hasVariants) {
+                $updateData['base_quantity'] = $request->base_quantity;
+            }
+            // If variants exist, don't touch base_quantity - it's managed by variant operations
+
+            $product->update($updateData);
 
             // Handle thumbnail image update
             if ($request->hasFile('thumbnail_image_path')) {

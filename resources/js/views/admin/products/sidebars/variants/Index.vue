@@ -89,10 +89,6 @@ const updateItem = async () => {
             severity: "success",
         });
 
-        // Emit to parent to refresh data or handle success
-        $emit("updateItem", response);
-
-        // Close the drawer
         $emit("update:isOpen", false);
 
         // Refresh variants data
@@ -121,6 +117,7 @@ const updateVariants = (data) => {
             .put(`api/admin/products/${current.value.id}/variants`, data)
             .then((res) => {
                 console.log("Update response:", res.data);
+                $emit("updateItem", res.data.product);
                 resolve(res.data);
             })
             .catch((err) => {

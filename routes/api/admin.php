@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\ActivityHistoryController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\AuthController;
 use App\Http\Controllers\Admin\CategoryController;
+use App\Http\Controllers\Admin\CurrencyController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\ProductOptionController;
 use App\Http\Controllers\Admin\ProductVariantController;
@@ -92,6 +93,10 @@ Route::middleware(["auth:sanctum"])->group(function () {
         Route::patch('/update', 'update');
         Route::patch('/change-status', 'changeStatus');
         Route::delete('/delete/{id}', 'delete');
+    });
+
+    Route::prefix('currencies')->controller(CurrencyController::class)->group(function () {
+        Route::get('/', 'index');
     });
 
 
