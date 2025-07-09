@@ -11,6 +11,7 @@ import { i18n } from "@/plugins/i18n";
 import { createPinia } from "pinia";
 import piniaPersist from "pinia-plugin-persist";
 import router from "./router/Index";
+import { createHead } from "@vueuse/head";
 
 import "swiper/css";
 import "swiper/scss";
@@ -26,6 +27,7 @@ const app = createApp(App);
 
 app.provide("emitter", emitter);
 
+const head = createHead();
 app.use(router);
 
 const pinia = createPinia();
@@ -42,6 +44,7 @@ app.use(PrimeVue, {
 app.use(abilitiesPlugin, ability);
 app.use(ToastService);
 app.use(ConfirmationService);
+app.use(head);
 app.use(i18n);
 app.use(pinia);
 

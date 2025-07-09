@@ -1,6 +1,6 @@
 <script setup>
 import { $t } from "@/plugins/i18n";
-import { ref, toRefs } from "vue";
+import { ref, toRefs, watch } from "vue";
 const props = defineProps({
     current: {
         required: true,
@@ -21,11 +21,48 @@ const $emit = defineEmits(["update:isOpen"]);
 const { isOpen, current } = toRefs(props);
 import { Swiper, SwiperSlide } from "swiper/vue";
 import { Navigation, Pagination } from "swiper/modules";
-
+import emitter from "@/plugins/emitter";
+import axios from "@/plugins/axios";
 const currentIndex = ref(0);
 const onSwiper = (swiper) => {
     currentIndex.value = swiper.activeIndex;
 };
+
+const isLoading = ref(false);
+const currentVariants = ref([]);
+const getVariants = async () => {
+    return new Promise((resolve, reject) => {
+        axios
+            .get(`api/admin/products/${current.value.id}/variants`)
+            .then((res) => {
+                console.log("Fetched variants:", res.data);
+                currentVariants.value = res.data.variants || [];
+                resolve(res.data);
+            })
+            .catch((err) => {
+                console.error("Error fetching variants:", err);
+                emitter.emit("toast", {
+                    summary: $t("status.error.title"),
+                    message: "Failed to load variants",
+                    severity: "error",
+                });
+                currentVariants.value = [];
+                reject(err);
+            })
+            .finally(() => {
+                isLoading.value = false;
+            });
+    });
+};
+
+watch(
+    () => isOpen.value,
+    (val) => {
+        if (val) {
+            getVariants();
+        }
+    },
+);
 </script>
 <template>
     <Drawer
@@ -254,6 +291,84 @@ const onSwiper = (swiper) => {
                             ></Button>
                         </div>
                     </Swiper>
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <!-- Skeleton when loading -->
+                <div v-if="isLoading">
+                    <div
+                        v-for="n in 2"
+                        :key="n"
+                        class="border rounded-lg p-4 mb-3 bg-gray-50 animate-pulse"
+                    >
+                        <div class="h-4 bg-gray-300 rounded w-1/3 mb-2"></div>
+                        <div class="h-4 bg-gray-300 rounded w-1/2 mb-1"></div>
+                        <div class="h-4 bg-gray-300 rounded w-1/4 mb-1"></div>
+                        <div class="h-4 bg-gray-300 rounded w-3/4"></div>
+                    </div>
+                </div>
+
+                <!-- Actual content when not loading -->
+                <div v-else-if="currentVariants?.length">
+                    <p class="font-bold mb-2 capitalize">
+                        {{ $t("products.variants.title", 2) }}
+                    </p>
+
+                    <div
+                        v-for="(variant, index) in currentVariants"
+                        :key="variant.id"
+                        class="border rounded-lg p-4 mb-3 bg-gray-50"
+                    >
+                        <p class="text-sm text-gray-500 mb-1">
+                            {{ $t("products.variant") }} {{ index + 1 }}
+                        </p>
+
+                        <div class="grid grid-cols-2 gap-2 text-sm">
+                            <div>
+                                <span class="font-medium"
+                                    >{{ $t("products.price") }}:</span
+                                >
+                                {{ variant.price }} {{ current.currency.code }}
+                            </div>
+                            <div>
+                                <span class="font-medium"
+                                    >{{ $t("products.quantity") }}:</span
+                                >
+                                {{ variant.quantity }}
+                            </div>
+                            <div>
+                                <span class="font-medium"
+                                    >{{ $t("products.status") }} :
+                                </span>
+                                <span
+                                    :class="
+                                        variant.status
+                                            ? 'text-green-600'
+                                            : 'text-red-600'
+                                    "
+                                >
+                                    {{
+                                        variant.status
+                                            ? $t("common.active")
+                                            : $t("common.inactive")
+                                    }}
+                                </span>
+                            </div>
+                            <div class="col-span-2">
+                                <span class="font-medium"
+                                    >{{ $t("products.option_values") }} :
+                                </span>
+                                <span class="mt-1 text-gray-700">
+                                    {{
+                                        variant.option_values
+                                            .map((opt) => opt.value)
+                                            .join(", ")
+                                    }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

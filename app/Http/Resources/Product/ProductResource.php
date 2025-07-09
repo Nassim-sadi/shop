@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources\Product;
 
+use App\Http\Resources\Options\ProductOptionsResource;
 use App\Http\Resources\Variants\ProductVariantResource;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -37,6 +38,7 @@ class ProductResource extends JsonResource
             'weight' => $this->weight,
             'weight_unit' => $this->weight_unit,
             'featured' => $this->featured,
+            'options' =>  ProductOptionsResource::collection($this->options),
             'thumbnail_image_path' => $this->thumbnail_image_path,
             'variants' => ProductVariantResource::collection($this->variants),
 

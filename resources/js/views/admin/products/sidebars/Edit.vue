@@ -405,6 +405,7 @@ const haveVariants = computed(() => {
         block-scroll
         class="extra-large-drawer"
     >
+        >
         <div
             class="h-full w-full flex items-center justify-center"
             v-if="loading || loadingImages"
@@ -876,7 +877,7 @@ const haveVariants = computed(() => {
                     @click="prevStep"
                     v-if="activeStep !== 1"
                 />
-                {{ haveVariants }}
+
                 <Button
                     :label="$t('common.next')"
                     @click="nextStep"

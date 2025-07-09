@@ -382,6 +382,8 @@
         "no_variants": "No variants for this product",
         "variants_count_options_warning": "Options cannot be changed when variants exist for this product, Delete variants first to modify options.",
         "variants_count_quantity_warning": "Quantity is automatically calculated from variants and cannot be edited directly. Remove all variants to edit quantity manually.",
+        "option_values": "Option Values",
+        "quantity": "Quantity",
         "variants": {
             "title": "variant | variants",
             "create": "Create variant",
@@ -426,6 +428,7 @@
         "delete_success": "Product option deleted successfully"
     },
     "navigation": {
+        "title": "Navigation",
         "home": "Home",
         "pages": "Pages",
         "dashboard": "Dashboard",
@@ -457,5 +460,12 @@
             "shop_now": "Shop now",
             "new_arrival": "New arrival"
         }
-    }
+    },
+    "toggle_user_menu": "Toggle user menu",
+    "store": "Store",
+    "about": "About",
+    "contact": "Contact",
+    "search_placeholder": "Search products...",
+    "search_aria_label": "Search input",
+    "search_button_aria": "Submit search"
 }

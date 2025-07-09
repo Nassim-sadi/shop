@@ -28,10 +28,10 @@ class ProductVariantController extends Controller
     $this->authorize('product_update');
     debugbar()->log($request->all());
 
-    // Validate the product exists
-    $product = Product::findOrFail($id);
+    // Get product and eager load variants + option values
+    $product = Product::with('variants.optionValues')->findOrFail($id);
 
-    // Validate the request data
+    // Validate request
     $request->validate([
       'newVariants' => 'sometimes|array',
       'newVariants.*.price' => 'required|numeric|min:0',
@@ -52,92 +52,82 @@ class ProductVariantController extends Controller
     $updatedVariants = [];
     $deletedCount = 0;
 
-    // Handle deleted variants first
-    if ($request->has('deletedVariants') && !empty($request->deletedVariants)) {
-      $deletedIds = $request->deletedVariants;
-
-      // Make sure the variants belong to this product
-      $variantsToDelete = $product->variants()->whereIn('id', $deletedIds)->get();
+    // 🗑️ Delete variants
+    if (!empty($request->deletedVariants)) {
+      $variantsToDelete = $product->variants->whereIn('id', $request->deletedVariants);
 
       foreach ($variantsToDelete as $variant) {
-        // Delete associated option values first
         $variant->optionValues()->detach();
-        // Delete the variant
         $variant->delete();
         $deletedCount++;
       }
     }
 
-    // Handle new variants creation
-    if ($request->has('newVariants') && !empty($request->newVariants)) {
-      $processedVariants = [];
-      foreach ($request->newVariants as $variantData) {
-        $processedVariant = [
+    // ➕ Create new variants
+    if (!empty($request->newVariants)) {
+      $processedVariants = collect($request->newVariants)->map(function ($variantData) use ($product) {
+        return [
           'product_id' => $product->id,
           'price' => $variantData['price'],
           'quantity' => $variantData['quantity'],
           'status' => $variantData['status'],
         ];
-        $processedVariants[] = $processedVariant;
-      }
+      });
 
-      // Create new variants
-      $createdVariants = $product->variants()->createMany($processedVariants);
+      $createdVariants = $product->variants()->createMany($processedVariants->toArray());
 
-      // Handle option values for each new variant
       foreach ($createdVariants as $index => $variant) {
-        $optionValues = $request->newVariants[$index]['options'] ?? [];
-        if (!empty($optionValues)) {
-          $optionValueIds = array_values($optionValues);
+        $optionValueIds = array_values($request->newVariants[$index]['options'] ?? []);
+        if (!empty($optionValueIds)) {
           $variant->optionValues()->sync($optionValueIds);
         }
       }
     }
 
-    // Handle existing variants updates
-    if ($request->has('updatedVariants') && !empty($request->updatedVariants)) {
+    // ✏️ Update variants
+    if (!empty($request->updatedVariants)) {
       foreach ($request->updatedVariants as $variantData) {
-        // Find the variant that belongs to this product
-        $variant = $product->variants()->findOrFail($variantData['id']);
+        $variant = $product->variants->firstWhere('id', $variantData['id']);
+        if (!$variant) continue;
 
-        // Update variant data
         $variant->update([
           'price' => $variantData['price'],
           'quantity' => $variantData['quantity'],
           'status' => $variantData['status'],
         ]);
 
-        // Update option values
-        $optionValues = $variantData['options'] ?? [];
-        if (!empty($optionValues)) {
-          $optionValueIds = array_values($optionValues);
+        $optionValueIds = array_values($variantData['options'] ?? []);
+        if (!empty($optionValueIds)) {
           $variant->optionValues()->sync($optionValueIds);
         }
+
         $updatedVariants[] = $variant;
       }
     }
 
-    // Calculate and update base_quantity
-    $baseQuantity = $product->variants()->sum('quantity');
+    // 📊 Recalculate quantity & count from memory
+    $product->load('variants.optionValues'); // refresh after changes
+
+    $baseQuantity = $product->variants->sum('quantity');
+
+
     $product->update(['base_quantity' => $baseQuantity]);
+    $product = $product->withCount('variants')->first();
 
-    //get product details
-    $variantCount = $product->variants()->count();
-
-    // log activity 
+    // 🧠 Log activity
     $agent = UA::parse($request->server('HTTP_USER_AGENT'));
     ActivityHistoryJob::dispatch(
       data: [
         'model' => 'products',
         'action' => 'update',
-        'data' => ['product' =>  $product],
+        'data' => ['product' => $product],
         'user_id' => $request->user()->id,
       ],
       platform: $agent->os->family,
       browser: $agent->ua->family,
     );
 
-    // Return response with created, updated, and deleted counts
+    // ✅ Response
     return response()->json([
       'message' => 'Variants updated successfully',
       'created_count' => count($createdVariants),
@@ -145,12 +135,15 @@ class ProductVariantController extends Controller
       'deleted_count' => $deletedCount,
       'base_quantity' => $baseQuantity,
       'product' => new ProductResource($product),
-      'variants' => $product->variants()->with('optionValues')->get([
-        'id',
-        'price',
-        'quantity',
-        'status',
-      ])
+      'variants' => $product->variants->map(function ($variant) {
+        return [
+          'id' => $variant->id,
+          'price' => $variant->price,
+          'quantity' => $variant->quantity,
+          'status' => $variant->status,
+          'option_values' => $variant->optionValues,
+        ];
+      }),
     ]);
   }
 }

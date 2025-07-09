@@ -117,6 +117,8 @@ const updateVariants = (data) => {
             .put(`api/admin/products/${current.value.id}/variants`, data)
             .then((res) => {
                 console.log("Update response:", res.data);
+                console.log(res.data.product);
+
                 $emit("updateItem", res.data.product);
                 resolve(res.data);
             })

@@ -28,15 +28,35 @@ const getProductBySlug = () => {
 onMounted(async () => {
     await getProductBySlug();
 });
+import test from "./test.vue";
+import { useHead } from "@vueuse/head";
+
+const MetaData = computed(() => {
+    return {
+        title: product.value.name,
+        meta: [
+            {
+                name: "description",
+                content: product.value.description,
+            },
+            {
+                property: "og:title",
+                content: product.value.name,
+            },
+            {
+                property: "og:image",
+                content: product.value.thumbnail_image_path,
+            },
+        ],
+    };
+});
+
+useHead(MetaData);
 </script>
 
 <template>
     <div>
-        <pre>
-
-        {{ product }}
-      </pre
-        >
+        <test :product="product"></test>
     </div>
 </template>
 

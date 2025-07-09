@@ -22,40 +22,16 @@ class ProductController extends Controller
     return response()->json([
       'category' => $category,
       'products' => new ProductCollection($products),
-      'breadcrumbs' => $this->getBreadcrumbs($category),
     ]);
   }
 
-  private function getBreadcrumbs($category)
-  {
-    $breadcrumbs = collect();
-    $current = $category;
 
-    while ($current) {
-      $breadcrumbs->prepend([
-        'name' => $current->name,
-        'slug' => $current->slug,
-        'url' => '/' . $current->slug
-      ]);
-      $current = $current->parent;
-    }
-
-    // Add products breadcrumb
-    $breadcrumbs->push([
-      'name' => 'Products',
-      'slug' => 'products',
-      'url' => '/' . $category->slug . '/products'
-    ]);
-
-    return $breadcrumbs;
-  }
 
   public function getProductBySlug(Request $request, $productSlug)
   {
     $product = Product::where('slug', $productSlug)->firstOrFail();
     return response()->json([
       'product' => ProductResource::make($product)->resolve(),
-      'breadcrumbs' => $this->getBreadcrumbs($product->category),
     ]);
   }
 }

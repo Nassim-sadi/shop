@@ -27,23 +27,6 @@ class CategoryController extends Controller
 
     return response()->json([
       'category' => $category,
-      'breadcrumbs' => $this->getBreadcrumbs($category),
     ]);
-  }
-
-  private function getBreadcrumbs($category)
-  {
-    $breadcrumbs = collect();
-    $current = $category;
-
-    while ($current) {
-      $breadcrumbs->prepend([
-        'name' => $current->name,
-        'slug' => $current->slug,
-        'url' => '/' . $current->slug
-      ]);
-      $current = $current->parent;
-    }
-    return $breadcrumbs;
   }
 }

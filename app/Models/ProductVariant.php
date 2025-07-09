@@ -9,7 +9,7 @@ use App\Traits\FormateDate;
 class ProductVariant extends Model
 {
     use FormateDate;
-    protected $fillable = ['product_id', 'price', 'quantity', 'status'];
+    protected $fillable = ['product_id', 'price', 'quantity', 'status', 'discount'];
 
     public function images()
     {

@@ -66,7 +66,7 @@ const handleLogout = () => {
 <template>
     <Drawer
         v-model:visible="isVisible"
-        :header="$t('navigation', 'Navigation')"
+        :header="$t('navigation.title')"
         position="left"
         class="mobile-menu-drawer"
         @hide="handleClose"
@@ -84,7 +84,7 @@ const handleLogout = () => {
                     @click="handleNavigation({ name: 'dashboard' })"
                 >
                     <i class="pi pi-home"></i>
-                    {{ $t("dashboard") }}
+                    {{ $t("navigation.dashboard") }}
                 </button>
 
                 <button
@@ -99,8 +99,8 @@ const handleLogout = () => {
                     class="mobile-menu-item"
                     @click="handleNavigation({ name: 'orders' })"
                 >
-                    <i class="pi pi-shopping-cart"></i>
-                    {{ $t("orders") }}
+                    <i class="pi pi-shopping-cart capitalize"></i>
+                    {{ $t("navigation.orders") }}
                 </button>
 
                 <button
@@ -128,7 +128,7 @@ const handleLogout = () => {
                     @click="handleNavigation({ name: 'register' })"
                 >
                     <i class="pi pi-user-plus"></i>
-                    {{ $t("register") }}
+                    {{ $t("auth.register") }}
                 </Button>
             </div>
 
@@ -152,7 +152,7 @@ const handleLogout = () => {
 
             <!-- Categories Panel Menu -->
             <div class="mobile-categories-section">
-                <h3>{{ $t("categories", "Categories") }}</h3>
+                <h3>{{ $t("categories.title") }}</h3>
                 <div class="mobile-panel-menu-container">
                     <PanelMenu :model="categories" class="mobile-panel-menu">
                         <template #item="{ item }">

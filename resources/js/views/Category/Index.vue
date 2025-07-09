@@ -60,12 +60,33 @@ watch(
     categorySlug,
     (newSlug) => {
         if (newSlug) {
+            console.log("🚀 ~ .then ~ newSlug:", newSlug);
             getCategoryData(newSlug);
             getCategoryProducts(newSlug);
         }
     },
     { immediate: true },
 );
+
+import { useHead } from "@vueuse/head";
+
+useHead({
+    title: category.value?.name,
+    meta: [
+        {
+            name: "description",
+            content: category.value?.description,
+        },
+        {
+            property: "og:title",
+            content: category.value?.name,
+        },
+        {
+            property: "og:image",
+            content: category.value?.image,
+        },
+    ],
+});
 </script>
 
 <template>

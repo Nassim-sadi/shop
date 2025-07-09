@@ -64,7 +64,7 @@ const navItems = computed(() => [
         to: "/",
     },
     {
-        label: $t("categories"),
+        label: $t("categories.title"),
         to: "/categories",
         isSpecial: true, // Special handling for categories dropdown
     },
@@ -320,8 +320,7 @@ onMounted(() => {
                     size="xlarge"
                 >
                     <Avatar
-                        :image="auth.user?.image"
-                        :label="auth.user?.name || user?.email"
+                        :image="auth.user.image"
                         class="avatar-small"
                         shape="square"
                         size="large"

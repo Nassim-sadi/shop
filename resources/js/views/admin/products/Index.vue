@@ -67,14 +67,11 @@ const statusOptions = [
 const auth = authStore();
 
 const getProductOptions = async () => {
-    console.log("getting product options");
     return new Promise((resolve, reject) => {
         axios
             .get("api/admin/product-options/all")
             .then((res) => {
                 productOptions.value = res.data;
-                console.log(productOptions.value);
-
                 resolve(res.data);
             })
             .catch((err) => {
@@ -103,18 +100,6 @@ const getProductImages = async () => {
             });
     });
 };
-
-// const setRoleOptions = (data) => {
-//     roleOptions.value = [
-//         ...roleOptions.value,
-//         ...data.map((role) => {
-//             return {
-//                 label: role.name,
-//                 value: role.id,
-//             };
-//         }),
-//     ];
-// };
 
 const getProducts = async () => {
     if (loading.value) return;
@@ -328,7 +313,6 @@ const createItem = (val) => {
             })
             .then((res) => {
                 products.value.push(res.data.product);
-                console.log(products.value);
                 uploadPercentage.value = 0;
                 total.value++;
                 isCreateOpen.value = false;
@@ -373,8 +357,6 @@ onMounted(async () => {
     await getCategories();
     await getProductOptions();
     await getCurrencies();
-    console.log(currencies.value);
-
     start_date.value.setDate(start_date.value.getDate() - 17);
     await getProducts();
 });
