@@ -14,7 +14,7 @@ const { product } = defineProps({
             :alt="product.thumbnail_image_path"
             class="product-image"
         />
-        <h3>{{ product.name }}</h3>
+        <h3 class="product-name truncate">{{ product.name }}</h3>
         <p class="price">${{ product.listing_price }}</p>
         <p class="weight" v-if="product.weight">
             {{ product.weight }} {{ product.weight_unit }}

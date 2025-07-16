@@ -1,8 +1,14 @@
 <style lang="scss" scoped></style>
 <script setup>
 import { Swiper, SwiperSlide } from "swiper/vue";
+import router from "@/router/Index";
+const goToCategory = (category) => {
+    router.push({
+        name: "category",
+        params: { categorySlug: category.slug },
+    });
+};
 
-// Props
 const { categories, modelValue } = defineProps({
     categories: {
         type: Array,
@@ -13,16 +19,6 @@ const { categories, modelValue } = defineProps({
         default: null,
     },
 });
-
-// Emits
-const emit = defineEmits(["update:modelValue"]);
-
-// Methods
-const selectCategory = (categoryId) => {
-    console.log("🚀 ~ selectCategory ~ categoryId:", categoryId);
-
-    // emit("update:modelValue", categoryId);
-};
 
 // Swiper configuration
 const swiperOptions = {
@@ -42,8 +38,8 @@ const swiperOptions = {
                 class="slide-auto"
             >
                 <div
-                    @click="selectCategory(category.id)"
-                    class="category-chip"
+                    @click="goToCategory(category)"
+                    class="custom-btn"
                     :class="{ active: modelValue === category.id }"
                     role="button"
                     tabindex="0"

@@ -21,12 +21,20 @@ class CategoryController extends Controller
     return CategoryResource::collection($categories);
   }
 
+  public function getHomepageCategories()
+  {
+    debugbar()->log("getting homepage categories");
+
+    $categories = Category::whereDoesntHave('children')->orderBy('order', 'ASC')->limit(8)->get();
+    debugbar()->log($categories);
+    return CategoryResource::collection($categories);
+  }
+
   public function getCategoryBySlug($categorySlug)
   {
     $category = Category::where('slug', $categorySlug)->firstOrFail();
-
     return response()->json([
-      'category' => $category,
+      'category' => new CategoryResource($category),
     ]);
   }
 }

@@ -301,25 +301,6 @@ watch(
 
 <template>
     <div class="min-h-screen bg-gray-50">
-        <pre>{{ product }}</pre>
-        {{ variantCombinations }}
-        <!-- Breadcrumb -->
-        <div class="bg-white border-b">
-            <div class="max-w-7xl mx-auto px-4 py-3">
-                <nav class="text-sm text-gray-600">
-                    <span class="hover:text-orange-600 cursor-pointer"
-                        >Home</span
-                    >
-                    <span class="mx-2">&gt;</span>
-                    <span class="hover:text-orange-600 cursor-pointer">{{
-                        product.category?.name
-                    }}</span>
-                    <span class="mx-2">&gt;</span>
-                    <span class="text-gray-900">{{ product.name }}</span>
-                </nav>
-            </div>
-        </div>
-
         <div class="max-w-7xl mx-auto px-4 py-6">
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 <div class="lg:sticky lg:top-6 lg:self-start">
@@ -394,89 +375,32 @@ watch(
                 <div class="space-y-6">
                     <div class="bg-white rounded-lg shadow-sm p-6">
                         <div class="space-y-4">
-                            <h1
-                                class="text-2xl lg:text-3xl font-bold text-gray-900"
-                            >
+                            <h3 class="">
                                 {{ product.name }}
-                            </h1>
-                            <div>
+                            </h3>
+                            <div class="options">
                                 <template v-if="haveVariants">
-                                    <h2 class="text-2xl font-bold mb-6">
-                                        {{ $t("products.options") }}
-                                    </h2>
+                                    <p class="options-title">
+                                        {{ $t("products.options") }} :
+                                    </p>
 
-                                    <!-- Price Display -->
-                                    <div class="mb-6">
-                                        <div
-                                            v-if="currentVariant"
-                                            class="space-y-2"
-                                        >
-                                            <div
-                                                class="flex items-baseline gap-2"
-                                            >
-                                                <span
-                                                    class="text-3xl font-bold text-green-600"
-                                                >
-                                                    ${{
-                                                        parseFloat(
-                                                            currentVariant.price,
-                                                        ).toFixed(2)
-                                                    }}
-                                                </span>
-
-                                                <span
-                                                    v-if="
-                                                        currentVariant.discount
-                                                    "
-                                                    class="text-lg text-gray-500 line-through"
-                                                >
-                                                    ${{
-                                                        (
-                                                            parseFloat(
-                                                                currentVariant.price,
-                                                            ) /
-                                                            (1 -
-                                                                currentVariant.discount /
-                                                                    100)
-                                                        ).toFixed(2)
-                                                    }}
-                                                </span>
-                                                <span
-                                                    v-if="
-                                                        currentVariant.discount
-                                                    "
-                                                    class="text-sm bg-red-100 text-red-800 px-2 py-1 rounded"
-                                                >
-                                                    -{{
-                                                        currentVariant.discount
-                                                    }}%
-                                                </span>
-                                            </div>
-                                            <p class="text-sm text-gray-600">
-                                                Price includes GST. FREE
-                                                delivery available.
-                                            </p>
-                                        </div>
-                                        <div v-else class="text-gray-500">
-                                            Select all options to see price
-                                        </div>
-                                    </div>
                                     <!-- Option Selectors -->
-                                    <div class="space-y-6">
+                                    <div class="options-selectors">
                                         <div
                                             v-for="(
                                                 options, optionId
                                             ) in groupedOptions"
                                             :key="optionId"
-                                            class="space-y-3"
                                         >
-                                            <h3
+                                            <h4
                                                 class="text-lg font-semibold capitalize"
                                             >
                                                 {{ optionNames[optionId] }}
-                                            </h3>
+                                            </h4>
 
-                                            <div class="flex gap-2 flex-wrap">
+                                            <div
+                                                class="flex gap-2 flex-wrap mb-4"
+                                            >
                                                 <button
                                                     v-for="option in options"
                                                     :key="option.id"
@@ -524,10 +448,7 @@ watch(
                                 </template>
 
                                 <!-- Quantity Selector -->
-                                <div
-                                    v-if="currentVariant"
-                                    class="mt-6 space-y-4"
-                                >
+                                <div v-if="currentVariant" class="space-y-4">
                                     <div class="flex items-center gap-4">
                                         <div class="flex items-center">
                                             <span
@@ -627,27 +548,6 @@ watch(
                                     </div>
                                 </div>
 
-                                <!-- Variant Info (for debugging) -->
-                                <div
-                                    v-if="currentVariant"
-                                    class="mt-6 p-4 bg-gray-50 rounded-lg"
-                                >
-                                    <h4 class="font-semibold mb-2">
-                                        Selected Variant:
-                                    </h4>
-                                    <div class="text-sm text-gray-600">
-                                        <p>
-                                            Variant ID: {{ currentVariant.id }}
-                                        </p>
-                                        <p>
-                                            Price: ${{ currentVariant.price }}
-                                        </p>
-                                        <p>
-                                            Stock: {{ currentVariant.quantity }}
-                                        </p>
-                                    </div>
-                                </div>
-
                                 <div>
                                     <p class="text-sm text-gray-600">
                                         {{ product.listing_price }}
@@ -737,9 +637,7 @@ watch(
                                 </div>
                                 <div>
                                     <span class="font-medium">SKU:</span>
-                                    <span class="ml-2">{{
-                                        product.slug?.toUpperCase()
-                                    }}</span>
+                                    <span class="ml-2">{{ product.sku }}</span>
                                 </div>
                                 <!-- <div>
                                     <span class="font-medium">Stock:</span>
@@ -822,5 +720,18 @@ watch(
 .fade-scale-enter-to {
     opacity: 1;
     transform: scale(1);
+}
+
+.options {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+
+    & .options-title {
+        margin-bottom: 0.5rem;
+        font-size: 1.25rem;
+        font-weight: bold;
+        color: var(--primary-clr);
+    }
 }
 </style>

@@ -405,7 +405,7 @@ onMounted(() => {
     left: 0;
     top: 0;
     width: 100%;
-    background: var(--darkest-clr);
+    background: var(--primary-clr);
     backdrop-filter: blur(10px);
     border-bottom: 1px solid var(--surface-border);
     transition: all var(--layout-section-transition-duration);
@@ -496,6 +496,9 @@ onMounted(() => {
                 width: auto;
                 :deep(.p-select-label) {
                     font-weight: 600;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
                 }
             }
 

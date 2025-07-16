@@ -679,3 +679,9 @@ label {
     align-items: center;
     justify-content: space-between;
 }
+
+.truncate {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}

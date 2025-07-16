@@ -8,6 +8,7 @@ Route::prefix('categories')->controller(CategoryController::class)->group(functi
   Route::get('/', 'getRootCategories');
   Route::get('/leaf', 'getLeafCategories');
 
+  Route::get('/homeCategories', 'getHomepageCategories');
   Route::get('/{categorySlug}', 'getCategoryBySlug')
     ->where('categorySlug', '[a-zA-Z0-9\-_]+');
   Route::get('/{categorySlug}/products', [ProductController::class, 'getProductsByCategory']);

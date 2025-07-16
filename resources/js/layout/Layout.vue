@@ -1,6 +1,20 @@
 <script setup>
 import Footer from "@/components/footer/Index.vue";
 import Navbar from "@/components/header/Navbar.vue";
+import Breadcrumbs from "@/components/Breadcrumbs.vue";
+import { computed } from "vue";
+import { useRoute } from "vue-router";
+
+const route = useRoute();
+
+const showBreadcrumbs = computed(() => {
+    const hiddenRoutes = ["/", "/cart", "/checkout", "/orders", "/account"];
+    return (
+        !hiddenRoutes.includes(route.path) &&
+        !route.path.startsWith("/orders/") &&
+        !route.path.startsWith("/account/")
+    );
+});
 </script>
 
 <template>
@@ -8,6 +22,7 @@ import Navbar from "@/components/header/Navbar.vue";
         <div class="layout-main-container-client">
             <Navbar />
             <div class="layout-main-client">
+                <Breadcrumbs v-if="showBreadcrumbs" />
                 <router-view></router-view>
             </div>
         </div>

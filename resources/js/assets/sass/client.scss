@@ -30,14 +30,15 @@
 }
 .client {
     background-color: var(--white-clr);
+
     h1,
     h2,
     h3,
     h4,
     h5,
     h6 {
-        margin: 1.5rem 0 1rem 0;
-        font-family: inherit;
+        margin: 1.5rem 0 1rem;
+        font-family: "Lato", sans-serif;
         font-weight: 700;
         line-height: 1.5;
         color: var(--text-clr);
@@ -46,25 +47,84 @@
     h1 {
         font-size: 2.5rem;
     }
-
     h2 {
         font-size: 2rem;
     }
-
     h3 {
         font-size: 1.75rem;
     }
-
     h4 {
         font-size: 1.5rem;
     }
-
     h5 {
         font-size: 1.25rem;
     }
-
     h6 {
         font-size: 1rem;
+    }
+
+    // Responsive scaling
+    @media (max-width: 1024px) {
+        h1 {
+            font-size: 2.2rem;
+        }
+        h2 {
+            font-size: 1.8rem;
+        }
+        h3 {
+            font-size: 1.6rem;
+        }
+        h4 {
+            font-size: 1.4rem;
+        }
+        h5 {
+            font-size: 1.15rem;
+        }
+        h6 {
+            font-size: 0.95rem;
+        }
+    }
+
+    @media (max-width: 768px) {
+        h1 {
+            font-size: 2rem;
+        }
+        h2 {
+            font-size: 1.6rem;
+        }
+        h3 {
+            font-size: 1.4rem;
+        }
+        h4 {
+            font-size: 1.25rem;
+        }
+        h5 {
+            font-size: 1rem;
+        }
+        h6 {
+            font-size: 0.875rem;
+        }
+    }
+
+    @media (max-width: 480px) {
+        h1 {
+            font-size: 1.75rem;
+        }
+        h2 {
+            font-size: 1.5rem;
+        }
+        h3 {
+            font-size: 1.25rem;
+        }
+        h4 {
+            font-size: 1.1rem;
+        }
+        h5 {
+            font-size: 0.95rem;
+        }
+        h6 {
+            font-size: 0.85rem;
+        }
     }
 
     p {
@@ -193,4 +253,19 @@
 
 .p-editor-content .ql-editor {
     min-height: 15rem;
+}
+
+.custom-btn {
+    color: var(--white-clr);
+    text-decoration: none;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    transition: all 0.2s;
+    font-size: 0.875rem;
+}
+
+.custom-btn:hover {
+    color: var(--accent-clr);
+    font-weight: bold;
+    background-color: var(--primary-clr);
 }

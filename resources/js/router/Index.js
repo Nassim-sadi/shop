@@ -8,6 +8,7 @@ import { isUserLoggedIn } from "./utils";
 import { $t } from "@/plugins/i18n";
 const router = createRouter({
     history: createWebHistory(),
+    strict: false, // Allow both with and without trailing slash
     routes: [
         {
             path: "/",
@@ -20,12 +21,17 @@ const router = createRouter({
                     component: () => import("@/views/home/Index.vue"),
                 },
                 {
-                    path: "/:categorySlug/:page?",
+                    path: "categories",
+                    name: "public-categories",
+                    component: () => import("@/views/Category/List/Index.vue"),
+                },
+                {
+                    path: "/categories/:categorySlug",
                     name: "category",
                     component: () => import("@/views/Category/Index.vue"),
                 },
                 {
-                    path: "/:categorySlug/:productSlug",
+                    path: "/categories/:categorySlug/:productSlug",
                     name: "product",
                     component: () => import("@/views/Product/Index.vue"),
                 },

@@ -523,7 +523,9 @@ onMounted(async () => {
 
             <Column :header="$t('products.name')">
                 <template #body="slotProps">
-                    <div class="flex items-center gap-2 font-semibold">
+                    <div
+                        class="flex items-center gap-2 font-semibold truncate max-w-[200px]"
+                    >
                         {{ slotProps.data.name }}
                     </div>
                 </template>

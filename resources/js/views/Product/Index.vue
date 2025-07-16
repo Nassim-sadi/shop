@@ -28,7 +28,7 @@ const getProductBySlug = () => {
 onMounted(async () => {
     await getProductBySlug();
 });
-import test from "./test.vue";
+import Product from "./Product.vue";
 import { useHead } from "@vueuse/head";
 
 const MetaData = computed(() => {
@@ -56,7 +56,7 @@ useHead(MetaData);
 
 <template>
     <div>
-        <test :product="product"></test>
+        <Product :product="product"></Product>
     </div>
 </template>
 
