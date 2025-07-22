@@ -21,7 +21,7 @@ onMounted(async () => {
 });
 </script>
 <template>
-    <div class="grid grid-cols-12 gap-8">
+    <div class="card flex flex-col gap-4">
         <Profile
             :user="auth.user"
             :loading="loading"

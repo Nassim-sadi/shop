@@ -52,51 +52,49 @@ const changePassword = (val) => {
 <template>
     <Edit
         @submit="changePassword"
-        v-model:isOpen="sidebar"
+        v-model:is-open="sidebar"
         :loading="loading"
     />
 
-    <div class="grid grid-cols-12 col-span-12 lg:col-span-6 card mb-0">
-        <div
-            class="font-semibold text-surface-900 dark:text-surface-0 text-xl col-span-12 flex justify-between items-baseline mb-4"
-        >
-            <h3 class="text-surface-900 dark:text-surface-0">
-                {{ $t("settings.security") }}
-            </h3>
+    <div
+        class="font-semibold text-surface-900 dark:text-surface-0 text-xl col-span-12 flex justify-between items-baseline"
+    >
+        <h3 class="text-surface-900 dark:text-surface-0">
+            {{ $t("settings.security") }}
+        </h3>
 
-            <div class="hidden lg:block">
-                <Button
-                    text
-                    class="bg-blue-100 dark:bg-blue-400/10 rounded-border"
-                    :label="$t('user.edit_password')"
-                    icon="pi pi-pencil"
-                    @click="edit"
-                />
-            </div>
-
-            <div class="block lg:hidden">
-                <Button text icon="pi pi-ellipsis-v" @click="togglePopover" />
-            </div>
-
-            <Popover ref="popover">
-                <Button
-                    text
-                    icon="pi pi-pencil"
-                    class="bg-blue-100 dark:bg-blue-400/10 rounded-border"
-                    :label="$t('user.edit_password')"
-                    @click="edit"
-                />
-            </Popover>
+        <div class="hidden lg:block">
+            <Button
+                text
+                class="bg-blue-100 dark:bg-blue-400/10 rounded-border"
+                :label="$t('user.edit_password')"
+                icon="pi pi-pencil"
+                @click="edit"
+            />
         </div>
 
-        <div class="col-span-12">
-            <div class="flex items-center">
-                <p class="font-semibold">
-                    <i class="pi pi-lock"></i>
-                    {{ $t("auth.password") }} :&#160;
-                </p>
-                <p>*******</p>
-            </div>
+        <div class="block lg:hidden">
+            <Button text icon="pi pi-ellipsis-v" @click="togglePopover" />
+        </div>
+
+        <Popover ref="popover">
+            <Button
+                text
+                icon="pi pi-pencil"
+                class="bg-blue-100 dark:bg-blue-400/10 rounded-border"
+                :label="$t('user.edit_password')"
+                @click="edit"
+            />
+        </Popover>
+    </div>
+
+    <div class="col-span-12">
+        <div class="flex items-center">
+            <p class="font-semibold">
+                <i class="pi pi-lock"></i>
+                {{ $t("auth.password") }} :&#160;
+            </p>
+            <p>*******</p>
         </div>
     </div>
 </template>
