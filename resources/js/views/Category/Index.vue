@@ -99,12 +99,18 @@ useHead({
         <div class="category-header">
             <h1>{{ category.name }}</h1>
             <p v-if="category.description">{{ category.description }}</p>
-            <img
-                v-if="category.image"
-                :src="category.image"
-                :alt="category.name"
-                class="category-banner"
-            />
+            <div v-if="category.image" class="category-banner-wrapper">
+                <img
+                    :src="category.image"
+                    :alt="category.name"
+                    class="category-banner-bg"
+                />
+                <img
+                    :src="category.image"
+                    :alt="category.name"
+                    class="category-banner"
+                />
+            </div>
         </div>
 
         <!-- PRODUCTS SECTION -->
@@ -133,6 +139,7 @@ useHead({
     max-width: 1200px;
     margin: 0 auto;
     padding: 20px;
+    width: 100%;
 }
 
 /* Category Header Styles */
@@ -156,12 +163,35 @@ useHead({
     margin: 0 auto 20px;
 }
 
-.category-banner {
+.category-banner-wrapper {
+    position: relative;
     width: 100%;
     max-height: 300px;
-    object-fit: cover;
+    overflow: hidden;
     border-radius: 12px;
-    margin-top: 20px;
+}
+
+/* Blurred background */
+.category-banner-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: blur(20px) brightness(0.6);
+    transform: scale(1.1);
+    z-index: 1;
+}
+
+/* Foreground image */
+.category-banner {
+    position: relative;
+    z-index: 2;
+    display: block;
+    margin: auto;
+    max-height: 300px;
+    object-fit: contain;
 }
 
 .products-section h2 {
