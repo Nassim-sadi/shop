@@ -46,12 +46,36 @@ const showBreadcrumbs = computed(() => {
 }
 
 .layout-main-client {
+    /* Flexbox container for main content */
+    display: flex;
+    flex-direction: column;
+
+    /* Take remaining space after navbar */
+    flex: 1;
+    min-height: 0; /* Allows flex children to shrink */
+
+    /* Content spacing */
     padding: 1rem;
+
+    /* Ensure content doesn't overflow */
+    overflow-y: auto;
+
+    /* Optional: Add some spacing from edges */
+    max-width: 1600px; /* Adjust based on your design */
+    margin: 0 auto;
+    width: 100%;
 }
 
-@media (max-width: 960px) {
+/* Responsive adjustments */
+@media (max-width: 768px) {
     .layout-main-client {
-        padding: 1rem;
+        padding: 0.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .layout-main-client {
+        padding: 0.25rem;
     }
 }
 </style>

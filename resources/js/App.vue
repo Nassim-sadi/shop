@@ -26,6 +26,9 @@ const showToast = () => {
 const checkAuth = async () => {
     if (!route.meta.requireAuth) return;
     await auth.getUser();
+    if (!auth.user) {
+        router.push({ name: "login" });
+    }
 };
 
 onMounted(async () => {

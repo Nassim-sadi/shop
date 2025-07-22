@@ -270,6 +270,12 @@ const createItem = () => {
     formData.append("thumbnail_image_path", imageFile.value);
     formData.append("name", product.value.name);
     formData.append("description", product.value.description);
+
+    product.value.long_description = product.value.long_description.replace(
+        /&nbsp;/g,
+        " ",
+    );
+
     formData.append("long_description", product.value.long_description);
     formData.append("base_price", product.value.base_price);
     formData.append("listing_price", product.value.listing_price);

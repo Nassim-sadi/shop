@@ -269,6 +269,11 @@ const editItem = () => {
     formData.append("id", edited.value.id);
     formData.append("name", edited.value.name);
     formData.append("description", edited.value.description);
+    edited.value.long_description = edited.value.long_description.replace(
+        /&nbsp;/g,
+        " ",
+    );
+
     formData.append("long_description", edited.value.long_description);
     formData.append("base_price", edited.value.base_price);
     formData.append("listing_price", edited.value.listing_price);

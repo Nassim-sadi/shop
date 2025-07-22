@@ -13,6 +13,8 @@ const categorySlug = computed(() => route.params.categorySlug);
 const page = 1;
 
 const goToProduct = (product) => {
+    console.log("clicking");
+
     router.push({
         name: "product",
         params: {

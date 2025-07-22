@@ -66,7 +66,6 @@ export const authStore = defineStore("authStore", {
                         const newAbilities = defineAbilitiesFor(this.user);
                         ability.update(newAbilities.rules);
                         this.permissions = newAbilities.rules;
-
                         resolve(response);
                     })
                     .catch((error) => {

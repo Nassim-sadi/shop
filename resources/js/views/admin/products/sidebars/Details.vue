@@ -70,7 +70,7 @@ watch(
         :header="$t('products.details')"
         position="right"
         @update:visible="$emit('update:isOpen', $event)"
-        class="enhanced-drawer medium-drawer"
+        class="enhanced-drawer large-drawer"
         block-scroll
     >
         <div class="drawer-content">
@@ -117,7 +117,7 @@ watch(
                         </div>
                         <div
                             v-html="current.long_description"
-                            class="info-value prose"
+                            class="info-value prose overflow-x-scroll"
                         />
                     </div>
 

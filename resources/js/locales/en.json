@@ -165,7 +165,8 @@
         "preview": "Preview",
         "status": "Status",
         "actions": "Actions",
-        "total": "In total there are"
+        "total": "In total there are",
+        "show_all": "Show all"
     },
     "roles": {
         "page": "Roles",

@@ -380,10 +380,6 @@ watch(
                             </h3>
                             <div class="options">
                                 <template v-if="haveVariants">
-                                    <p class="options-title">
-                                        {{ $t("products.options") }} :
-                                    </p>
-
                                     <!-- Option Selectors -->
                                     <div class="options-selectors">
                                         <div
@@ -392,11 +388,13 @@ watch(
                                             ) in groupedOptions"
                                             :key="optionId"
                                         >
-                                            <h4
-                                                class="text-lg font-semibold capitalize"
-                                            >
-                                                {{ optionNames[optionId] }}
-                                            </h4>
+                                            <div class="flex">
+                                                <h5
+                                                    class="text-lg font-semibold capitalize !text-muted-color"
+                                                >
+                                                    {{ optionNames[optionId] }}
+                                                </h5>
+                                            </div>
 
                                             <div
                                                 class="flex gap-2 flex-wrap mb-4"
@@ -662,7 +660,7 @@ watch(
                     </div>
 
                     <div
-                        class="bg-white rounded-lg shadow-sm p-6 prose"
+                        class="bg-white rounded-lg shadow-sm p-6 prose overflow-auto break-words"
                         v-html="product.long_description"
                     ></div>
                 </div>
@@ -672,28 +670,8 @@ watch(
 </template>
 
 <style scoped>
-/* Add Tailwind CSS classes or custom styles here */
-.prose {
-    max-width: none;
-}
-
-.prose h3 {
-    margin-top: 1.5rem;
-    margin-bottom: 0.5rem;
-    font-weight: 600;
-}
-
-.prose ul {
-    margin-top: 0.5rem;
-    margin-bottom: 1rem;
-}
-
-.prose li {
-    margin-top: 0.25rem;
-    margin-bottom: 0.25rem;
-}
-
 /* Sticky positioning for larger screens */
+
 @media (min-width: 1024px) {
     .lg\:sticky {
         position: sticky;

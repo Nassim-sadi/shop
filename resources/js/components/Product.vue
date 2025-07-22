@@ -1,11 +1,13 @@
 <script setup>
-import { defineProps } from "vue";
 const { product } = defineProps({
     product: {
         type: Object,
         required: true,
     },
 });
+
+import { useCartStore } from "@/store/CartStore";
+const { addToCart } = useCartStore();
 </script>
 <template>
     <div class="product-card">
@@ -19,7 +21,9 @@ const { product } = defineProps({
         <p class="weight" v-if="product.weight">
             {{ product.weight }} {{ product.weight_unit }}
         </p>
-        <button class="add-to-cart-btn">Add to Cart</button>
+        <button class="add-to-cart-btn" @click.stop="addToCart(product)">
+            Add to Cart
+        </button>
     </div>
 </template>
 

@@ -14,7 +14,6 @@ const getCategories = async () => {
         axios
             .get("/api/categories/homeCategories")
             .then((res) => {
-                console.log("🚀 ~ .then ~ res:", res.data);
                 categories.value = res.data;
                 resolve(res.data);
             })
@@ -41,8 +40,18 @@ const goToCategory = (category) => {
 </script>
 
 <template>
-    <div class="by-category">
-        <h2>{{ $t("home.sections.by_category") }}</h2>
+    <div class="categories-card">
+        <div class="flex justify-between items-center">
+            <h2>{{ $t("home.sections.by_category") }}</h2>
+
+            <Button
+                type="button"
+                @click="router.push({ name: 'public-categories' })"
+                outlined
+            >
+                {{ $t("common.show_all") }}
+            </Button>
+        </div>
 
         <div v-if="loading" class="loading">Loading categories...</div>
 
@@ -69,4 +78,39 @@ const goToCategory = (category) => {
         </div>
     </div>
 </template>
-<style scoped></style>
+
+<style scoped>
+/* Loading Animation */
+.loading {
+    text-align: center;
+    padding: 4rem 0;
+    font-size: 1.125rem;
+    color: #6b7280;
+    position: relative;
+}
+
+.loading::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    bottom: -20px;
+    width: 40px;
+    height: 4px;
+    margin-left: -20px;
+    background: linear-gradient(90deg, #6366f1, #8b5cf6, #ec4899);
+    border-radius: 2px;
+    animation: loading-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes loading-pulse {
+    0%,
+    100% {
+        opacity: 0.3;
+        transform: scaleX(0.8);
+    }
+    50% {
+        opacity: 1;
+        transform: scaleX(1);
+    }
+}
+</style>
