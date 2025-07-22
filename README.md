@@ -76,6 +76,17 @@ php artisan queue:listen   # For handling jobs like emails or uploads
 
 ---
 
+### 🚧 Missing Features
+
+The following features are planned but not yet implemented:
+
+- [ ] 🛒 **Shopping Cart** – Allow customers to add, remove, and update product quantities before checkout.
+- [ ] 🔍 **Product Search (Client)** – Enable keyword-based search for products on the customer side.
+- [ ] 📦 **Order Management (Client/Admin)** – Clients can place and view orders, admins can manage and fulfill them.
+- [x] 🛎️ **Admin Product Search** – Already implemented. The client-side search will share similar logic for consistency and code reuse.
+
+---
+
 ## 📝 License
 
 MIT — Free to use, modify, and distribute.
