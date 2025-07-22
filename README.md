@@ -6,7 +6,7 @@ A modern, full-stack eCommerce application built with **Laravel** and **Vue 3**,
 
 ![Vue](https://img.shields.io/badge/Vue-3.x-42b883?logo=vue.js)
 ![Laravel](https://img.shields.io/badge/Laravel-10.x-red?logo=laravel)
-![License: AGPL v3](https://img.shields.io/badge/License-AGPL%20v3-blue.svg)
+[![License: AGPL v3](https://img.shields.io/badge/License-AGPL%20v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
 
 ## ✨ Features
 
