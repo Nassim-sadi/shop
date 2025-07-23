@@ -1,17 +1,75 @@
+<script setup>
+import { computed } from "vue";
+import { useRoute } from "vue-router";
+
+const route = useRoute();
+const breadcrumbs = computed(() => {
+    const { name, params } = route;
+
+    const crumbs = [];
+
+    // Always start with Home
+    crumbs.push({
+        name: "Home",
+        path: "/",
+        type: "home",
+    });
+
+    if (name === "category" || name === "product") {
+        // Only show category if we are on a category or product page
+        if (params.categorySlug) {
+            crumbs.push({
+                name: formatCategoryName(params.categorySlug),
+                path: `/categories/${params.categorySlug}`,
+                type: "category",
+            });
+        }
+    }
+
+    if (name === "product" && params.productSlug) {
+        crumbs.push({
+            name: getProductName(params.productSlug),
+            path: `/categories/${params.categorySlug}/${params.productSlug}`,
+            type: "product",
+        });
+    }
+
+    return crumbs;
+});
+
+const formatCategoryName = (slug) => {
+    return slug.replace(/-/g, " ").replace(/\b\w/g, (l) => l.toUpperCase());
+};
+
+const getProductName = (productSlug) => {
+    const name =
+        route.params.productName ||
+        route.meta?.productName ||
+        formatName(productSlug);
+    return truncateText(name, 40);
+};
+
+const formatName = (slug) => {
+    return slug.replace(/-/g, " ").replace(/\b\w/g, (l) => l.toUpperCase());
+};
+
+const truncateText = (text, maxLength) => {
+    return text.length <= maxLength
+        ? text
+        : text.substring(0, maxLength).trim() + "...";
+};
+</script>
+
 <template>
     <nav class="breadcrumb" v-if="breadcrumbs.length > 0">
         <ol class="breadcrumb-list">
-            <li class="breadcrumb-item">
-                <router-link to="/" class="breadcrumb-link">{{
-                    $t("navigation.home")
-                }}</router-link>
-            </li>
             <li
                 v-for="(crumb, index) in breadcrumbs"
                 :key="index"
                 class="breadcrumb-item"
             >
-                <span class="breadcrumb-separator">/</span>
+                <!-- Add separator only if not the first item -->
+                <span v-if="index !== 0" class="breadcrumb-separator">/</span>
                 <router-link
                     v-if="index < breadcrumbs.length - 1"
                     :to="crumb.path"
@@ -24,82 +82,6 @@
         </ol>
     </nav>
 </template>
-
-<script setup>
-import { computed } from "vue";
-import { useRoute } from "vue-router";
-import { $t } from "@/plugins/i18n";
-
-const route = useRoute();
-const breadcrumbs = computed(() => {
-    const pathArray = route.path.split("/").filter((path) => path);
-    const crumbs = [];
-
-    if (pathArray.length === 0) return [];
-
-    let currentPath = "";
-
-    pathArray.forEach((segment, index) => {
-        currentPath += `/${segment}`;
-
-        if (segment === "categories" || segment === "category") {
-            return;
-        }
-
-        if (segment === "products" || segment === "product") {
-            return;
-        }
-
-        if (index === 0) {
-            crumbs.push({
-                name: formatCategoryName(segment),
-                path: currentPath,
-                type: "category",
-            });
-        } else if (index === 1) {
-            crumbs.push({
-                name: getProductName(segment),
-                path: currentPath,
-                type: "product",
-            });
-        } else {
-            crumbs.push({
-                name: formatName(segment),
-                path: currentPath,
-                type: "page",
-            });
-        }
-    });
-    return crumbs;
-});
-
-const formatCategoryName = (slug) => {
-    return slug.replace(/-/g, " ").replace(/\b\w/g, (l) => l.toUpperCase());
-};
-
-const getProductName = (productSlug) => {
-    let name = "";
-    if (route.params.productName) {
-        name = route.params.productName;
-    } else if (route.meta?.productName) {
-        name = route.meta.productName;
-    } else {
-        name = formatName(productSlug);
-    }
-
-    const truncated = truncateText(name, 40);
-    return truncated;
-};
-
-const truncateText = (text, maxLength) => {
-    if (text.length <= maxLength) return text;
-    return text.substring(0, maxLength).trim() + "...";
-};
-
-const formatName = (slug) => {
-    return slug.replace(/-/g, " ").replace(/\b\w/g, (l) => l.toUpperCase());
-};
-</script>
 
 <style scoped>
 .breadcrumb {
