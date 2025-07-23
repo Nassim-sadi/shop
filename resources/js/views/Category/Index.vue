@@ -12,17 +12,6 @@ const loading = ref(false);
 const categorySlug = computed(() => route.params.categorySlug);
 const page = 1;
 
-const goToProduct = (product) => {
-    console.log("clicking");
-
-    router.push({
-        name: "product",
-        params: {
-            categorySlug: categorySlug.value, // You need this
-            productSlug: product.slug, // And this
-        },
-    });
-};
 const getCategoryData = async () => {
     return new Promise((resolve, reject) => {
         axios
@@ -62,7 +51,6 @@ watch(
     categorySlug,
     (newSlug) => {
         if (newSlug) {
-            console.log("🚀 ~ .then ~ newSlug:", newSlug);
             getCategoryData(newSlug);
             getCategoryProducts(newSlug);
         }
@@ -119,7 +107,7 @@ useHead({
 
             <div v-if="products.length > 0" class="products-grid">
                 <template v-for="product in products" :key="product.id">
-                    <Product :product="product" @click="goToProduct(product)" />
+                    <Product :product="product" />
                 </template>
             </div>
 
@@ -198,11 +186,5 @@ useHead({
     font-size: 2rem;
     margin-bottom: 30px;
     color: #1f2937;
-}
-
-.products-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 24px;
 }
 </style>

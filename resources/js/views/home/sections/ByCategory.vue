@@ -40,7 +40,7 @@ const goToCategory = (category) => {
 </script>
 
 <template>
-    <div class="categories-card">
+    <div class="section-card">
         <div class="flex justify-between items-center">
             <h2>{{ $t("home.sections.by_category") }}</h2>
 

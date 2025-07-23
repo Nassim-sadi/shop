@@ -8,7 +8,14 @@ import { useRoute } from "vue-router";
 const route = useRoute();
 
 const showBreadcrumbs = computed(() => {
-    const hiddenRoutes = ["/", "/cart", "/checkout", "/orders", "/account"];
+    const hiddenRoutes = [
+        "/",
+        "/cart",
+        "/checkout",
+        "/orders",
+        "/account",
+        "/categories",
+    ];
     return (
         !hiddenRoutes.includes(route.path) &&
         !route.path.startsWith("/orders/") &&

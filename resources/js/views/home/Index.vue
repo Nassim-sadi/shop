@@ -1,9 +1,11 @@
 <script setup>
 import ByCategory from "./sections/ByCategory.vue";
+import Featured from "./sections/Featured.vue";
 </script>
 <template>
     <div class="home">
         <ByCategory />
+        <Featured />
     </div>
 </template>
 
