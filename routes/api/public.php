@@ -15,5 +15,9 @@ Route::prefix('categories')->controller(CategoryController::class)->group(functi
 });
 
 Route::prefix('products')->controller(ProductController::class)->group(function () {
+
+  Route::get('/featured', 'getFeatured');
+  Route::get('/similar/{categoryId}', 'getSimilar');
+  Route::get('/search', 'search');
   Route::get('/{productSlug}', 'getProductBySlug');
 });
