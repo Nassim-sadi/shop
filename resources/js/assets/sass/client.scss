@@ -274,27 +274,28 @@
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     gap: 2rem;
-    margin-top: 2rem;
-    max-width: calc(4 * 280px + 3 * 2rem); /* 4 columns + 3 gaps */
+    max-width: calc(4 * 280px + 3 * 2rem); /* !TODO : Make this dynamic */
+    max-width: 100%; /* 4 columns + 3 gaps */
     margin-left: auto;
     margin-right: auto;
+    width: 100%;
 }
 
-.categories-card {
+.section-card {
     padding: 2rem;
     background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
     border-radius: 16px;
     margin: 2rem 0;
 }
 
-.categories-card h2 {
+.section-card h2 {
     font-size: 2.5rem;
     font-weight: 800;
     background: linear-gradient(135deg, #6366f1, #8b5cf6, #ec4899);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-    margin-bottom: 0;
+    margin-bottom: 2rem;
     letter-spacing: -0.025em;
 }
 
@@ -310,32 +311,6 @@
     border: 2px solid transparent;
     background-clip: padding-box;
     height: 220px;
-}
-
-.category-card::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(135deg, #6366f1, #8b5cf6, #ec4899, #f59e0b);
-    border-radius: 20px;
-    padding: 2px;
-    -webkit-mask:
-        linear-gradient(#fff 0 0) content-box,
-        linear-gradient(#fff 0 0);
-    -webkit-mask-composite: destination-out;
-    mask:
-        linear-gradient(#fff 0 0) content-box,
-        linear-gradient(#fff 0 0);
-    mask-composite: exclude;
-    opacity: 0;
-    transition: opacity 0.3s ease;
-}
-
-.category-card:hover::before {
-    opacity: 1;
 }
 
 .category-card:hover {
@@ -409,12 +384,12 @@
 
 /* Responsive Design */
 @media (max-width: 768px) {
-    .categories-card {
+    .section-card {
         padding: 1.5rem;
         margin: 1rem 0;
     }
 
-    .categories-card h2 {
+    .section-card h2 {
         font-size: 2rem;
     }
 
@@ -434,7 +409,13 @@
         grid-template-columns: 1fr;
     }
 
-    .categories-card h2 {
+    .section-card h2 {
         font-size: 1.75rem;
     }
+}
+
+.products-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 24px;
 }
