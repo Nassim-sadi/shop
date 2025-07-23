@@ -459,7 +459,8 @@
         "sections": {
             "by_category": "Shop by category",
             "shop_now": "Shop now",
-            "new_arrival": "New arrival"
+            "new_arrival": "New arrival",
+            "featured": "Featured"
         }
     },
     "toggle_user_menu": "Toggle user menu",
